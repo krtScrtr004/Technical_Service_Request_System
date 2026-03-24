@@ -1,0 +1,123 @@
+# ========================
+# ASP.NET MVC5 .gitignore
+# ========================
+
+# Build output
+[Dd]ebug/
+[Rr]elease/
+[Bb]in/
+[Oo]bj/
+[Ll]og/
+[Ll]ogs/
+[Oo]ut/
+build/
+artifacts/
+
+# Visual Studio files
+.vs/
+*.user
+*.suo
+*.userosscache
+*.sln.docstates
+*.userprefs
+
+# Solution and project files (optional — remove if you want to track these)
+# *.sln
+# *.csproj
+
+# NuGet
+*.nupkg
+*.snupkg
+**/packages/*
+!**/packages/build/
+*.nuget.props
+*.nuget.targets
+project.lock.json
+project.fragment.lock.json
+
+# Roslyn cache
+*.nuget.g.props
+*.nuget.g.targets
+
+# ASP.NET / MVC specific
+App_Data/
+App_Start/*.designer.cs
+*.pubxml
+*.pubxml.user
+*.publishproj
+PublishScripts/
+
+# Web publish output
+publish/
+*_i.c
+*_p.c
+*_h.h
+*.ilk
+*.meta
+*.obj
+*.iobj
+*.pch
+*.pdb
+*.ipdb
+*.pgc
+*.pgd
+*.rsp
+*.sbr
+*.tlb
+*.tli
+*.tlh
+*.tmp
+*.tmp_proj
+*_wpftmp.csproj
+*.log
+*.tlog
+*.vspscc
+*.vssscc
+
+# Entity Framework Migrations (keep migration files, ignore snapshots if preferred)
+# Migrations/
+
+# Bundling & Minification output
+*.min.css
+*.min.js
+bundles/
+
+# Node / npm (if used for front-end tooling)
+node_modules/
+npm-debug.log
+yarn-error.log
+.npm/
+
+# Static web assets cache
+.sass-cache/
+.cache/
+
+# Test results
+TestResults/
+[Tt]est[Rr]esult*/
+*.trx
+*.coverage
+*.coveragexml
+
+# Rider / JetBrains
+.idea/
+*.sln.iml
+
+# Windows
+Thumbs.db
+ehthumbs.db
+Desktop.ini
+$RECYCLE.BIN/
+
+# macOS
+.DS_Store
+.AppleDouble
+.LSOverride
+
+# Environment / Secrets — NEVER commit these
+*.env
+*.env.*
+appsettings.Development.json
+appsettings.Local.json
+secrets.json
+Web.config.user
