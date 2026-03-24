@@ -1,0 +1,52 @@
+﻿@model TROUBLESHOOTING_REPAIR_SERVICE_REQUEST_SYSTEM.Models.RegistrationVerifyAccountModel
+
+@{
+    ViewBag.Title = "Registration Request Success";
+}
+
+@section Styles
+{
+    <link rel="stylesheet" href="~/Content/App/RegistrationRequest/Success.css" type="text/css" />
+}
+
+<section class="container registration-request-success-page center-child">
+    <div class="row">
+
+        <div class="col-md-1"></div>
+
+        <div class="col-md-10 col-sm-11">
+            <section class="panel panel-success success-panel fade-in">
+                <section class="panel-heading">
+                    <h3 class="panel-title">
+                        <i class="glyphicon glyphicon-ok-circle"></i>
+                        Request for Account Registration
+                    </h3>
+                </section>
+
+                <section class="panel-body center-text">
+                    <div class="success-icon-wrap center-child">
+                        <i class="glyphicon glyphicon-envelope success-icon"></i>
+                    </div>
+
+                    <h4 class="success-subtitle">
+                        Hello @Model.RegistrationRequest.FirstName!
+                    </h4>
+
+                    <p class="success-message wrap-text">
+                        Your account registration request has been submitted successfully.
+                        Please proceed to KMITS - IT to verify your account and claim your username and password.
+                        You may use this account for your transactions in this system.
+                    </p>
+                </section>
+
+                <section class="panel-footer center-text">
+                    <a href="@Url.Action("Login", "Account")" class="btn btn-primary">
+                        Go to Login Page <i class="fa fa-arrow-circle-o-right"></i>
+                    </a>
+                </section>
+            </section>
+        </div>
+
+        <div class="col-md-1"></div>
+    </div>
+</section>

@@ -1,0 +1,107 @@
+﻿@model TROUBLESHOOTING_REPAIR_SERVICE_REQUEST_SYSTEM.Models.RegistrationCreateViewModel
+
+@{
+    ViewBag.Title = "Registration Success";
+}
+
+@section Styles
+{
+    <link rel="stylesheet" href="~/Content/App/Registration/Success.css" type="text/css" />
+}
+
+<section class="container registration-success-page">
+    <div class="row">
+        <div class="col-md-2 col-sm-1"></div>
+
+        <div class="col-md-8 col-sm-10">
+            <div class="panel panel-primary success-panel">
+
+                @* Heading *@
+                <section class="panel-heading">
+                    <h3 class="panel-title">
+                        <i class="glyphicon glyphicon-ok-sign"></i>
+                        Account Registration Successful
+                    </h3>
+                </section>
+
+                @* Body *@
+                <section class="panel-body">
+                    <div class="alert alert-success" role="alert">
+                        The account was created successfully.
+                    </div>
+
+                    <h4 class="center-text success-subtitle">
+                        ACCOUNT INFORMATION
+                    </h4>
+
+                    <div class="table-responsive">
+                        <table class="table table-bordered table-striped success-table">
+                            <tbody>
+
+                                @* Full Name *@
+                                <tr>
+                                    <th>Full Name</th>
+                                    <td colspan="3">@Model.Registration.FirstName @Model.Registration.MiddleName @Model.Registration.LastName</td>
+                                </tr>
+
+                                @* Email Address *@
+                                <tr>
+                                    <th>Email Address</th>
+                                    <td>@Model.Registration.Email</td>
+                                    <th>User Type</th>
+                                    <td>@Model.Registration.AccountType</td>
+                                </tr>
+
+                                <tr>
+                                    @* Registration Date *@
+                                    <th>Registration Date</th>
+                                    <td>
+                                        @(Model.Registration.RegistrationDate.HasValue
+                                            ? Model.Registration.RegistrationDate.Value.ToString("MMMM dd, yyyy")
+                                            : "-")
+                                    </td>
+
+                                    @* Username *@
+                                    <th>User Name</th>
+                                    <td>
+                                        <span class="label label-danger credential-chip">@Model.Registration.UserName</span>
+                                    </td>
+                                </tr>
+
+                                <tr>
+                                    @* Expiry Date *@
+                                    <th>Expiry Date</th>
+                                    <td>
+                                        @(Model.Registration.ExpiryDate.HasValue
+                                            ? Model.Registration.ExpiryDate.Value.ToString("MMMM dd, yyyy")
+                                            : "-")
+                                    </td>
+
+                                    @* Default Password *@
+                                    <th>Default Password</th>
+                                    <td>
+                                        <span class="label label-danger credential-chip">@Model.Registration.Code</span>
+                                    </td>
+                                </tr>
+                            </tbody>
+                        </table>
+
+                    </div>
+                </section>
+
+                @* Footer *@
+                <section class="panel-footer">
+                    <div class="text-right">
+                        <a href="@Url.Action("Details", "Registration", new { id = Model.Registration.Id })" class="btn btn-primary">
+                            Done
+                        </a>
+                    </div>
+                </section>
+
+            </div>
+        </div>
+
+        <div class="col-md-2 col-sm-1"></div>
+    </div>
+</section>
+

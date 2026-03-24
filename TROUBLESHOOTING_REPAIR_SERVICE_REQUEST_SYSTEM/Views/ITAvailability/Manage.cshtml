@@ -1,0 +1,75 @@
+﻿@model TROUBLESHOOTING_REPAIR_SERVICE_REQUEST_SYSTEM.Models.ITAvailabilityManageViewModel
+@using TROUBLESHOOTING_REPAIR_SERVICE_REQUEST_SYSTEM.Core
+
+@{
+    ViewBag.Title = "Schedule Availability Management";
+
+    var currentUser = ViewBag.CurrentUser as UserSession;
+}
+
+@section Styles {
+    <link rel="stylesheet" href="~/Content/App/ITAvailability/Manage.css" type="text/css" />
+}
+
+
+<section class="container center-child">
+
+    <section class="content-panel panel panel-default">
+        <section class="panel-heading">
+            <h4>
+                <i class="glyphicon glyphicon-calendar"></i>
+                SCHEDULE AVAILABILITY MANAGEMENT
+            </h4>
+
+            <p>
+                You can use the calendar below to select the dates you are unavailable for work. Once you are done, click the "Save Changes" button to update your schedule.
+            </p>
+        </section>
+
+        <section class="content-panel-body panel-body flex-row">
+            <section>
+                @Html.AntiForgeryToken()
+                @Html.HiddenFor(model => model.SelectedStringDates, new { id = "preloaded_blocked_dates" })
+
+                @* Calendar *@
+                <div class='input-group date' id='datetime_picker'></div>
+            </section>
+
+            <section class="selected-date-badge-container flex-col">
+                <div class="flex-row flex-wrap">
+                    @* Badges Here *@
+                </div>
+
+                <section class="buttons-container flex-col flex-child-end-v">
+                    <hr class="bg-default" />
+
+                    <div class="buttons flex-row-reverse">
+                        <button id="modify_availability_button" type="button" class="btn btn-primary btn-sm">
+                            <i class="glyphicon glyphicon glyphicon-floppy-disk"></i>
+                            Save Changes
+                        </button>
+
+                        <a href="/" class="btn btn-danger btn-sm">
+                            <i class="glyphicon glyphicon glyphicon-remove"></i>
+                            Cancel
+                        </a>
+                    </div>
+                </section>
+
+            </section>
+
+        </section>
+    </section>
+
+</section>
+
+@section Scripts {
+    <script>
+        const submitUrl = '@Url.Action("Manage", "ITAvailability", new { id = currentUser.Id })';
+    </script>
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-datepicker/1.10.0/js/bootstrap-datepicker.min.js"></script>
+    <script type="module" src="~/Scripts/App/ITAvailability/InitializeDatetimePicker.js" defer></script>
+    <script type="module" src="~/Scripts/App/ITAvailability/SaveChanges.js" defer></script>
+}
+

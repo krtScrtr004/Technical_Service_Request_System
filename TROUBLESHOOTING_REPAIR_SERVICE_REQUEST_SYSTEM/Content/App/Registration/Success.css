@@ -1,0 +1,65 @@
+﻿body {
+}
+
+.registration-success-page {
+    padding-top: 2rem;
+    padding-bottom: 2rem;
+}
+
+.success-panel {
+    border-radius: var(--input-border-radius);
+    overflow: hidden;
+}
+
+.success-panel .panel-heading {
+    background: var(--primary);
+    border-color: var(--primary);
+}
+
+.success-panel .panel-title {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    font-weight: 600;
+}
+
+.success-subtitle {
+    margin: 1.25rem 0;
+    font-weight: 700;
+    color: var(--primary);
+}
+
+.success-table th {
+    width: 20%;
+    background-color: #f8f9fa;
+    color: var(--primary);
+}
+
+.success-table td {
+    vertical-align: middle !important;
+}
+
+.credential-chip {
+    display: inline-block;
+    font-size: 1.2rem;
+    padding: 0.5rem 0.85rem;
+}
+
+.success-panel .panel-footer {
+    background-color: #fff;
+}
+
+@media (max-width: 767px) {
+    .registration-success-page {
+        padding-top: 1.5rem;
+        padding-bottom: 1.5rem;
+    }
+
+    .success-subtitle {
+        font-size: 1.8rem;
+    }
+
+    .credential-chip {
+        font-size: 1.1rem;
+    }
+}

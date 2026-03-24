@@ -1,0 +1,50 @@
+﻿.notification-page-panel {
+    width: 75rem;
+}
+
+.content-panel-heading > h3 {
+    gap: 1rem;
+}
+
+.notification-box-container:hover,
+.notification-box-container:focus,
+.notification-box-container:focus-within {
+    text-decoration: none;
+}
+
+.notification-box {
+    border: 1px solid var(--default);
+    cursor: pointer;
+}
+
+    .notification-box > hr {
+        margin: 0;
+    }
+
+    .notification-box .message {
+        flex: 1;
+    }
+
+    .notification-box .date {
+        width: 25ch;
+        color: #808080;
+    }
+
+.content-panel-footer {
+    padding: 1rem inherit;
+}
+
+    .content-panel-footer .pagination {
+        margin: 0;
+    }
+
+/* Notification Detail Modal */
+
+.notification-detail-modal td:first-child {
+    width: 16ch;
+}
+
+.notification-detail-modal .message-row > td:last-child > div {
+    max-height: 20rem;
+    overflow-y: auto;
+}

@@ -1,0 +1,101 @@
+﻿@model TROUBLESHOOTING_REPAIR_SERVICE_REQUEST_SYSTEM.Models.TechnicalServiceRequestDetailsViewModel
+@using TROUBLESHOOTING_REPAIR_SERVICE_REQUEST_SYSTEM.Core
+
+@{
+    var currentUser = ViewBag.CurrentUser as UserSession;
+    var firstName = currentUser.FirstName;
+    var lastName = currentUser.LastName;
+    var middleName = currentUser.MiddleName;
+
+}
+
+<section id="add_action_history_modal" class="modal fade" role="dialog">
+    <section class="modal-dialog">
+
+        @* Modal content *@
+        <section class="modal-content">
+
+            @* Header *@
+            <section class="modal-header bg-info">
+                <button type="button" class="close" data-dismiss="modal">&times;</button>
+
+                <h4 class="modal-title text-light">
+                    <i class="glyphicon glyphicon-list-alt text-light"></i>
+                    Add A New Action
+                </h4>
+            </section>
+
+            @using (Html.BeginForm(
+                "Create",
+                "TechnicalServiceRequestHistory",
+                new { technicalServiceRequestId = Model.Id },
+                FormMethod.Post
+            ))
+            {
+                @Html.AntiForgeryToken();
+
+                @* Body *@
+                <section class="modal-body">
+                    @Html.HiddenFor(model => model.Id)
+
+                    <section class="name-inputs flex-row">
+                        @* First Name *@
+                        <div class="form-group">
+                            <label class="text-primary light-text" for="firstName">First Name</label>
+                            <input type="text" id="firstName" name="firstName" value="@firstName" class="form-control" required disabled />
+                        </div>
+
+                        @* Middle Name *@
+                        <div class="form-group">
+                            <label class="text-primary light-text" for="middleName">Middle Name</label>
+                            <input type="text" id="middleName" name="middleName" value="@middleName" class="form-control" required disabled />
+                        </div>
+
+                        @* Last Name *@
+                        <div class="form-group">
+                            <label class="text-primary light-text" for="lastName">Last Name</label>
+                            <input type="text" id="lastName" name="lastName" value="@lastName" class="form-control" required disabled />
+                        </div>
+                    </section>
+
+                    <section class="secondary-info-inputs flex-row">
+                        @* Date *@
+                        <div class="form-group">
+                            <label class="text-primary light-text" for="ActionDate">Date</label>
+                            <input type="date" id="ActionDate" name="ActionDate" value="@DateTime.Now.ToString("yyyy-MM-dd")" class="form-control" required disabled />
+                        </div>
+
+                        @* Status *@
+                        <div class="form-group">
+                            <label class="text-primary light-text" for="technical_service_request_status_select">Status</label>
+
+                            @Html.DropDownListFor(
+                                 model => model.TechnicalServiceRequestStatusId,
+                                 Model.TechnicalServiceRequestStatuses,
+                                 "-- STATUS --",
+                                 htmlAttributes: new
+                                      {
+                                     id = "technical_service_request_status_select",
+                                     @class = "form-control",
+                                 }
+                                )
+                        </div>
+                    </section>
+
+                    <section class="form-group">
+                        <label class="text-primary light-text" for="ActionTaken">Action Taken</label>
+                        <textarea class="form-control" id="ActionTaken" name="ActionTaken" rows="10" min="0" maxlength="500" required></textarea>
+                    </section>
+                </section>
+
+                @* Footer *@
+                <section class="modal-footer">
+                    <button type="button" class="btn btn-danger" data-dismiss="modal">Close</button>
+                    <button type="submit" class="btn btn-info">Add</button>
+                </section>
+            }
+
+        </section>
+
+    </section>
+</section>

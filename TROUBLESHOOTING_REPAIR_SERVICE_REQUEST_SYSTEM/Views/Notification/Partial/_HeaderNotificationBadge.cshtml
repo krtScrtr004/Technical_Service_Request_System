@@ -1,0 +1,8 @@
+﻿@model TROUBLESHOOTING_REPAIR_SERVICE_REQUEST_SYSTEM.Models.NotificationBadgeViewModels
+
+@if (Model.UnreadCount > 0)
+{
+    <span class="badge" id="notification_badge">
+        @Model.UnreadCount
+    </span>
+}

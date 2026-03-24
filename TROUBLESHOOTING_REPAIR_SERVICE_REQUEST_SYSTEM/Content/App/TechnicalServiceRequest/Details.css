@@ -1,0 +1,85 @@
+﻿.tsr-detail-page-container {
+    width: 85rem;
+}
+
+.detail-table {
+    table-layout: fixed;
+}
+
+.request-information-table tr td:first-child {
+    width: 50ch;
+}
+
+.section-heading-title {
+    border-left: 4px solid var(--primary);
+    padding-left: 1rem;
+}
+
+.status-label {
+    display: inline-block;
+    min-width: 10ch;
+    text-align: center;
+    letter-spacing: 0.3px;
+    font-size: 1.1rem;
+}
+
+#severity_container {
+    height: fit-content;
+    margin: 0;
+}
+
+#update_severity_button {
+    background-color: transparent;
+    border: none;
+}
+
+    #update_severity_button:hover {
+        text-decoration: underline;
+    }
+
+#add_action_history_button {
+    height: fit-content;
+    padding: 0.75rem 1.25rem;
+    margin-bottom: 10px;
+}
+
+#add_action_history_modal .name-inputs,
+#add_action_history_modal .secondary-info-inputs {
+    gap: 1rem;
+}
+
+    #add_action_history_modal .secondary-info-inputs > * {
+        flex: 1;
+    }
+
+#add_action_history_modal textarea {
+    resize: none;
+}
+
+.action-history-table-container {
+    max-height: 50rem;
+    overflow-y: auto;
+}
+
+#cancel_request_button {
+    margin: 15px 15px 0 0;
+}
+
+.schedule-row-data {
+    padding: 0 !important;
+}
+
+.schedule-date * {
+    flex: 1;
+    width: 100%;
+}
+
+.schedule-date > div > div {
+    padding: 8px;
+}
+
+    .schedule-date > div > div:first-child {
+        background-color: #ecf0f1;
+        border-right: 1px solid #B9C1C2;
+        border-left: 1px solid #B9C1C2;
+    }

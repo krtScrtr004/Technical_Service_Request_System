@@ -1,0 +1,20 @@
+﻿@{
+    ViewBag.Title = "Unauthorized";
+
+    var link = Request.IsAuthenticated
+        ? Url.Action("Index", "Dashboard")
+        : Url.Action("Login", "Account");
+}
+
+<section class="full-body-content center-child flex-1">
+    <div class="flex-col flex-child-center-v">
+        <h1 class="text-danger text-center">
+            <i class="glyphicon glyphicon-lock text-danger" aria-hidden="true"></i>
+            Unauthorized
+        </h1>
+        <h5 class="text-center">
+            You are not authorized to access this page.
+            <a href="@link">Go Back.</a>
+        </h5>
+    </div>
+</section>

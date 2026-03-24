@@ -1,0 +1,20 @@
+﻿@{
+    ViewBag.Title = "Not Found";
+
+    var link = Request.IsAuthenticated
+        ? Url.Action("Index", "Dashboard")
+        : Url.Action("Login", "Account");
+}
+
+<section class="full-body-content center-child flex-1">
+    <div class="flex-col flex-child-center-v">
+        <h1 class="text-danger text-center">
+            <i class="glyphicon glyphicon-question-sign text-danger" aria-hidden="true"></i>
+            Not Found
+        </h1>
+        <h5 class="text-center">
+            The page you are looking for could not be found.
+            <a href="@link">Go Back.</a>
+        </h5>
+    </div>
+</section>

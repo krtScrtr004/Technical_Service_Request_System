@@ -1,0 +1,48 @@
+﻿@model IEnumerable<TROUBLESHOOTING_REPAIR_SERVICE_REQUEST_SYSTEM.Models.NotificationDetailViewModels>
+@using TROUBLESHOOTING_REPAIR_SERVICE_REQUEST_SYSTEM.Utilities
+
+@if (Model.Count() > 0)
+{
+    foreach (var notification in Model)
+    {
+        var isReadClass = notification.IsRead ? "bg-light" : "";
+
+        <button class="unset-button notification-box-container js-open-notification-detail" type="button"
+                data-id="@notification.Id"
+                data-title="@notification.Title"
+                data-message="@notification.Message"
+                data-is-read="@(notification.IsRead ? "true" : "false" )"
+                data-created-at="@notification.CreatedAt.ToString("MMMM dd yyyy, hh:mm tt")">
+            <div class="notification-box well flex-col @isReadClass">
+                <h4 class="single-line-ellipsis text-primary bold-text" title="@notification.Title">
+                    @notification.Title
+                </h4>
+
+                <hr class="bg-default" />
+
+                <div class="flex-row flex-space-between">
+                    <p class="message light-text multi-line-ellipsis-2 text-primary" title="@notification.Message">
+                        @notification.Message
+                    </p>
+
+                    <p class="date light-text text-right">
+                        @notification.CreatedAt.ToString("MMMM dd, yyyy - hh:mm tt")
+                    </p>
+                </div>
+            </div>
+
+        </button>
+    }
+}
+else
+{
+    <div class="flex-col flex-child-center-v flex-child-center-h">
+        <h1 class="text-primary">
+            <i class="glyphicon glyphicon-inbox"></i>
+        </h1>
+        <h5 class="text-primary text-center light-text">
+            You have no notifications
+        </h5>
+    </div>
+}
+

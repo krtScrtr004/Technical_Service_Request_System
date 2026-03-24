@@ -1,0 +1,107 @@
+﻿@model TROUBLESHOOTING_REPAIR_SERVICE_REQUEST_SYSTEM.Models.TechnicalServiceRequestHistory
+@using TROUBLESHOOTING_REPAIR_SERVICE_REQUEST_SYSTEM.Enumerables
+
+@{ 
+    Func<int, string> getStatusLabelClass = (status) =>
+    {
+        switch (status)
+        {
+            case TechnicalServiceRequestStatusEnum.PENDING:
+                return "label label-warning status-label";
+            case TechnicalServiceRequestStatusEnum.OPEN:
+                return "label label-primary status-label";
+            case TechnicalServiceRequestStatusEnum.ONGOING:
+                return "label label-info status-label";
+            case TechnicalServiceRequestStatusEnum.RESOLVED:
+                return "label label-success status-label";
+            case TechnicalServiceRequestStatusEnum.CANCELLED:
+                return "label label-danger status-label";
+            case TechnicalServiceRequestStatusEnum.CLOSED:
+                return "label label-default status-label";
+            default:
+                return "label label-default status-label";
+        }
+    };
+}
+
+
+@* Action Taken By *@
+<tr>
+    <td class="text-primary light-text active">
+        TAKEN BY
+    </td>
+
+    @* Last Name *@
+    <td class="text-primary bold-text">
+        @Model.ActionTakenByRegistration.LastName
+    </td>
+
+
+    @* First Name *@
+    <td class="text-primary bold-text">
+        @Model.ActionTakenByRegistration.FirstName
+    </td>
+
+    @* Middle Name *@
+    <td class="text-primary bold-text">
+        @(Model.ActionTakenByRegistration.MiddleName ?? "N/A")
+
+    </td>
+
+    <td rowspan="3" class="generate-srf-button-container">
+        <a class="btn btn-success btn-sm" href="@Url.Action("Form", "TechnicalServiceRequests", new { id = Model.Id })">
+            <i class="glyphicon glyphicon-file"></i>
+            Generate TSRF
+        </a>
+    </td>
+</tr>
+
+<tr>
+    @* Date *@
+    <td class="text-primary light-text active">
+        DATE
+    </td>
+
+    <td class="text-primary bold-text">
+        @Model.DateAction.GetValueOrDefault().ToString("MMMM dd, yyyy hh:mm tt")
+    </td>
+
+    @* Status *@
+    <td class="text-primary light-text active">
+        STATUS
+    </td>
+
+    <td class="text-primary bold-text">
+        @if (Model.TechnicalServiceRequestStatusId.HasValue && Model.TechnicalServiceRequestStatusId > 0)
+        {
+            <span class="@getStatusLabelClass(Model.TechnicalServiceRequestStatusId.Value)">
+                @Model.TechnicalServiceRequestStatus.TechnicalServiceRequestStatusName
+            </span>
+        }
+        else
+        {
+            <span class="label label-default">
+                N/A
+            </span>
+        }
+
+    </td>
+</tr>
+
+@* Action Taken *@
+<tr>
+    <td colspan="1" class="text-primary light-text active">
+        ACTION TAKEN
+    </td>
+
+    <td colspan="3" class="text-primary">
+        @(string.IsNullOrEmpty(Model.ActionTaken)
+              ? "N/A"
+              : Model.ActionTaken)
+    </td>
+</tr>
+
+<tr>
+    <td colspan="4">
+    </td>
+</tr>

@@ -1,0 +1,188 @@
+﻿@using TROUBLESHOOTING_REPAIR_SERVICE_REQUEST_SYSTEM.Enumerables
+@using TROUBLESHOOTING_REPAIR_SERVICE_REQUEST_SYSTEM.Models
+@using TROUBLESHOOTING_REPAIR_SERVICE_REQUEST_SYSTEM.Core
+
+@{
+    ViewBag.Title = "Dashboard";
+    var currentUser = ViewBag.CurrentUser as UserSession;
+    var roleName = AccountTypeEnum.IsAdmin(currentUser.PrivilegeIds)
+        ? "Administrator"
+        : AccountTypeEnum.IsIT(currentUser.PrivilegeIds)
+            ? "IT"
+            : "Standard User";
+}
+
+@section Styles {
+    <link rel="stylesheet" href="~/Content/App/Dashboard/Index.css" type="text/css" />
+}
+   
+<section class="dashboard-page container">
+    <section class="dashboard-header panel panel-default">
+        <section class="panel-body">
+            <h3 class="text-primary dashboard-title">Welcome, @currentUser.FirstName @currentUser.LastName</h3>
+            <p class="dashboard-subtitle">
+                Role: <span class="label label-info">@roleName</span>
+            </p>
+        </section>
+    </section> 
+
+    <section class="row dashboard-cards-row">
+        <div class="col-md-3 col-sm-6">
+            <section class="panel panel-default dashboard-card">
+                <section class="panel-body">
+                    <p class="dashboard-card-label">Total Requests</p>
+                    <h3 id="card_total_requests" class="dashboard-card-value text-primary">0</h3>
+                </section>
+            </section>
+        </div>
+
+        <div class="col-md-3 col-sm-6">
+            <section class="panel panel-default dashboard-card">
+                <section class="panel-body">
+                    <p class="dashboard-card-label">Active Requests</p>
+                    <h3 id="card_active_requests" class="dashboard-card-value text-warning">0</h3>
+                </section>
+            </section>
+        </div>
+
+        <div class="col-md-3 col-sm-6">
+            <section class="panel panel-default dashboard-card">
+                <section class="panel-body">
+                    <p class="dashboard-card-label">Resolved Requests</p>
+                    <h3 id="card_resolved_requests" class="dashboard-card-value text-success">0</h3>
+                </section>
+            </section>
+        </div>
+
+        <div class="col-md-3 col-sm-6">
+            <section class="panel panel-default dashboard-card">
+                <section class="panel-body">
+                    <p class="dashboard-card-label">Unread Notifications</p>
+                    <h3 id="card_unread_notifications" class="dashboard-card-value text-danger">0</h3>
+                </section>
+            </section>
+        </div>
+    </section>
+
+    <section class="row dashboard-cards-row">
+        <div class="col-md-4 col-sm-6">
+            <section class="panel panel-default dashboard-card dashboard-extra-card">
+                <section class="panel-body">
+                    <p id="extra_label_1" class="dashboard-card-label">-</p>
+                    <h3 id="extra_value_1" class="dashboard-card-value text-primary">0</h3>
+                </section>
+            </section>
+        </div>
+
+        <div class="col-md-4 col-sm-6">
+            <section class="panel panel-default dashboard-card dashboard-extra-card">
+                <section class="panel-body">
+                    <p id="extra_label_2" class="dashboard-card-label">-</p>
+                    <h3 id="extra_value_2" class="dashboard-card-value text-primary">0</h3>
+                </section>
+            </section>
+        </div>
+
+        <div class="col-md-4 col-sm-12">
+            <section class="panel panel-default dashboard-card dashboard-extra-card">
+                <section class="panel-body">
+                    <p id="extra_label_3" class="dashboard-card-label">-</p>
+                    <h3 id="extra_value_3" class="dashboard-card-value text-primary">0</h3>
+                </section>
+            </section>
+        </div>
+    </section>
+
+    <section class="row dashboard-chart-row">
+        <div class="col-md-6 col-sm-12">
+            <section class="panel panel-default dashboard-chart-panel">
+                <section class="panel-heading">
+                    <b>Requests by Status</b>
+                </section>
+                <section class="panel-body">
+                    <div id="request_status_chart" class="dashboard-chart-container"></div>
+                </section>
+            </section>
+        </div>
+
+        <div class="col-md-6 col-sm-12">
+            <section class="panel panel-default dashboard-chart-panel">
+                <section class="panel-heading">
+                    <b>Top Service Types</b>
+                </section>
+                <section class="panel-body">
+                    <div id="request_type_chart" class="dashboard-chart-container"></div>
+                </section>
+            </section>
+        </div>
+    </section>
+
+    <section class="row dashboard-chart-row">
+        <div class="col-md-12">
+            <section class="panel panel-default dashboard-chart-panel">
+                <section class="panel-heading">
+                    <b>Request Trend (Last 6 Months)</b>
+                </section>
+                <section class="panel-body">
+                    <div id="request_trend_chart" class="dashboard-chart-container dashboard-chart-container-lg"></div>
+                </section>
+            </section>
+        </div>
+    </section>
+
+    <section class="dashboard-quick-actions panel panel-default">
+        <section class="panel-heading">
+            <b>Quick Actions</b>
+        </section>
+        <section class="panel-body">
+            <div class="dashboard-action-buttons">
+                @if (AccountTypeEnum.IsStandard(currentUser.PrivilegeIds))
+                {
+                    <a href="@Url.Action("Create", "TechnicalServiceRequests")" class="btn btn-primary">
+                        <i class="glyphicon glyphicon-plus"></i>
+                        Create Request
+                    </a>
+                    <a href="@Url.Action("Index", "TechnicalServiceRequests")" class="btn btn-default">
+                        <i class="glyphicon glyphicon-list"></i>
+                        My Requests
+                    </a>
+                }
+                else if (AccountTypeEnum.IsIT(currentUser.PrivilegeIds))
+                {
+                    <a href="@Url.Action("Index", "TechnicalServiceRequests")" class="btn btn-primary">
+                        <i class="glyphicon glyphicon-briefcase"></i>
+                        View Work Queue
+                    </a>
+                    <a href="@Url.Action("Manage", "ITAvailability")" class="btn btn-warning">
+                        <i class="glyphicon glyphicon-calendar"></i>
+                        Manage Availability
+                    </a>
+                }
+                else
+                {
+                    <a href="@Url.Action("Index", "RegistrationRequest")" class="btn btn-primary">
+                        <i class="glyphicon glyphicon-user"></i>
+                        Registration Requests
+                    </a>
+                    <a href="@Url.Action("Index", "Registration")" class="btn btn-default">
+                        <i class="glyphicon glyphicon-th-list"></i>
+                        Manage Accounts
+                    </a>
+                    <a href="@Url.Action("Index", "TechnicalServiceRequests")" class="btn btn-info">
+                        <i class="glyphicon glyphicon-stats"></i>
+                        All Service Requests
+                    </a>
+                }
+            </div>
+        </section>
+    </section>
+</section>
+
+@section Scripts {
+    <script src="~/Content/Highcharts-11.4.5/code/highcharts.js"></script>
+    <script>
+        const dashboardDataUrl = '@Url.Action("GetDashboardData", "Dashboard")';
+    </script>
+    <script src="~/Scripts/App/Dashboard/InitializeDashboard.js" defer></script>
+}
+

@@ -1,0 +1,61 @@
+.registration-request-create-panel {
+    width: 70rem;
+    padding: 30px;
+    border-radius: 8px;
+    min-height: 750px;
+}
+
+.registration-request-create-logo {
+    width: 10em;
+}
+
+.registration-request-create-title {
+    font-size: 2.2rem;
+    font-weight: 600;
+    margin-top: 20px;
+    margin-bottom: 16px;
+}
+
+.registration-request-create-description {
+    font-weight: 500;
+    margin-bottom: 24px;
+}
+
+.registration-request-create-form-body {
+    margin-top: 30px;
+}
+
+.form-group {
+    margin-bottom: 18px;
+}
+
+.control-label {
+    text-align: right;
+    padding-top: 7px;
+    font-weight: 500;
+}
+
+.registration-request-create-input {
+    width: 100%;
+}
+
+.registration-request-create-submit {
+    height: 40px;
+    font-size: 14px;
+    margin: 18px 0;
+}
+
+@media (max-width: 991px) {
+    .registration-request-create-panel {
+        width: 100%;
+        padding: 10px;
+    }
+    .registration-request-create-input {
+        width: 100%;
+        margin-left: 0;
+    }
+    .control-label {
+        text-align: left;
+        padding-top: 0;
+    }
+}

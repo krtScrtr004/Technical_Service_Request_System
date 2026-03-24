@@ -1,0 +1,100 @@
+﻿.registration-details-page {
+    padding-top: 2rem;
+    padding-bottom: 2rem;
+}
+
+.content-panel {
+    box-shadow: var(--box-shadow);
+    border-radius: var(--input-border-radius);
+    overflow: hidden;
+}
+
+    .content-panel .panel-heading,
+    .content-panel .panel-body,
+    .content-panel .panel-footer {
+        padding: 2.25rem;
+    }
+
+.profile-header {
+    gap: 1rem;
+}
+
+.profile-header hr {
+    margin: 0;
+}
+
+.profile-name {
+    margin: 0;
+    font-weight: 700;
+}
+
+.registration-id {
+    font-size: 1.2rem !important;
+    margin-top: 0.5rem;
+    margin-bottom: 0;
+    opacity: 0.85;
+}
+
+.details-section + .details-section {
+    margin-top: 2rem;
+}
+
+.section-header {
+    border-left: 3px solid var(--primary);
+    padding-left: 8px;
+    margin-bottom: 1rem;
+}
+
+    .section-header > h4 {
+        margin: 0;
+        color: var(--primary);
+        font-weight: 100;
+    }
+
+.section-table-container {
+    padding: 0;
+}
+
+.section-table .first-col {
+    width: 25ch;
+    text-align: right;
+}
+
+.management-buttons-container {
+    background: #fff;
+}
+
+.options-label {
+    margin: 0 0 1rem;
+    font-size: 1.5rem;
+}
+
+.buttons-container {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 1rem;
+}
+
+    .buttons-container > button {
+        min-width: 24ch;
+    }
+
+        .buttons-container > button > div {
+            gap: 0.5rem;
+        }
+
+@media (max-width: 767px) {
+    .registration-details-page {
+        padding-top: 1.5rem;
+        padding-bottom: 1.5rem;
+    }
+
+    .section-table .first-col {
+        width: 40%;
+    }
+
+    .buttons-container > button {
+        width: 100%;
+        min-width: 100%;
+    }
+}

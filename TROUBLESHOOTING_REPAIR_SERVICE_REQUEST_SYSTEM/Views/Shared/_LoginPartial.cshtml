@@ -1,0 +1,37 @@
+﻿@using Microsoft.AspNet.Identity
+@using TROUBLESHOOTING_REPAIR_SERVICE_REQUEST_SYSTEM.Models
+@using TROUBLESHOOTING_REPAIR_SERVICE_REQUEST_SYSTEM.Core
+
+@{ var currentUser = ViewBag.CurrentUser as UserSession; }
+
+
+@using (Html.BeginForm(
+    "LogOff",
+    "Account",
+    FormMethod.Post,
+    new { id = "logoutForm", @class = "navbar-right" })
+)
+{
+    @Html.AntiForgeryToken()
+
+    <ul class="nav navbar-nav navbar-right">
+        <li>
+            <a href="@Url.Action("Index", "Notification")" class="notification text-primary">
+                <i class="glyphicon glyphicon-bell notification-icon"></i>
+                @Html.Action("HeaderNotificationBadge", "Notification")
+            </a>
+        </li>
+
+        <li>
+            @Html.ActionLink(
+                "Hello, " + currentUser.FirstName + " " + currentUser.LastName,
+                "Details",
+                "Registration",
+                routeValues: new { id = currentUser.Id },
+                htmlAttributes: new { title = "Manage" }
+            )
+        </li>
+
+        <li><a href="javascript:document.getElementById('logoutForm').submit()">Log off</a></li>
+    </ul>
+}
