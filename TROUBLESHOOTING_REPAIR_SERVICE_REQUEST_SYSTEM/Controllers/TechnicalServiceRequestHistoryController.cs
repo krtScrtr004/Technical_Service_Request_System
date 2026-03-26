@@ -49,7 +49,6 @@ namespace TROUBLESHOOTING_REPAIR_SERVICE_REQUEST_SYSTEM.Controllers
 
                         // Set the ActionTakenByRegistrationId to the current user's registration ID
                         technicalServiceRequestHistory.ActionTakenByRegistrationId = technician.Id;
-                        technicalServiceRequestHistory.ActionTakenByRegistration = technician.ToRegistration();
 
                         technicalServiceRequestHistory.TechnicalServiceRequestId = technicalServiceRequestId;
                         technicalServiceRequestHistory.DateAction = DateTime.Now;
@@ -87,11 +86,14 @@ namespace TROUBLESHOOTING_REPAIR_SERVICE_REQUEST_SYSTEM.Controllers
                             });
                         }
 
-
-                        // When status is completed, closed or cancelled, assign the top request from the queue to the IT
                         var completedTaskIds = TechnicalServiceRequestStatusEnum.GetCompletedStatusIds();
-                        if (technicalServiceRequest.TechnicalServiceRequestStatusId.HasValue &&
-                            completedTaskIds.Contains(technicalServiceRequest.TechnicalServiceRequestStatusId.Value))
+                        var nonAssistedRequestIds = TechnicalServiceTypeEnum.GetNonAssistedServiceIds();
+
+                        var isCompleted = completedTaskIds.Contains(technicalServiceRequest.TechnicalServiceRequestStatusId.Value);
+                        var isNonAssisted = technicalServiceRequest.TechnicalServiceTypeId.HasValue && nonAssistedRequestIds.Contains(technicalServiceRequest.TechnicalServiceTypeId.Value);
+
+                        // When status is completed, closed or cancelled and service type is not non-assisted, assign the top request from the queue to the IT
+                        if (technicalServiceRequest.TechnicalServiceRequestStatusId.HasValue && isCompleted && !isNonAssisted)
                         {
                             var queuedRequest = AssignTechnicianToPendingRequest(technician.Id);
                             if (queuedRequest != null)
@@ -109,12 +111,10 @@ namespace TROUBLESHOOTING_REPAIR_SERVICE_REQUEST_SYSTEM.Controllers
                                     notificationService.NotifyClientOnEnqueuedRequest(
                                         queuedRequestClientId.Value,
                                         queuedRequest.ReferenceCode,
-                                        queuedRequest.TechnicalServiceRequestHistories
-                                            .OrderByDescending(h => h.DateAction)
-                                            .FirstOrDefault()
-                                            ?.ActionTakenByRegistration
-                                            .FirstName
+                                        technician.FirstName
                                     );
+
+                                    TechnicalServiceRequestHub.RefreshTechnicalServiceRequestList();
                                 }
                             }
                         }
@@ -122,6 +122,7 @@ namespace TROUBLESHOOTING_REPAIR_SERVICE_REQUEST_SYSTEM.Controllers
                         _db.SaveChanges();
                         transaction.Commit();
 
+                        TechnicalServiceRequestHub.RefreshTechnicalServiceRequestList();
                         TechnicalServiceRequestHub.RefreshTechnicalServiceRequestActionHistory(technicalServiceRequestHistory.Id);
                         // Notify the client
                         notificationService.RefreshUserUi(clientId.Value);
@@ -181,6 +182,7 @@ namespace TROUBLESHOOTING_REPAIR_SERVICE_REQUEST_SYSTEM.Controllers
                 // Assign only to a repair and troubleshooting request
                 queuedRequest.TechnicalServiceRequestHistories.Add(new TechnicalServiceRequestHistory
                 {
+                    TechnicalServiceRequestId = queuedRequest.Id,
                     ActionTakenByRegistrationId = technicianId,
                     TechnicalServiceRequestStatusId = (int)TechnicalServiceRequestStatusEnum.ONGOING,
                     DateAction = DateTime.Now,

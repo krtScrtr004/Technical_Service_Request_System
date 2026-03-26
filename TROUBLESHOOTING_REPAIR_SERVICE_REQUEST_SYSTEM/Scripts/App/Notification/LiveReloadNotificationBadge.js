@@ -15,10 +15,11 @@
         $.get(notificationBadgeUrl)
             .done(function (html) {
                 const $notification = $('#notification_badge');
-                const $parent = $notification.parent();
+                if ($notification.length > 0) {
+                    $notification.remove();
+                }
 
-                $notification.remove();
-                $parent.append(html);
+                $(".notification-badge-container")?.append(html);
             })
     };
 });

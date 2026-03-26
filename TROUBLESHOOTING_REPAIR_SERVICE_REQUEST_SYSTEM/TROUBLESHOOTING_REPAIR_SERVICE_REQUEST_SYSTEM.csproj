@@ -290,6 +290,10 @@
     <Compile Include="Migrations\202603170626155_addGroupSpecificNotificationProperties.Designer.cs">
       <DependentUpon>202603170626155_addGroupSpecificNotificationProperties.cs</DependentUpon>
     </Compile>
+    <Compile Include="Migrations\202603250053492_removeUnusedProperties.cs" />
+    <Compile Include="Migrations\202603250053492_removeUnusedProperties.Designer.cs">
+      <DependentUpon>202603250053492_removeUnusedProperties.cs</DependentUpon>
+    </Compile>
     <Compile Include="Migrations\Configuration.cs" />
     <Compile Include="Models\AccountViewModels.cs" />
     <Compile Include="Models\IdentityModels.cs" />
@@ -3178,6 +3182,7 @@
     <Content Include="Scripts\App\RegistrationRequest\DenyNonLetterKey.js" />
     <Content Include="Scripts\App\RegistrationRequest\InitializeListingDataTable.js" />
     <Content Include="Scripts\App\RegistrationRequest\Psgc.js" />
+    <Content Include="Scripts\App\Registration\DenyRegistration.js" />
     <Content Include="Scripts\App\Registration\InitializeListingDataTable.js" />
     <Content Include="Scripts\App\TechnicalServiceRequest\CancelRequest.js" />
     <Content Include="Scripts\App\TechnicalServiceRequest\InitializeListingDataTable.js" />
@@ -3632,8 +3637,7 @@
     <Content Include="Views\TechnicalServiceRequests\Create.cshtml" />
     <Content Include="Views\TechnicalServiceRequests\Details.cshtml" />
     <Content Include="Views\TechnicalServiceRequests\Index.cshtml" />
-    <Content Include="Views\PartialLayout\_AlertModal.cshtml" />
-    <Content Include="Views\TechnicalServiceRequests\Partial\_CreateEditForm.cshtml" />
+    <Content Include="Views\Shared\_AlertModal.cshtml" />
     <Content Include="Views\Notification\Index.cshtml" />
     <Content Include="Views\Notification\Partial\_HeaderNotificationBadge.cshtml" />
     <Content Include="Views\Notification\Partial\_NotificationList.cshtml" />
@@ -3646,13 +3650,13 @@
     <Content Include="Views\TechnicalServiceRequests\Partial\_ActionHistoryRow.cshtml" />
     <Content Include="Views\TechnicalServiceRequests\Partial\_AddActionHistoryModal.cshtml" />
     <Content Include="Views\TechnicalServiceRequests\Partial\_UpdateSeverityModal.cshtml" />
+    <Content Include="Views\Registration\Partial\_ManagePrivilegeModal.cshtml" />
   </ItemGroup>
   <ItemGroup>
     <Folder Include="App_Data\" />
     <Folder Include="Content\Public\Employee\" />
     <Folder Include="Content\Public\Events\" />
     <Folder Include="Content\Public\QrCode\Equipment\" />
-    <Folder Include="Views\TechnicalServiceRequestHistory\" />
   </ItemGroup>
   <ItemGroup>
     <Content Include="fonts\glyphicons-halflings-regular.woff2" />
@@ -3715,6 +3719,9 @@
     </EmbeddedResource>
     <EmbeddedResource Include="Migrations\202603170626155_addGroupSpecificNotificationProperties.resx">
       <DependentUpon>202603170626155_addGroupSpecificNotificationProperties.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Migrations\202603250053492_removeUnusedProperties.resx">
+      <DependentUpon>202603250053492_removeUnusedProperties.cs</DependentUpon>
     </EmbeddedResource>
   </ItemGroup>
   <PropertyGroup>

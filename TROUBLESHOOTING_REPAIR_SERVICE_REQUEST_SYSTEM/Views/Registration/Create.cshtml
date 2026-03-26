@@ -9,6 +9,8 @@
     <link rel="stylesheet" href="~/Content/App/Registration/Create.css" type="text/css" />
 }
 
+@Html.AntiForgeryToken()
+
 <section class="container registration-create-page">
     <div class="row">
         <div class="col-md-2 col-sm-1"></div>
@@ -140,10 +142,14 @@
                         </section>
                     </section>
 
-                    <section class="panel-footer clearfix">
+                    <section class="panel-footer clearfix flex-row-reverse">
                         <button type="submit" class="btn btn-primary pull-right">
                             Next Step <i class="fa fa-arrow-right"></i>
                         </button>
+
+                        <button id="deny_registration_request_button" type="button" class="btn btn-danger pull-right">
+                            Deny <i class="fa fa-arrow-right"></i>
+                        </button>   
                     </section>
                 }
             </div>
@@ -152,3 +158,13 @@
         <div class="col-md-2 col-sm-1"></div>
     </div>
 </section>
+
+@section Scripts {
+    <script>
+        const registrationRequestId = "@Model.RegistrationRequest.Id";
+        const denyUrl = "@Url.Action("DenyRegistration", "Registration")";
+        const denyRedirectUrl = "@Url.Action("Index", "RegistrationRequest")";
+    </script>
+
+    <script src="~/Scripts/App/Registration/DenyRegistration.js" defer></script>
+}

@@ -229,7 +229,8 @@
                                 <td class="text-primary bold-text">
                                     <div class="flex-row flex-space-between">
                                         <p id="severity_container">
-                                            @if (Model.TechnicalServiceRequestSeverityId.HasValue && Model.TechnicalServiceRequestSeverityId > 0)
+                                            @if (Model.TechnicalServiceRequestSeverityId.HasValue && 
+                                                 Model.TechnicalServiceRequestSeverityId > 0)
                                             {
                                                 <span class="@getSeverityLabelClass(Model.TechnicalServiceRequestSeverityId.Value)">
                                                     @Model.TechnicalServiceRequestSeverity.SeverityName
@@ -243,10 +244,15 @@
                                             }
                                         </p>
 
-                                        @if (AccountTypeEnum.IsAdmin(userAccountType) || AccountTypeEnum.IsIT(userAccountType))
+                                        @if (AccountTypeEnum.IsIT(userAccountType))
                                         {
                                             Html.RenderPartial("~/Views/TechnicalServiceRequests/Partial/_UpdateSeverityModal.cshtml");
-                                            <button type="button" id="update_severity_button" class="unset-button text-info" data-toggle="modal" data-target="#update_severity_modal">Update</button>
+                                            <button 
+                                                type="button" 
+                                                id="update_severity_button" 
+                                                class="unset-button text-info" 
+                                                data-toggle="modal" 
+                                                data-target="#update_severity_modal">Update</button>
                                         }
                                     </div>
                                 </td>
@@ -281,7 +287,7 @@
 
                             @* Show schedule if request is a schedule control process *@
                             @if (Model.TechnicalServiceTypeId.HasValue &&
-                                                            TechnicalServiceTypeEnum.IsScheduleControlProcessRequest(Model.TechnicalServiceTypeId.Value))
+                                 TechnicalServiceTypeEnum.IsScheduleControlProcessRequest(Model.TechnicalServiceTypeId.Value))
                             {
                                 <tr>
                                     <td colspan="2" class="schedule-row-data">
@@ -323,7 +329,6 @@
                                 </tr>
                             }
 
-
                         </tbody>
                     </table>
                 </div>
@@ -339,7 +344,12 @@
                     @if (AccountTypeEnum.IsIT(userAccountType))
                     {
                         Html.RenderPartial("~/Views/TechnicalServiceRequests/Partial/_AddActionHistoryModal.cshtml");
-                        <button id="add_action_history_button" class="btn btn-primary btn-sm" type="button" data-toggle="modal" data-target="#add_action_history_modal">
+                        <button 
+                            id="add_action_history_button" 
+                            class="btn btn-sm" 
+                            type="button" 
+                            data-toggle="modal" 
+                            data-target="#add_action_history_modal">
                             <i class="glyphicon glyphicon-plus"></i>
                             Add
                         </button>
@@ -373,7 +383,11 @@
             @if (isCancellable && AccountTypeEnum.IsStandard(currentUser.PrivilegeIds))
             {
                 <section class="flex-row-reverse">
-                    <button id="cancel_request_button" class="btn btn-danger btn-sm center-child" type="button" data-request-id="@Model.Id">
+                    <button 
+                        id="cancel_request_button" 
+                        class="btn btn-danger btn-sm center-child" 
+                        type="button" 
+                        data-request-id="@Model.Id">
                         <i class="glyphicon glyphicon glyphicon-remove"></i>
                         Cancel
                     </button>

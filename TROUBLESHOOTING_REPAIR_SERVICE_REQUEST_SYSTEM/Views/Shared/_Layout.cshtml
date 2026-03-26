@@ -5,6 +5,8 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>@ViewBag.Title - TSR SYSTEM</title>
 
+    <link rel="icon" type="image/x-icon" href="~/Content/Images/logo.png" />
+
 
     @Styles.Render("~/Content/css")
     @Scripts.Render("~/bundles/modernizr")
@@ -38,7 +40,7 @@
 
     @* SweetAlert2 *@
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
-    @Html.Partial("~/Views/PartialLayout/_AlertModal.cshtml");
+    @Html.Partial("~/Views/Shared/_AlertModal.cshtml");
 
     @* Data Tables *@
     <script src="https://cdn.datatables.net/1.13.6/js/jquery.dataTables.min.js"></script>

@@ -1,0 +1,77 @@
+﻿@model TROUBLESHOOTING_REPAIR_SERVICE_REQUEST_SYSTEM.Models.Registration
+@using TROUBLESHOOTING_REPAIR_SERVICE_REQUEST_SYSTEM.Enumerables
+
+@{
+    var userCurrentPrivileges = Model.UserPrivileges
+        .Where(p => p.PrivilegeId.HasValue)
+        .Select(p => p.PrivilegeId.Value)
+        .ToArray();
+}
+
+
+<section id="manage_privilege_modal" class="modal fade" role="dialog">
+    <section class="modal-dialog">
+
+        <section class="modal-content">
+
+            @* Header *@
+            <section class="modal-header bg-primary">
+                <button type="button" class="close" data-dismiss="modal">&times;</button>
+
+                <h4 class="modal-title text-light">
+                    <i class="glyphicon glyphicon-lock text-light"></i>
+                    Manage User Privilege
+                </h4>
+            </section>
+
+            @using (Html.BeginForm(
+                "ManagePrivilege",
+                "Registration",
+                new { id = Model.Id },
+                FormMethod.Post
+            ))
+            {
+                @Html.AntiForgeryToken();
+
+                @* Body *@
+                <section class="modal-body">
+                    <div class="form-group">
+                        <label for="update_privilege" class="light-text">Update Privilege:</label>
+                        <select class="form-control" name="update_privilege">
+                            <option value="@AccountTypeEnum.ADMIN" @(AccountTypeEnum.IsAdmin(userCurrentPrivileges) ? "selected" : "")>
+                                @AccountTypeEnum.DisplayName(
+                                    AccountTypeEnum.ADMIN
+                               )
+                            </option>
+                            <option value="@AccountTypeEnum.IT" @(AccountTypeEnum.IsIT(userCurrentPrivileges) ? "selected" : "")>
+                                @AccountTypeEnum.DisplayName(
+                                    AccountTypeEnum.IT
+                               )
+                            </option>
+                            <option value="@AccountTypeEnum.STANDARD" @(AccountTypeEnum.IsStandard(userCurrentPrivileges) ? "selected" : "")>
+                                @AccountTypeEnum.DisplayName(
+                                    AccountTypeEnum.STANDARD
+                               )
+                            </option>
+                        </select>
+                    </div>
+
+                    <p>
+                        <em class="light-text text-primary">
+                            You can use this section to review and update the privileges assigned to the user as needed.
+                        </em>
+                    </p>
+                </section>
+
+                @* Footer *@
+                <section class="modal-footer">
+                    <button class="btn btn-primary btn-sm">
+                        <i class="glyphicon glyphicon-floppy-disk"></i>
+                        Save
+                    </button>
+                </section>
+            }
+        </section>
+
+    </section>
+</section>

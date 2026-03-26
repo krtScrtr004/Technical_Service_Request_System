@@ -41,20 +41,20 @@ namespace TROUBLESHOOTING_REPAIR_SERVICE_REQUEST_SYSTEM.Models
         [Display(Name = "First Name")]
         [MinLength(length: 1, ErrorMessage = "The minimum length is 1.")]
         [MaxLength(100, ErrorMessage = "The maximum length is 100.")]
-        [RegularExpression("^[\\w\\s\\-\\.\\,]+$", ErrorMessage = "Input contains invalid character(s)")]
+        [RegularExpression("^[A-Za-z\\s\\-\\.\\,]+$", ErrorMessage = "Input contains invalid character(s)")]
         public string FirstName { get; set; }
 
         [Display(Name = "Middle Name")]
         [MinLength(length: 1, ErrorMessage = "The minimum length is 1.")]
         [MaxLength(100, ErrorMessage = "The maximum length is 100.")]
-        [RegularExpression("^[\\w\\s\\-\\.\\,]+$", ErrorMessage = "Input contains invalid character(s)")]
+        [RegularExpression("^[A-Za-z\\s\\-\\.\\,]+$", ErrorMessage = "Input contains invalid character(s)")]
         public string MiddleName { get; set; }
 
         [Required]
         [Display(Name = "Last Name")]
         [MinLength(length: 1, ErrorMessage = "The minimum length is 1.")]
         [MaxLength(100, ErrorMessage = "The maximum length is 100.")]
-        [RegularExpression("^[\\w\\s\\-\\.\\,]+$", ErrorMessage = "Input contains invalid character(s)")]
+        [RegularExpression("^[A-Za-z\\s\\-\\.\\,]+$", ErrorMessage = "Input contains invalid character(s)")]
         public string LastName { get; set; }
 
         [Required]
@@ -66,6 +66,7 @@ namespace TROUBLESHOOTING_REPAIR_SERVICE_REQUEST_SYSTEM.Models
         [Required]
         [Display(Name = "Contact Number")]
         [DataType(DataType.PhoneNumber)]
+        [Phone(ErrorMessage = "Invalid phone number format.")]
         public string ContactNumber { get; set; }
     }
 }

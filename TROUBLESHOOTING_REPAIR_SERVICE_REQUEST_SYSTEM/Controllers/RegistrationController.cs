@@ -1,4 +1,5 @@
 ﻿//using ImageResizer;
+using Microsoft.Ajax.Utilities;
 using Microsoft.AspNet.Identity;
 using Microsoft.AspNet.Identity.EntityFramework;
 using System;
@@ -87,7 +88,7 @@ namespace TROUBLESHOOTING_REPAIR_SERVICE_REQUEST_SYSTEM.Controllers
 
         // GET: /Registration/Create
         [Authorize2]
-        
+
         public ActionResult Create(int id)
         {
             var registrationRequest = _db.RegistrationRequests
@@ -110,6 +111,13 @@ namespace TROUBLESHOOTING_REPAIR_SERVICE_REQUEST_SYSTEM.Controllers
         [AuthenticateUserPrivilege(new int[] { AccountTypeEnum.ADMIN })]
         public ActionResult Create(RegistrationCreateViewModel registrationCreateViewModel, int id)
         {
+            var currentUser = GetUserSession();
+            if (currentUser == null)
+            {
+                return new HttpStatusCodeResult(HttpStatusCode.Forbidden);
+            }
+            ViewBag.CurrentUser = currentUser;
+
             var registrationRequestFiller = new RegistrationRequest()
             {
                 Id = id,
@@ -199,7 +207,7 @@ namespace TROUBLESHOOTING_REPAIR_SERVICE_REQUEST_SYSTEM.Controllers
                     registration.LastName.Replace("Ñ", "N");
 
                     // Update the registration with the generated username and code
-                    registration.UserName = registrationCreateViewModel.Email;
+                    //registration.UserName = registrationCreateViewModel.Email;
                     registration.Code = code;
 
                     this.CreateApplicationUser(ref registrationCreateViewModel, registration, code);
@@ -229,7 +237,7 @@ namespace TROUBLESHOOTING_REPAIR_SERVICE_REQUEST_SYSTEM.Controllers
                     }
                     _db.UserPrivileges.Add(userprivilege);
 
-                    registration.SessionPrivilegeId = userprivilege.PrivilegeId;
+                    // registration.SessionPrivilegeId = userprivilege.PrivilegeId;
 
                     // Update the registration request to indicate that the account information has been provided
                     registrationRequest.AccountInformation = true;
@@ -263,31 +271,139 @@ namespace TROUBLESHOOTING_REPAIR_SERVICE_REQUEST_SYSTEM.Controllers
                 }
             }
         }
-        
+
         [Authorize2]
         [AuthenticateUserPrivilege(new int[] { AccountTypeEnum.STANDARD, AccountTypeEnum.IT, AccountTypeEnum.ADMIN })]
         public ActionResult Success(string registrationId)
         {
-            // Decrypt the registration ID from the query string
-            var dec = Custom.Controllers.EncryptionHelper.Decrypt(registrationId);
-            int? id = Int32.Parse(dec);
-            if (!id.HasValue)
+            try
+            {
+                // Decrypt the registration ID from the query string
+                var dec = Custom.Controllers.EncryptionHelper.Decrypt(registrationId);
+                int? id = Int32.Parse(dec);
+                if (!id.HasValue)
+                {
+                    return new HttpStatusCodeResult(HttpStatusCode.BadRequest);
+                }
+
+                // Find the registration request by the decrypted id
+                var registration = _db.Registrations
+                    .FirstOrDefault(i => i.Id == id);
+                if (registration == null)
+                {
+                    return HttpNotFound();
+                }
+
+                return View(new RegistrationCreateViewModel
+                {
+                    Registration = registration
+                });
+            }
+            catch (Exception ex)
+            {
+                return RedirectToAction("NotFound", "Error");
+            }
+        }
+
+        [Authorize2]
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        [AuthenticateUserPrivilege(new int[] { AccountTypeEnum.ADMIN })]
+        public ActionResult ManagePrivilege(int id, int update_privilege) // update_privilege -> name attribute of the select element
+        {
+            if (id < 1)
             {
                 return new HttpStatusCodeResult(HttpStatusCode.BadRequest);
             }
 
-            // Find the registration request by the decrypted id
-            var registration = _db.Registrations
-                .FirstOrDefault(i => i.Id == id);
-            if (registration == null)
+            using (var transaction = _db.Database.BeginTransaction())
             {
-                return HttpNotFound();
+                try
+                {
+                    var validPrivilegeIds = new List<int>
+                    {
+                        AccountTypeEnum.ADMIN,
+                        AccountTypeEnum.IT,
+                        AccountTypeEnum.STANDARD
+                    };
+                    if (!validPrivilegeIds.Contains(update_privilege))
+                    {
+                        throw new Exception("Invalid privilege Id.");
+                    }
+
+                    var registration = _db.Registrations
+                        .Include(r => r.UserPrivileges)
+                        .FirstOrDefault(r => r.Id == id);
+                    if (registration == null)
+                    {
+                        return HttpNotFound();
+                    }
+
+                    var currentPrivileges = registration.UserPrivileges.ToArray();
+                    // Check if user does not have the privilege that is being updated
+                    if (!currentPrivileges
+                        .Where(p => p.PrivilegeId.HasValue)
+                        .Select(r => r.PrivilegeId.Value)
+                        .ToArray()
+                        .Contains(update_privilege))
+                    {
+                        foreach (var privilege in currentPrivileges)
+                        {
+                            // Modify all existing privilege
+                            if (privilege.PrivilegeId.HasValue)
+                            {
+                                privilege.PrivilegeId = update_privilege;
+                                _db.Entry(privilege).State = EntityState.Modified;
+                            }
+                        }
+
+                        var privilegeName = AccountTypeEnum.DisplayName(update_privilege);
+                        registration.AccountType = privilegeName;
+                        _db.Entry(registration).State = EntityState.Modified;
+
+                        _db.Notifications.Add(new Notification()
+                        {
+                            Title = "Privilege Update",
+                            Message = "Your privilege has been updated to " + privilegeName + ". Please log in again in order for this change to take effect.",
+                            RecipientRegistrationId = registration.Id,
+                            IsRead = false,
+                            IsActive = true,
+                            ForAdmin = false,
+                            ForIT = false,
+                            CreatedAt = DateTime.Now
+                        });
+
+                        // Update user roles based on the new privilege
+                        UpdateUserRoles(registration, privilegeName);
+
+                        _db.SaveChanges();
+                        transaction.Commit();
+
+                        // Notify user 
+                        (new NotificationService()).RefreshUserUi(registration.Id);
+
+                        TempData["AlertModal"] = new AlertModalUtility
+                        {
+                            Title = "Success",
+                            Message = "User privilege updated successfully.",
+                            Status = AlertModalStatus.Success
+                        };
+                    }
+                }
+                catch (Exception ex)
+                {
+                    transaction.Rollback();
+                    TempData["AlertModal"] = new AlertModalUtility
+                    {
+                        Title = "Error",
+                        Message = "An error occured. Please try again.",
+                        Status = AlertModalStatus.Error
+                    };
+                    ModelState.AddModelError("", "An error occurred while making a request: " + ex.Message);
+                }
             }
 
-            return View(new RegistrationCreateViewModel
-            {
-                Registration = registration
-            });
+            return RedirectToAction("Details", new { id = id });
         }
 
         [Authorize2]
@@ -531,6 +647,44 @@ namespace TROUBLESHOOTING_REPAIR_SERVICE_REQUEST_SYSTEM.Controllers
             }
         }
 
+        [Authorize2]
+        [AuthenticateUserPrivilege(new int[] { AccountTypeEnum.ADMIN })]
+        public ActionResult DenyRegistration(int id)
+        {
+            try
+            {
+                if (id < 1)
+                {
+                    throw new Exception("Invalid regstration request Id.");
+                }
+
+                var registrationRequest = _db.RegistrationRequests
+                    .FirstOrDefault(r => r.Id == id);
+                if (registrationRequest == null)
+                {
+                    throw new Exception("Registration request not found.");
+                }
+
+                registrationRequest.IsDenied = true;
+                registrationRequest.IsApproved = false;
+                _db.Entry(registrationRequest).State = EntityState.Modified;
+                _db.SaveChanges();
+
+                return Json(new
+                {
+                    success = true,
+                }, JsonRequestBehavior.AllowGet);
+            }
+            catch (Exception ex)
+            {
+                return Json(new
+                {
+                    succes = false,
+                    error = ex.Message
+                }, JsonRequestBehavior.AllowGet);
+            }
+        }
+
         #endregion
 
         #region Helper
@@ -548,7 +702,7 @@ namespace TROUBLESHOOTING_REPAIR_SERVICE_REQUEST_SYSTEM.Controllers
 
             // If the user creation is successful, proceed to assign roles and privileges
             var officerNew = _db.Registrations.Find(registration.Id);
-            officerNew.UserName = username;
+            //officerNew.UserName = username;
 
             var RoleManager = new RoleManager<IdentityRole>(new RoleStore<IdentityRole>(_db));
             // Check if the role for the officer's account type exists, and if not, create it
@@ -561,6 +715,45 @@ namespace TROUBLESHOOTING_REPAIR_SERVICE_REQUEST_SYSTEM.Controllers
             // Assign the officer to the appropriate role based on their account type
             var temp = _db.Users.Single(i => i.UserName == user.UserName);
             UserManager.AddToRole(temp.Id, officerNew.AccountType);
+        }
+
+        private void UpdateUserRoles(Registration registration, string privilegeName)
+        {
+            var appUser = UserManager.FindByEmail(registration.Email);
+            if (appUser != null)
+            {
+                // ensure role exists
+                var roleManager = new RoleManager<IdentityRole>(new RoleStore<IdentityRole>(_db));
+                if (!roleManager.RoleExists(privilegeName))
+                {
+                    var createRoleResult = roleManager.Create(new IdentityRole(privilegeName));
+                    if (!createRoleResult.Succeeded)
+                    {
+                        throw new Exception("Failed to create role: " + string.Join(", ", createRoleResult.Errors));
+                    }
+                }
+
+                // remove all current roles (or remove specific ones)
+                var currentRoles = UserManager.GetRoles(appUser.Id).ToArray();
+                if (currentRoles.Any())
+                {
+                    var removeResult = UserManager.RemoveFromRoles(appUser.Id, currentRoles);
+                    if (!removeResult.Succeeded)
+                    {
+                        throw new Exception("Failed to remove user roles: " + string.Join(", ", removeResult.Errors));
+                    }
+                }
+
+                // add new role
+                var addResult = UserManager.AddToRole(appUser.Id, privilegeName);
+                if (!addResult.Succeeded)
+                {
+                    throw new Exception("Failed to add role: " + string.Join(", ", addResult.Errors));
+                }
+
+                // Update security stamp to invalidate existing cookies (forces re-login on all devices)
+                UserManager.UpdateSecurityStamp(appUser.Id);
+            }
         }
 
         #endregion

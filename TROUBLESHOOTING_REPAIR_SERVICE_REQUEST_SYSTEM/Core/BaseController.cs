@@ -24,7 +24,7 @@ namespace TROUBLESHOOTING_REPAIR_SERVICE_REQUEST_SYSTEM.Core
             var currentUser = _db.Registrations.FirstOrDefault(r => r.Email == User.Identity.Name);
             if (currentUser == null)
             {
-
+                return null;
             }
 
             return new UserSession

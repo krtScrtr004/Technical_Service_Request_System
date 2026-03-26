@@ -34,7 +34,6 @@ namespace TROUBLESHOOTING_REPAIR_SERVICE_REQUEST_SYSTEM.Controllers
         }
 
         // GET: TechnicalServiceRequests/Details/5
-        [Authorize2]
         [AuthenticateUserPrivilege(new int[] { AccountTypeEnum.STANDARD, AccountTypeEnum.IT, AccountTypeEnum.ADMIN })]
         public ActionResult Details(int? id)
         {
@@ -71,6 +70,7 @@ namespace TROUBLESHOOTING_REPAIR_SERVICE_REQUEST_SYSTEM.Controllers
             return View(casted);
         }
 
+        [AuthenticateUserPrivilege(new int[] { AccountTypeEnum.STANDARD, AccountTypeEnum.IT, AccountTypeEnum.ADMIN })]
         public ActionResult Form(int id)
         {
             if (id < 1)
@@ -122,6 +122,13 @@ namespace TROUBLESHOOTING_REPAIR_SERVICE_REQUEST_SYSTEM.Controllers
         [AuthenticateUserPrivilege(new int[] { AccountTypeEnum.STANDARD })]
         public ActionResult Create(TechnicalServiceRequestCreateViewModel technicalServiceRequestCreateViewModel)
         {
+            var currentUser = GetUserSession();
+            if (currentUser == null)
+            {
+                return HttpNotFound();
+            }
+            ViewBag.CurrentUser = currentUser;
+
             if (!ModelState.IsValid)
             {
                 var errors = GetModelStateErrors();
@@ -150,16 +157,16 @@ namespace TROUBLESHOOTING_REPAIR_SERVICE_REQUEST_SYSTEM.Controllers
                     technicalServiceRequest.DateRequest = DateTime.Now;
 
                     // Trim and uppercase information for consistency
-                    technicalServiceRequest.ClientFirstName = technicalServiceRequest.ClientFirstName?.Trim().ToUpper();
-                    technicalServiceRequest.ClientLastName = technicalServiceRequest.ClientLastName?.Trim().ToUpper();
-                    technicalServiceRequest.ClientMiddleName = technicalServiceRequest.ClientMiddleName?.Trim().ToUpper();
-                    technicalServiceRequest.ClientExtensionName = technicalServiceRequest.ClientExtensionName?.Trim().ToUpper();
-                    technicalServiceRequest.ClientOffice = technicalServiceRequest.ClientOffice?.Trim().ToUpper();
-                    technicalServiceRequest.ClientPosition = technicalServiceRequest.ClientPosition?.Trim().ToUpper();
-                    technicalServiceRequest.ClientOffice = technicalServiceRequest.ClientOffice.Trim().ToUpper();
-                    technicalServiceRequest.ClientPosition = technicalServiceRequest.ClientPosition.Trim().ToUpper();
+                    technicalServiceRequest.ClientFirstName = technicalServiceRequest.ClientFirstName?.Trim().ToUpperInvariant();
+                    technicalServiceRequest.ClientLastName = technicalServiceRequest.ClientLastName?.Trim().ToUpperInvariant();
+                    technicalServiceRequest.ClientMiddleName = technicalServiceRequest.ClientMiddleName?.Trim().ToUpperInvariant();
+                    technicalServiceRequest.ClientExtensionName = technicalServiceRequest.ClientExtensionName?.Trim().ToUpperInvariant();
+                    technicalServiceRequest.ClientOffice = technicalServiceRequest.ClientOffice?.Trim().ToUpperInvariant();
+                    technicalServiceRequest.ClientPosition = technicalServiceRequest.ClientPosition?.Trim().ToUpperInvariant();
+                    technicalServiceRequest.ClientOffice = technicalServiceRequest.ClientOffice.Trim().ToUpperInvariant();
+                    technicalServiceRequest.ClientPosition = technicalServiceRequest.ClientPosition.Trim().ToUpperInvariant();
                     technicalServiceRequest.Others = !string.IsNullOrWhiteSpace(technicalServiceRequest.Others) 
-                            ? technicalServiceRequest.Others.Trim() 
+                            ? technicalServiceRequest.Others.Trim().ToUpperInvariant() 
                             : string.Empty;
 
                     var selectedTechnicalServiceType = technicalServiceRequest.TechnicalServiceTypeId;
@@ -198,7 +205,13 @@ namespace TROUBLESHOOTING_REPAIR_SERVICE_REQUEST_SYSTEM.Controllers
                     }
                     else
                     {
-                        throw new Exception("Please select a valid service type or specify the details in the 'Others' field.");
+                        TempData["alertModal"] = new AlertModalUtility()
+                        {
+                            Title = "Invalid Service Type",
+                            Message = "Please select a valid service type or specify the details in the 'Others' field.",
+                            Status = AlertModalStatus.Error
+                        };
+                        return View(technicalServiceRequestCreateViewModel);
                     }
 
                     if (!isQueued)
@@ -343,7 +356,12 @@ namespace TROUBLESHOOTING_REPAIR_SERVICE_REQUEST_SYSTEM.Controllers
                 else if (associatedUserPrivilege == AccountTypeEnum.IT)
                 {
                     var nonAssistedServiceIds = TechnicalServiceTypeEnum.GetNonAssistedServiceIds();
-                    // IT can see requests that they have taken action on (based on TechnicalServiceRequestHistories)
+                    
+                    /**
+                     * IT can see requests:
+                     * - They have taken action on (based on TechnicalServiceRequestHistories)
+                     * - Non-Assisted requests
+                     */
                     query = _db.TechnicalServiceRequests
                         .Include(t => t.TechnicalServiceType)
                         .Include(t => t.TechnicalServiceRequestStatus)
@@ -394,6 +412,23 @@ namespace TROUBLESHOOTING_REPAIR_SERVICE_REQUEST_SYSTEM.Controllers
                         query = query.Where(i =>
                             i.TechnicalServiceTypeId.HasValue &&
                             nonAssistedServices.Contains(i.TechnicalServiceTypeId.Value)
+                        );
+                    }
+                    else if (typeFilter == "queued")
+                    {
+                        var queuedRequestIds = _db.TechnicalServiceRequestQueues
+                            .Where(q => !q.IsProcessed)
+                            .Select(q => q.TechnicalServiceRequestId)
+                            .ToList();
+
+                        // Reset base query to fetch only queued requests
+                        query = _db.TechnicalServiceRequests
+                            .Include(t => t.TechnicalServiceType)
+                            .Include(t => t.TechnicalServiceRequestStatus)
+                            .Where(i =>
+                                i.TechnicalServiceTypeId.HasValue &&
+                                queuedRequestIds.Contains(i.Id
+                            )
                         );
                     }
                 }
@@ -590,7 +625,7 @@ namespace TROUBLESHOOTING_REPAIR_SERVICE_REQUEST_SYSTEM.Controllers
 
                 // Check is current status can still be cancelled
                 var cancellableStatus = TechnicalServiceRequestStatusEnum.GetCancellableStatusIds();
-                if (cancellableStatus.Contains(currentStatus.Value))
+                if (!cancellableStatus.Contains(currentStatus.Value))
                 {
                     return Json(new
                     {
@@ -800,12 +835,14 @@ namespace TROUBLESHOOTING_REPAIR_SERVICE_REQUEST_SYSTEM.Controllers
             var itAccountTypeName = AccountTypeEnum.DisplayName(AccountTypeEnum.IT);
 
             var activeStatusIds = TechnicalServiceRequestStatusEnum.GetActiveStatusIds();
+            var nonAssistedRequestIds = TechnicalServiceTypeEnum.GetNonAssistedServiceIds();
 
             // Build a set of technicians currently busy with active requests
             var busyTechnicianIds = _db.TechnicalServiceRequests
                 .Where(r =>
                     r.TechnicalServiceRequestStatusId.HasValue &&
-                    activeStatusIds.Contains(r.TechnicalServiceRequestStatusId.Value))
+                    activeStatusIds.Contains(r.TechnicalServiceRequestStatusId.Value) &&
+                    (r.TechnicalServiceTypeId.HasValue && !nonAssistedRequestIds.Contains(r.TechnicalServiceTypeId.Value))) // Exclude non-assisted requests
                 .Select(r => r.TechnicalServiceRequestHistories
                     .OrderByDescending(h => h.UpdatedAt)
                     .Select(h => h.ActionTakenByRegistrationId)
@@ -848,13 +885,9 @@ namespace TROUBLESHOOTING_REPAIR_SERVICE_REQUEST_SYSTEM.Controllers
 
             var itAccountTypeName = AccountTypeEnum.DisplayName(AccountTypeEnum.IT);
 
-            // Requests in these statuses are still actively consumi ng a technician
-            var activeStatusIds = new List<int>
-            {
-                TechnicalServiceRequestStatusEnum.PENDING,
-                TechnicalServiceRequestStatusEnum.OPEN,
-                TechnicalServiceRequestStatusEnum.ONGOING
-            };
+            // Requests in these statuses are still actively consuming a technician
+            var activeStatusIds = TechnicalServiceRequestStatusEnum.GetActiveStatusIds();
+            var nonAssistedRequestIds = TechnicalServiceTypeEnum.GetNonAssistedServiceIds();
 
 
             // Build a set of technicians currently busy with active requests
@@ -862,6 +895,7 @@ namespace TROUBLESHOOTING_REPAIR_SERVICE_REQUEST_SYSTEM.Controllers
                 .Where(r =>
                     r.TechnicalServiceRequestStatusId.HasValue &&
                     activeStatusIds.Contains(r.TechnicalServiceRequestStatusId.Value) &&
+                    (r.TechnicalServiceTypeId.HasValue && !nonAssistedRequestIds.Contains(r.TechnicalServiceRequestStatusId.Value)) && // Exclude non-assisted requests
                     // Check if the request is scheduled on the same date as the new request
                     (DbFunctions.TruncateTime(r.TechnicalServiceRequestScheduledDate) == DbFunctions.TruncateTime(scheduleDate) &&
                         (
@@ -961,7 +995,7 @@ namespace TROUBLESHOOTING_REPAIR_SERVICE_REQUEST_SYSTEM.Controllers
 
             // Get all schedules on the same day
             var sameDaySchedules = _db.TechnicalServiceRequests
-                .Where(i => i.TechnicalServiceRequestScheduledDate == newScheduledDate)
+                .Where(i => DbFunctions.TruncateTime(i.TechnicalServiceRequestScheduledDate) == DbFunctions.TruncateTime(newScheduledDate))
                 .ToList();
 
             // Check whether the schedule is not conflictiing with other requests

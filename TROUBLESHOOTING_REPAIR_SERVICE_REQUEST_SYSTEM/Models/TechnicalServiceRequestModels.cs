@@ -84,20 +84,20 @@ namespace TROUBLESHOOTING_REPAIR_SERVICE_REQUEST_SYSTEM.Models
         [DisplayName("Last Name")]
         [MinLength(1, ErrorMessage = "The minimum length is 1")]
         [MaxLength(100, ErrorMessage = "The maximum length is 100")]
-        [RegularExpression("^[\\w\\s-]+$", ErrorMessage = "Input contains invalid character(s)")]
+        [RegularExpression("^[A-Za-z\\s-]+$", ErrorMessage = "Input contains invalid character(s)")]
         public string ClientLastName { get; set; }
         [Required]
         [DataType(DataType.Text)]
         [DisplayName("First Name")]
         [MinLength(1, ErrorMessage = "The minimum length is 1")]
         [MaxLength(100, ErrorMessage = "The maximum length is 100")]
-        [RegularExpression("^[\\w\\s-]+$", ErrorMessage = "Input contains invalid character(s)")]
+        [RegularExpression("^[A-Za-z\\s-]+$", ErrorMessage = "Input contains invalid character(s)")]
         public string ClientFirstName { get; set; }
         [DataType(DataType.Text)]
         [DisplayName("Middle Name")]
         [MinLength(1, ErrorMessage = "The minimum length is 1")]
         [MaxLength(100, ErrorMessage = "The maximum length is 100")]
-        [RegularExpression("^[\\w\\s-]+$", ErrorMessage = "Input contains invalid character(s)")]
+        [RegularExpression("^[A-Za-z\\s-]+$", ErrorMessage = "Input contains invalid character(s)")]
         public string ClientMiddleName { get; set; }
         [DataType(DataType.Text)]
         [DisplayName("Extension Name")]

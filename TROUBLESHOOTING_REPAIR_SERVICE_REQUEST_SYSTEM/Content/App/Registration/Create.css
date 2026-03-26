@@ -93,6 +93,7 @@
 
 .panel-footer {
     background: #fff;
+    gap: 0.5rem;
 }
 
 @media (max-width: 767px) {

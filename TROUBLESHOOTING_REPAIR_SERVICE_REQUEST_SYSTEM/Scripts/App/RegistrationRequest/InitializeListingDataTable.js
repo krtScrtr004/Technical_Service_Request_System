@@ -59,7 +59,7 @@
                 render: function (data, type, row) {
                     const parse = (val) => val === true || val === 1 || val?.toString().toLowerCase().trim() === "true";
 
-                    if (!parse(row.IsApproved) || parse(row.IsDenied)) {
+                    if (!parse(row.IsApproved) && !parse(row.IsDenied)) {
                         return `<a class="btn btn-sm btn-primary" href="/Registration/Create/${row.Id}">
                                     <i class="glyphicon glyphicon-flash"></i>
                                 </a>`;

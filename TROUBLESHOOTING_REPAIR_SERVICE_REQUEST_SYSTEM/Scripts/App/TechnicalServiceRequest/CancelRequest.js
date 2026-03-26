@@ -56,7 +56,6 @@
                     text: "An error occured. Please try again.",
                     icon: "error",
                     confirmButtonText: 'Understood',
-                    width: "600px"
                 });
                 console.error(error);
             }

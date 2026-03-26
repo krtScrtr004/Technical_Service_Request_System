@@ -127,11 +127,14 @@ table.table-bordered {
     font-size: 1.6rem !important;
 }
 
+.modal-header > button.close {
+    color: var(--default);
+}
+
 .panel-title > i,
 .modal-title > i {
     margin-right: 1rem;
 }
-
 
 .dataTables_wrapper {
     padding: var(--space);

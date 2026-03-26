@@ -16,42 +16,42 @@ using System.Net;
 
 namespace Custom.Controllers
 {
-    [Authorize]
-    public static class dbEmployee
-    {
-        public static Registration RegistrationIdentity(string UserIdentityName)
-        {
-            ApplicationDbContext db = new ApplicationDbContext();
-            return db.Registrations.Single(i => i.UserName == UserIdentityName);
-        }
+    //[Authorize]
+    //public static class dbEmployee
+    //{
+    //    public static Registration RegistrationIdentity(string UserIdentityName)
+    //    {
+    //        ApplicationDbContext db = new ApplicationDbContext();
+    //        return db.Registrations.Single(i => i.UserName == UserIdentityName);
+    //    }
 
-        public static List<UserPrivilege> UserPrivilegeNow()
-        {
-            ApplicationDbContext db = new ApplicationDbContext();
-            Registration registration = db.Registrations.Single(i => i.UserName == HttpContext.Current.User.Identity.Name);
+    //    public static List<UserPrivilege> UserPrivilegeNow()
+    //    {
+    //        ApplicationDbContext db = new ApplicationDbContext();
+    //        Registration registration = db.Registrations.Single(i => i.UserName == HttpContext.Current.User.Identity.Name);
 
-            var user = db.UserPrivileges.Where(i => i.RegistrationId == registration.Id).ToList();
-            return user;
-        }
+    //        var user = db.UserPrivileges.Where(i => i.RegistrationId == registration.Id).ToList();
+    //        return user;
+    //    }
 
 
-        [Authorize]
-        public static Registration RegistrationNow()
-        {
-            try
-            {
-                ApplicationDbContext db = new ApplicationDbContext();
-                return db.Registrations.Single(i => i.UserName == HttpContext.Current.User.Identity.Name);
-            }
-            catch
-            {
-                var reg = new Registration();
-                reg.Id = 0;
-                return reg;
-            }
-        }
+    //    [Authorize]
+    //    public static Registration RegistrationNow()
+    //    {
+    //        try
+    //        {
+    //            ApplicationDbContext db = new ApplicationDbContext();
+    //            return db.Registrations.Single(i => i.UserName == HttpContext.Current.User.Identity.Name);
+    //        }
+    //        catch
+    //        {
+    //            var reg = new Registration();
+    //            reg.Id = 0;
+    //            return reg;
+    //        }
+    //    }
 
-    }
+    //}
 
     public static class EncryptionHelper
     {
@@ -116,31 +116,31 @@ namespace Custom.Controllers
     }
 
 
-    public static class HardCodedDatabase
-    {
-        public static DataTable Query(string querystr)
-        {
-            return Query(querystr, "");
-        }
+    //public static class HardCodedDatabase
+    //{
+    //    public static DataTable Query(string querystr)
+    //    {
+    //        return Query(querystr, "");
+    //    }
 
-        public static DataTable Query(string querystr, string connectionString)
-        {
-            if (connectionString == "")
-            {
-                connectionString = ConfigurationManager.ConnectionStrings["DefaultConnection"].ConnectionString;
-            }
+    //    public static DataTable Query(string querystr, string connectionString)
+    //    {
+    //        if (connectionString == "")
+    //        {
+    //            connectionString = ConfigurationManager.ConnectionStrings["DefaultConnection"].ConnectionString;
+    //        }
 
-            var dt = new DataTable();
-            using (SqlConnection sqlConn = new SqlConnection(connectionString.Replace("\r\n", "")))
-            {
-                using (SqlCommand cmd = new SqlCommand(querystr, sqlConn))
-                {
-                    SqlDataAdapter da = new SqlDataAdapter(cmd);
-                    da.Fill(dt);
-                }
-            }
+    //        var dt = new DataTable();
+    //        using (SqlConnection sqlConn = new SqlConnection(connectionString.Replace("\r\n", "")))
+    //        {
+    //            using (SqlCommand cmd = new SqlCommand(querystr, sqlConn))
+    //            {
+    //                SqlDataAdapter da = new SqlDataAdapter(cmd);
+    //                da.Fill(dt);
+    //            }
+    //        }
 
-            return dt;
+    //        return dt;
 
             //SqlConnection cmdconn = new SqlConnection();
             //var dt = new DataTable();
@@ -171,46 +171,46 @@ namespace Custom.Controllers
             //    cmdconn.Close();
             //}
             //return dt;
-        }
-    }
+    //    }
+    //}
 
-    public static class Dates
-    {
-        public static int Age(DateTime DateStarted, DateTime DateEnded)
-        {
-            int age = (Int32.Parse(DateEnded.ToString("yyyyMMdd")) - Int32.Parse(DateStarted.ToString("yyyyMMdd"))) / 10000;
-            return age;
-        }
+    //public static class Dates
+    //{
+    //    public static int Age(DateTime DateStarted, DateTime DateEnded)
+    //    {
+    //        int age = (Int32.Parse(DateEnded.ToString("yyyyMMdd")) - Int32.Parse(DateStarted.ToString("yyyyMMdd"))) / 10000;
+    //        return age;
+    //    }
 
-        public static int Age(DateTime DateStarted)
-        {
-            return Age(DateStarted, DateTime.Now);
-        }
-    }
+    //    public static int Age(DateTime DateStarted)
+    //    {
+    //        return Age(DateStarted, DateTime.Now);
+    //    }
+    //}
 
 
-    public static class Gender
-    {
-        public static bool Male = true;
-        public static bool Female = false;
+    //public static class Gender
+    //{
+    //    public static bool Male = true;
+    //    public static bool Female = false;
 
-        public static string Sex(bool sex)
-        {
-            return (sex == true) ? "Male" : "Female";
-        }
-    }
+    //    public static string Sex(bool sex)
+    //    {
+    //        return (sex == true) ? "Male" : "Female";
+    //    }
+    //}
 
-    public static class strings
-    {
-        public static string UppercaseWords(string value)
-        {
-            if (value == null || value.Trim() == "")
-            {
-                return "";
-            }
+    //public static class strings
+    //{
+    //    public static string UppercaseWords(string value)
+    //    {
+    //        if (value == null || value.Trim() == "")
+    //        {
+    //            return "";
+    //        }
 
-            var val2 = CultureInfo.CurrentCulture.TextInfo.ToTitleCase(value.ToLower());
-            return val2.Replace(" ii ", " II ").Replace(" iii ", " III ");
+    //        var val2 = CultureInfo.CurrentCulture.TextInfo.ToTitleCase(value.ToLower());
+    //        return val2.Replace(" ii ", " II ").Replace(" iii ", " III ");
 
             //if (value == null) { return ""; }
             //value = value.Trim();
@@ -233,13 +233,13 @@ namespace Custom.Controllers
 
 
             //return new string(array);
-        }
+    //    }
 
-        public static string NoComma(string value)
-        {
-            return value.Replace(",", "");
-        }
-    }
+    //    public static string NoComma(string value)
+    //    {
+    //        return value.Replace(",", "");
+    //    }
+    //}
 }
 
 
@@ -247,82 +247,82 @@ public class FTPHelper
 {
     //var contents = GetFtpDirectoryContents(new Uri("ftpDirectoryUri"), new NetworkCredential("userName", "password"));
 
-    public static string Upload(string folderpath, string sourcepath)
-    {
-        var basepath = NCROWebsite.FtpUrl + NCROWebsite.DocumentsFolder;
-        return Upload(NCROWebsite.FtpCredential, basepath, folderpath, sourcepath);
-    }
-    public static string Upload(NetworkCredential networkCredential, string basepath, string folderpath, string sourcepath)
-    {
-        var fp = folderpath.Split('/');
+    //public static string Upload(string folderpath, string sourcepath)
+    //{
+    //    var basepath = NCROWebsite.FtpUrl + NCROWebsite.DocumentsFolder;
+    //    return Upload(NCROWebsite.FtpCredential, basepath, folderpath, sourcepath);
+    //}
+    //public static string Upload(NetworkCredential networkCredential, string basepath, string folderpath, string sourcepath)
+    //{
+    //    var fp = folderpath.Split('/');
 
-        try
-        {
-            WebRequest request = WebRequest.Create(basepath + "/" + fp[0]);
-            request.Method = WebRequestMethods.Ftp.MakeDirectory;
-            request.Credentials = networkCredential;
-            WebResponse response = request.GetResponse();
-        }
-        catch { }
+    //    try
+    //    {
+    //        WebRequest request = WebRequest.Create(basepath + "/" + fp[0]);
+    //        request.Method = WebRequestMethods.Ftp.MakeDirectory;
+    //        request.Credentials = networkCredential;
+    //        WebResponse response = request.GetResponse();
+    //    }
+    //    catch { }
 
-        try
-        {
-            WebRequest request = WebRequest.Create(basepath + "/" + folderpath);
-            request.Method = WebRequestMethods.Ftp.MakeDirectory;
-            request.Credentials = networkCredential;
-            WebResponse response = request.GetResponse();
-        }
-        catch { }
+    //    try
+    //    {
+    //        WebRequest request = WebRequest.Create(basepath + "/" + folderpath);
+    //        request.Method = WebRequestMethods.Ftp.MakeDirectory;
+    //        request.Credentials = networkCredential;
+    //        WebResponse response = request.GetResponse();
+    //    }
+    //    catch { }
 
-        var filename = Path.GetFileName(sourcepath);
-        Uri requestUri = new Uri(basepath + "/" + folderpath + "/" + filename);
-        using (WebClient client = new WebClient())
-        {
-            client.Credentials = networkCredential;
-            client.UploadFile(requestUri, "STOR", sourcepath);
-        }
-        File.Delete(sourcepath);
+    //    var filename = Path.GetFileName(sourcepath);
+    //    Uri requestUri = new Uri(basepath + "/" + folderpath + "/" + filename);
+    //    using (WebClient client = new WebClient())
+    //    {
+    //        client.Credentials = networkCredential;
+    //        client.UploadFile(requestUri, "STOR", sourcepath);
+    //    }
+    //    File.Delete(sourcepath);
 
-        return "";
-    }
+    //    return "";
+    //}
 
-    public static List<string> GetFtpDirectoryContents(Uri requestUri, NetworkCredential networkCredential)
-    {
+    //public static List<string> GetFtpDirectoryContents(Uri requestUri, NetworkCredential networkCredential)
+    //{
 
-        var directoryContents = new List<string>(); // Create empty list to fill it later.
-                                                    // Create ftpWebRequest object with given options to get the Directory Contents. 
+    //    var directoryContents = new List<string>(); // Create empty list to fill it later.
+    //                                                // Create ftpWebRequest object with given options to get the Directory Contents. 
 
-        var ftpWebRequest = GetFtpWebRequest(requestUri, networkCredential, WebRequestMethods.Ftp.ListDirectory);
-        try
-        {
-            using (var ftpWebResponse = (FtpWebResponse)ftpWebRequest.GetResponse()) // Excute the ftpWebRequest and Get It's Response.
-            using (var streamReader = new StreamReader(ftpWebResponse.GetResponseStream())) // Get list of the Directory Contentss as Stream.
-            {
-                var line = string.Empty; // Initial default value for line.
-                do
-                {
-                    line = streamReader.ReadLine(); // Read current line of Stream.
-                    directoryContents.Add(line); // Add current line to Directory Contentss List.
-                } while (!string.IsNullOrEmpty(line)); // Keep reading while the line has value.
-            }
-        }
-        catch (Exception) { } // Do nothing incase of Exception occurred.
+    //    var ftpWebRequest = GetFtpWebRequest(requestUri, networkCredential, WebRequestMethods.Ftp.ListDirectory);
+    //    try
+    //    {
+    //        using (var ftpWebResponse = (FtpWebResponse)ftpWebRequest.GetResponse()) // Excute the ftpWebRequest and Get It's Response.
+    //        using (var streamReader = new StreamReader(ftpWebResponse.GetResponseStream())) // Get list of the Directory Contentss as Stream.
+    //        {
+    //            var line = string.Empty; // Initial default value for line.
+    //            do
+    //            {
+    //                line = streamReader.ReadLine(); // Read current line of Stream.
+    //                directoryContents.Add(line); // Add current line to Directory Contentss List.
+    //            } while (!string.IsNullOrEmpty(line)); // Keep reading while the line has value.
+    //        }
+    //    }
+    //    catch (Exception) { } // Do nothing incase of Exception occurred.
 
-        return directoryContents; // Return all list of Directory Contentss: Files/Sub Directories.
-    }
+    //    return directoryContents; // Return all list of Directory Contentss: Files/Sub Directories.
+    //}
 
-    public static FtpWebRequest GetFtpWebRequest(Uri requestUri, NetworkCredential networkCredential, string method = null)
-    {
-        var ftpWebRequest = (FtpWebRequest)WebRequest.Create(requestUri); // Create FtpWebRequest with given Request Uri.
-        ftpWebRequest.Credentials = networkCredential; //Set the Credentials of current FtpWebRequest.
+    //public static FtpWebRequest GetFtpWebRequest(Uri requestUri, NetworkCredential networkCredential, string method = null)
+    //{
+    //    var ftpWebRequest = (FtpWebRequest)WebRequest.Create(requestUri); // Create FtpWebRequest with given Request Uri.
+    //    ftpWebRequest.Credentials = networkCredential; //Set the Credentials of current FtpWebRequest.
 
-        if (!string.IsNullOrEmpty(method))
-        {
-            ftpWebRequest.Method = method; // Set the Method of FtpWebRequest incase it has a value.
-        }
+    //    if (!string.IsNullOrEmpty(method))
+    //    {
+    //        ftpWebRequest.Method = method; // Set the Method of FtpWebRequest incase it has a value.
+    //    }
 
-        return ftpWebRequest; // Return the configured FtpWebRequest.
-    }
+    //    return ftpWebRequest; // Return the configured FtpWebRequest.
+    //}
 }
 
 

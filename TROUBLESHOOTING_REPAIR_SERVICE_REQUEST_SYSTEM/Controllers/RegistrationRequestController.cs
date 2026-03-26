@@ -117,25 +117,32 @@ namespace TROUBLESHOOTING_REPAIR_SERVICE_REQUEST_SYSTEM.Controllers
         public ActionResult Success(string registrationId)
         {
             // Decrypt the id
-            var dec = Custom.Controllers.EncryptionHelper.Decrypt(registrationId);
-            int? id = Int32.Parse(dec);
-            if (!id.HasValue)
+            try
             {
-                return new HttpStatusCodeResult(HttpStatusCode.BadRequest);
-            }
+                var dec = Custom.Controllers.EncryptionHelper.Decrypt(registrationId);
+                int? id = Int32.Parse(dec);
+                if (!id.HasValue)
+                {
+                    return new HttpStatusCodeResult(HttpStatusCode.BadRequest);
+                }
 
-            // Find the registration request by the decrypted id
-            var registrationRequest = _db.RegistrationRequests
-                .FirstOrDefault(i => i.Id == id);
-            if (registrationRequest == null)
-            {
-                return HttpNotFound();
-            }
+                // Find the registration request by the decrypted id
+                var registrationRequest = _db.RegistrationRequests
+                    .FirstOrDefault(i => i.Id == id);
+                if (registrationRequest == null)
+                {
+                    return HttpNotFound();
+                }
 
-            return View(new RegistrationVerifyAccountModel
+                return View(new RegistrationVerifyAccountModel
+                {
+                    RegistrationRequest = registrationRequest
+                });
+            }
+            catch (Exception ex)
             {
-                RegistrationRequest = registrationRequest
-            });
+                return RedirectToAction("NotFound", "Error");
+            }
         }
 
         protected override void Dispose(bool disposing)

@@ -34,6 +34,7 @@ namespace TROUBLESHOOTING_REPAIR_SERVICE_REQUEST_SYSTEM.Services
             _db.SaveChanges();
 
             RefreshUserUi(technicianId);
+            TechnicalServiceRequestHub.RefreshTechnicalServiceRequestList();
 
             _db.Dispose();
         }

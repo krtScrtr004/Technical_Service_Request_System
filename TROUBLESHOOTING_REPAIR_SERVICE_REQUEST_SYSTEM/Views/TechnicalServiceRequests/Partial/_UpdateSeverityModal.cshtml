@@ -16,7 +16,7 @@
         <section class="modal-content">
 
             @* Header *@
-            <section class="modal-header bg-info">
+            <section class="modal-header bg-primary">
                 <button type="button" class="close" data-dismiss="modal">&times;</button>
 
                 <h4 class="modal-title text-light">
@@ -55,8 +55,14 @@
 
                 @* Footer *@
                 <section class="modal-footer">
-                    <button type="button" class="btn btn-danger" data-dismiss="modal">Close</button>
-                    <button id="confirm_update_severity_button" type="submit" class="btn btn-info" data-request-id="@Model.Id">Change</button>
+                    <button 
+                        id="confirm_update_severity_button" 
+                        type="submit" 
+                        class="btn btn-primary btn-sm" 
+                        data-request-id="@Model.Id">
+                        <i class="glyphicon glyphicon-refresh"></i>
+                        Change
+                    </button>
                 </section>
             }
 

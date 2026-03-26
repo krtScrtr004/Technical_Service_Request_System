@@ -166,6 +166,13 @@
 
                             @if (AccountTypeEnum.IsAdmin(currentUserPrivilegeIds))
                             {
+                                Html.RenderPartial("~/Views/Registration/Partial/_ManagePrivilegeModal.cshtml", Model.User);
+
+                                <button id="manage_privilege_button" type="button" class="btn btn-default btn-sm center-child" data-toggle="modal" data-target="#manage_privilege_modal">
+                                    <i class="glyphicon glyphicon-lock"></i>
+                                    MANAGE PRIVILEGES
+                                </button>
+
                                 <a id="deactivate_user_button" href="@Url.Action("Deactivate", "Registration", new { id = Model.User.Id })" class="btn btn-danger btn-sm center-child">
                                     <i class="glyphicon glyphicon-ban-circle"></i>
                                     DEACTIVATE USER
