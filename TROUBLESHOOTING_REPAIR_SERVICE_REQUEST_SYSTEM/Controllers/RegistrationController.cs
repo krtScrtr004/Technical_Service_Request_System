@@ -47,7 +47,7 @@ namespace TROUBLESHOOTING_REPAIR_SERVICE_REQUEST_SYSTEM.Controllers
             var currentUser = GetUserSession();
             if (currentUser == null)
             {
-                return new HttpStatusCodeResult(HttpStatusCode.Forbidden);
+                throw new HttpException(403, "Forbidden");
             }
 
             ViewBag.CurrentUser = currentUser;
@@ -62,13 +62,24 @@ namespace TROUBLESHOOTING_REPAIR_SERVICE_REQUEST_SYSTEM.Controllers
             var currentUser = GetUserSession();
             if (currentUser == null)
             {
-                return new HttpStatusCodeResult(HttpStatusCode.Forbidden);
+                throw new HttpException(403, "Forbidden");
+            }
+
+            /**
+             * If a standard or an IT user tries to access the details of another user, 
+             * redirect them to their own details page instead.
+             */
+            if (id != currentUser.Id &&
+                (AccountTypeEnum.IsStandard(currentUser.PrivilegeIds) ||
+                 AccountTypeEnum.IsIT(currentUser.PrivilegeIds)))
+            {
+                return RedirectToAction("Details", new { id = currentUser.Id });
             }
 
             var user = _db.Registrations.Find(id);
             if (user == null)
             {
-                return HttpNotFound();
+                throw new HttpException(404, "Not found");
             }
             var userRegistrationRequest = _db.RegistrationRequests
                 .FirstOrDefault(i => i.Id == user.RegistrationRequestId);
@@ -95,7 +106,7 @@ namespace TROUBLESHOOTING_REPAIR_SERVICE_REQUEST_SYSTEM.Controllers
                 .FirstOrDefault(i => i.Id == id);
             if (registrationRequest == null)
             {
-                return HttpNotFound();
+                throw new HttpException(404, "Not found");
             }
 
             return View(new RegistrationCreateViewModel()
@@ -114,7 +125,7 @@ namespace TROUBLESHOOTING_REPAIR_SERVICE_REQUEST_SYSTEM.Controllers
             var currentUser = GetUserSession();
             if (currentUser == null)
             {
-                return new HttpStatusCodeResult(HttpStatusCode.Forbidden);
+                throw new HttpException(403, "Forbidden");
             }
             ViewBag.CurrentUser = currentUser;
 
@@ -283,7 +294,7 @@ namespace TROUBLESHOOTING_REPAIR_SERVICE_REQUEST_SYSTEM.Controllers
                 int? id = Int32.Parse(dec);
                 if (!id.HasValue)
                 {
-                    return new HttpStatusCodeResult(HttpStatusCode.BadRequest);
+                    throw new HttpException(403, "Forbidden");
                 }
 
                 // Find the registration request by the decrypted id
@@ -291,7 +302,7 @@ namespace TROUBLESHOOTING_REPAIR_SERVICE_REQUEST_SYSTEM.Controllers
                     .FirstOrDefault(i => i.Id == id);
                 if (registration == null)
                 {
-                    return HttpNotFound();
+                    throw new HttpException(404, "Not found");
                 }
 
                 return View(new RegistrationCreateViewModel
@@ -313,7 +324,7 @@ namespace TROUBLESHOOTING_REPAIR_SERVICE_REQUEST_SYSTEM.Controllers
         {
             if (id < 1)
             {
-                return new HttpStatusCodeResult(HttpStatusCode.BadRequest);
+                throw new HttpException(403, "Forbidden");
             }
 
             using (var transaction = _db.Database.BeginTransaction())
@@ -336,7 +347,7 @@ namespace TROUBLESHOOTING_REPAIR_SERVICE_REQUEST_SYSTEM.Controllers
                         .FirstOrDefault(r => r.Id == id);
                     if (registration == null)
                     {
-                        return HttpNotFound();
+                        throw new HttpException(404, "Not found");
                     }
 
                     var currentPrivileges = registration.UserPrivileges.ToArray();
@@ -412,13 +423,13 @@ namespace TROUBLESHOOTING_REPAIR_SERVICE_REQUEST_SYSTEM.Controllers
         {
             if (id < 1)
             {
-                return new HttpStatusCodeResult(HttpStatusCode.BadRequest);
+                throw new HttpException(403, "Forbidden");
             }
 
             var registration = _db.Registrations.Find(id);
             if (registration == null)
             {
-                return HttpNotFound();
+                throw new HttpException(404, "Not found");
             }
 
             return View(new Deactivation

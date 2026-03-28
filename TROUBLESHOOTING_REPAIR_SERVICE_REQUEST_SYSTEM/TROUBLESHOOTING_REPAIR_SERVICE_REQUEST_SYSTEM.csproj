@@ -3185,6 +3185,7 @@
     <Content Include="Scripts\App\Registration\DenyRegistration.js" />
     <Content Include="Scripts\App\Registration\InitializeListingDataTable.js" />
     <Content Include="Scripts\App\TechnicalServiceRequest\CancelRequest.js" />
+    <Content Include="Scripts\App\TechnicalServiceRequest\InitializeDateTimePicker.js" />
     <Content Include="Scripts\App\TechnicalServiceRequest\InitializeListingDataTable.js" />
     <Content Include="Scripts\App\TechnicalServiceRequest\LiveReloadDetailsActionHistory.js" />
     <Content Include="Scripts\App\TechnicalServiceRequest\LiveReloadDetailsInfo.js" />

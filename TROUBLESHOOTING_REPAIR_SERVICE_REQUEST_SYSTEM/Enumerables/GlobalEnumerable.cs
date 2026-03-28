@@ -272,4 +272,11 @@ namespace TROUBLESHOOTING_REPAIR_SERVICE_REQUEST_SYSTEM.Enumerables
             }
         }
     }
+
+    public static class TechnicalServiceRequestScheduleLimitEnum
+    {
+        public const int AUDIO_VISUAL_SETUP = 3;
+        public const int LIVESTREAM_SETUP = 2;
+        public const int ZOOM_WEBEX_LINK = 4;
+    }
 }

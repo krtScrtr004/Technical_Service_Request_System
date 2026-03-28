@@ -142,26 +142,38 @@
                     }
 
                     <div class="row schedule-inputs @scheduleInputsClass flex-child-center-h">
+
                         @* Schedule Date *@
-                        <div class="col-sm-4 form-group relative">
+                        <div class="col-sm-5 form-group relative">
                             @Html.LabelFor(model => model.TechnicalServiceRequestScheduledDate)
-                            @Html.EditorFor(model => model.TechnicalServiceRequestScheduledDate, new { htmlAttributes = new { @class = "form-control" } })
+
+                            <div class="input-group date form-group relative" id="datetime_picker"></div>
+                            @Html.HiddenFor(model => model.TechnicalServiceRequestScheduledDate)
+
+                            <p class="text-muted">
+                                <i class="glyphicon glyphicon-info-sign"></i>
+                                You may only schedule activities 7 days in advance.
+                            </p>
+
                             @Html.ValidationMessageFor(model => model.TechnicalServiceRequestScheduledDate, "", new { @class = "text-danger" })
                         </div>
 
-                        @* Start Time *@
-                        <div class="col-sm-4 form-group relative">
-                            @Html.LabelFor(model => model.TechnicalServiceRequestScheduledStartTime)
-                            @Html.EditorFor(model => model.TechnicalServiceRequestScheduledStartTime, new { htmlAttributes = new { @class = "form-control" } })
-                            @Html.ValidationMessageFor(model => model.TechnicalServiceRequestScheduledStartTime, "", new { @class = "text-danger" })
+                        <div class="col-sm-7 flex-col">
+                            @* Start Time *@
+                            <div class="form-group relative flex-1">
+                                @Html.LabelFor(model => model.TechnicalServiceRequestScheduledStartTime)
+                                @Html.EditorFor(model => model.TechnicalServiceRequestScheduledStartTime, new { htmlAttributes = new { @class = "form-control" } })
+                                @Html.ValidationMessageFor(model => model.TechnicalServiceRequestScheduledStartTime, "", new { @class = "text-danger" })
+                            </div>
+
+                            @* End Time *@
+                            <div class="form-group relative flex-1">
+                                @Html.LabelFor(model => model.TechnicalServiceRequestScheduledEndTime)
+                                @Html.EditorFor(model => model.TechnicalServiceRequestScheduledEndTime, new { htmlAttributes = new { @class = "form-control" } })
+                                @Html.ValidationMessageFor(model => model.TechnicalServiceRequestScheduledEndTime, "", new { @class = "text-danger" })
+                            </div>
                         </div>
 
-                        @* End Time *@
-                        <div class="col-sm-4 form-group relative">
-                            @Html.LabelFor(model => model.TechnicalServiceRequestScheduledEndTime)
-                            @Html.EditorFor(model => model.TechnicalServiceRequestScheduledEndTime, new { htmlAttributes = new { @class = "form-control" } })
-                            @Html.ValidationMessageFor(model => model.TechnicalServiceRequestScheduledEndTime, "", new { @class = "text-danger" })
-                        </div>
                     </div>
                 </section>
 
@@ -170,6 +182,11 @@
                         <i class="glyphicon glyphicon-file"></i>
                         Request
                     </button>
+
+                    <a class="btn btn-danger bold-text" href="@Url.Action("Index", "TechnicalServiceRequests")">
+                        <i class="glyphicon glyphicon-remove-circle"></i>
+                        Cancel
+                    </a>
                 </section>
             }
         </section>
@@ -180,14 +197,20 @@
 @section Scripts {
     @Scripts.Render("~/bundles/jqueryval");
 
-<script>
+    <script>
         // List of service type IDs that require schedule inputs
         const requiredScheduleTypeIds = [
             @((int)TechnicalServiceTypeEnum.AUDIO_VISUAL_SETUP),
             @((int)TechnicalServiceTypeEnum.LIVESTREAM_SETUP),
             @((int)TechnicalServiceTypeEnum.ZOOM_WEBEX_LINK)
         ];
-</script>
-    <script src="~/Scripts/App/TechnicalServiceRequest/ToggleConditionalInputs.js"></script>
+
+        const fullyBookedDayByLimitUrl = "@Url.Action("GetFullyBookedDayByLimit", "TechnicalServiceRequests")";
+        const fullyBookedDayByScheduleUrl = "@Url.Action("GetFullyBookedDayBySchedule", "TechnicalServiceRequests")";
+    </script>
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-datepicker/1.10.0/js/bootstrap-datepicker.min.js"></script>
+    <script src="~/Scripts/App/TechnicalServiceRequest/ToggleConditionalInputs.js" defer></script>
+    <script src="~/Scripts/App/TechnicalServiceRequest/InitializeDateTimePicker.js" defer></script>
 }
 

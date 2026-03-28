@@ -3,6 +3,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Net;
+using System.Web;
 using System.Web.Mvc;
 using System.Web.UI;
 using TROUBLESHOOTING_REPAIR_SERVICE_REQUEST_SYSTEM.Attributes;
@@ -23,7 +24,7 @@ namespace TROUBLESHOOTING_REPAIR_SERVICE_REQUEST_SYSTEM.Controllers
             var currentUser = GetUserSession();
             if (currentUser == null)
             {
-                return new HttpStatusCodeResult(HttpStatusCode.Forbidden);
+                throw new HttpException(403, "Forbidden");
             }
 
             var notificationsQuery = _db.Notifications
@@ -64,7 +65,7 @@ namespace TROUBLESHOOTING_REPAIR_SERVICE_REQUEST_SYSTEM.Controllers
             var currentUser = GetUserSession();
             if (currentUser == null)
             {
-                return new HttpStatusCodeResult(HttpStatusCode.Forbidden);
+                throw new HttpException(403, "Forbidden");
             }
 
             var notifications = _db.Notifications
@@ -103,7 +104,7 @@ namespace TROUBLESHOOTING_REPAIR_SERVICE_REQUEST_SYSTEM.Controllers
             var currentUser = GetUserSession();
             if (currentUser == null)
             {
-                return new HttpStatusCodeResult(HttpStatusCode.Forbidden);
+                throw new HttpException(403, "Forbidden");
             }
 
             var isAdmin = AccountTypeEnum.IsAdmin(currentUser.PrivilegeIds);
@@ -148,17 +149,13 @@ namespace TROUBLESHOOTING_REPAIR_SERVICE_REQUEST_SYSTEM.Controllers
                 var currentUser = GetUserSession();
                 if (currentUser == null)
                 {
-                    return Json(new
-                    {
-                        success = false,
-                        message = "You are not authorized to perform this action."
-                    });
+                    throw new Exception("User not found.");
                 }
 
                 var notification = _db.Notifications.Find(id);
                 if (notification == null)
                 {
-                    return HttpNotFound();
+                    throw new Exception("Notification not found.");
                 }
 
                 if ((AccountTypeEnum.IsAdmin(currentUser.PrivilegeIds) && notification.ForAdmin) ||
@@ -193,11 +190,7 @@ namespace TROUBLESHOOTING_REPAIR_SERVICE_REQUEST_SYSTEM.Controllers
                 }
                 else
                 {
-                    return Json(new
-                    {
-                        success = false,
-                        message = "You are not authorized to mark this notification as read."
-                    });
+                    throw new Exception("You are not allowed to perform this action.");
                 }
             }
             catch (Exception ex)

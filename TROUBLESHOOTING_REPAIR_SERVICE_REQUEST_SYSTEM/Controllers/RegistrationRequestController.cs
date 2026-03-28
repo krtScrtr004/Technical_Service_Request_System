@@ -5,6 +5,7 @@ using System.Data.Entity;
 using System.Data.Entity.Core.Common.CommandTrees.ExpressionBuilder;
 using System.Linq;
 using System.Net;
+using System.Web;
 using System.Web.Mvc;
 using TROUBLESHOOTING_REPAIR_SERVICE_REQUEST_SYSTEM.Attributes;
 using TROUBLESHOOTING_REPAIR_SERVICE_REQUEST_SYSTEM.Core;
@@ -25,7 +26,7 @@ namespace TROUBLESHOOTING_REPAIR_SERVICE_REQUEST_SYSTEM.Controllers
             var currentUser = GetUserSession();
             if (currentUser == null)
             {
-                return new HttpStatusCodeResult(HttpStatusCode.Forbidden);
+                throw new HttpException(403, "Forbidden");
             }
 
             ViewBag.CurrentUser = currentUser;
@@ -123,7 +124,7 @@ namespace TROUBLESHOOTING_REPAIR_SERVICE_REQUEST_SYSTEM.Controllers
                 int? id = Int32.Parse(dec);
                 if (!id.HasValue)
                 {
-                    return new HttpStatusCodeResult(HttpStatusCode.BadRequest);
+                    throw new HttpException(403, "Forbidden");
                 }
 
                 // Find the registration request by the decrypted id
@@ -131,7 +132,7 @@ namespace TROUBLESHOOTING_REPAIR_SERVICE_REQUEST_SYSTEM.Controllers
                     .FirstOrDefault(i => i.Id == id);
                 if (registrationRequest == null)
                 {
-                    return HttpNotFound();
+                    throw new HttpException(404, "Not found");
                 }
 
                 return View(new RegistrationVerifyAccountModel

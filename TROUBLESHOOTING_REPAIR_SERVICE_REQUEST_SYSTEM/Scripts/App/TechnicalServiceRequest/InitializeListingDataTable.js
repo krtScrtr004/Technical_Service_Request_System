@@ -37,7 +37,7 @@
                 d.userId = userId,
                 d.typeFilter = $("#type_filter").val(),
                 d.statusFilter = $("#status_filter").val(),
-                d.date_request_filter = $("#dateRequestFilter").val()
+                d.dateRequestFilter = $("#date_request_filter").val()
             },
             error: function (xhr, error, thrown) {
                 console.error('Error loading data:', error);

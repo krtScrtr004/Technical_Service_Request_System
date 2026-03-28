@@ -94,7 +94,7 @@ namespace TROUBLESHOOTING_REPAIR_SERVICE_REQUEST_SYSTEM.Controllers
                             .FirstOrDefault(i => i.Email == model.Email);
                         if (currentUser == null)
                         {
-                            return HttpNotFound();
+                            throw new HttpException(404, "Not found");
                         }
 
                         new UserSession(

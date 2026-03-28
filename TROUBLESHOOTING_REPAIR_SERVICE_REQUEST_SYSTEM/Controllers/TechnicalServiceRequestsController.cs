@@ -4,6 +4,7 @@ using System.Data;
 using System.Data.Entity;
 using System.Linq;
 using System.Net;
+using System.Web;
 using System.Web.Mvc;
 using TROUBLESHOOTING_REPAIR_SERVICE_REQUEST_SYSTEM.Attributes;
 using TROUBLESHOOTING_REPAIR_SERVICE_REQUEST_SYSTEM.Core;
@@ -11,7 +12,6 @@ using TROUBLESHOOTING_REPAIR_SERVICE_REQUEST_SYSTEM.Enumerables;
 using TROUBLESHOOTING_REPAIR_SERVICE_REQUEST_SYSTEM.Models;
 using TROUBLESHOOTING_REPAIR_SERVICE_REQUEST_SYSTEM.Services;
 using TROUBLESHOOTING_REPAIR_SERVICE_REQUEST_SYSTEM.Utilities;
-using static TROUBLESHOOTING_REPAIR_SERVICE_REQUEST_SYSTEM.RegistrationRequestHub;
 
 namespace TROUBLESHOOTING_REPAIR_SERVICE_REQUEST_SYSTEM.Controllers
 {
@@ -26,7 +26,7 @@ namespace TROUBLESHOOTING_REPAIR_SERVICE_REQUEST_SYSTEM.Controllers
             var currentUser = GetUserSession();
             if (currentUser == null)
             {
-                return new HttpStatusCodeResult(HttpStatusCode.Forbidden);
+                throw new HttpException(403, "Forbidden");
             }
 
             ViewBag.CurrentUser = currentUser;
@@ -35,17 +35,17 @@ namespace TROUBLESHOOTING_REPAIR_SERVICE_REQUEST_SYSTEM.Controllers
 
         // GET: TechnicalServiceRequests/Details/5
         [AuthenticateUserPrivilege(new int[] { AccountTypeEnum.STANDARD, AccountTypeEnum.IT, AccountTypeEnum.ADMIN })]
-        public ActionResult Details(int? id)
+        public ActionResult Details(int id)
         {
-            if (id == null)
+            if (id < 1)
             {
-                return new HttpStatusCodeResult(HttpStatusCode.BadRequest);
+                throw new HttpException(403, "Forbidden");
             }
 
             var currentUser = GetUserSession();
             if (currentUser == null)
             {
-                return new HttpStatusCodeResult(HttpStatusCode.Forbidden);
+                throw new HttpException(403, "Forbidden");
             }
 
             TechnicalServiceRequest technicalServiceRequest = _db.TechnicalServiceRequests
@@ -59,8 +59,32 @@ namespace TROUBLESHOOTING_REPAIR_SERVICE_REQUEST_SYSTEM.Controllers
                 .FirstOrDefault(t => t.Id == id);
             if (technicalServiceRequest == null)
             {
-                return HttpNotFound();
+                throw new HttpException(404, "Not found");
             }
+
+            if (!AccountTypeEnum.IsAdmin(currentUser.PrivilegeIds))
+            {
+                var involvedTechnicianIds = technicalServiceRequest.TechnicalServiceRequestHistories
+                    .Select(t => t.ActionTakenByRegistrationId)
+                    .ToList();
+
+                var isAssistedRequest = technicalServiceRequest.TechnicalServiceTypeId.HasValue &&
+                    !TechnicalServiceTypeEnum.IsNonAssistedRequest(technicalServiceRequest.TechnicalServiceTypeId.Value);
+
+                var isRequestClient = AccountTypeEnum.IsStandard(currentUser.PrivilegeIds) &&
+                    currentUser.Email == technicalServiceRequest.ClientEmailAddress;
+
+                // IT can view if: (non-assisted) OR (assisted AND involved)
+                var isIT = AccountTypeEnum.IsIT(currentUser.PrivilegeIds);
+                var isInvolvedTechnician = isAssistedRequest && isIT && involvedTechnicianIds.Contains(currentUser.Id);
+                var isNonAssistedAndIT = !isAssistedRequest && isIT;
+
+                if (!isRequestClient && !isInvolvedTechnician && !isNonAssistedAndIT)
+                {
+                    return RedirectToAction("Index");
+                }
+            }
+
 
             // Cast technical service request to details view model 
             var casted = TechnicalServiceRequestTypeCaster
@@ -71,24 +95,50 @@ namespace TROUBLESHOOTING_REPAIR_SERVICE_REQUEST_SYSTEM.Controllers
         }
 
         [AuthenticateUserPrivilege(new int[] { AccountTypeEnum.STANDARD, AccountTypeEnum.IT, AccountTypeEnum.ADMIN })]
-        public ActionResult Form(int id)
+        public ActionResult Form(int id) // <- The Id here is the TechnicalServiceRequestHistory Id
         {
             if (id < 1)
             {
-                return new HttpStatusCodeResult(HttpStatusCode.BadRequest);
+                throw new HttpException(403, "Forbidden");
+            }
+
+            var currentUser = GetUserSession();
+            if (currentUser == null)
+            {
+                throw new HttpException(403, "Forbidden");
             }
 
             var technicalServiceRequestHistory = _db.TechnicalServiceRequestHistories
                 .Include(h => h.TechnicalServiceRequest)
                 .FirstOrDefault(h => h.Id == id);
-            if (technicalServiceRequestHistory == null)
+            var technicalServiceRequest = technicalServiceRequestHistory.TechnicalServiceRequest;
+            if (technicalServiceRequest == null || technicalServiceRequestHistory == null)
             {
-                return HttpNotFound();
-            }    
+                throw new HttpException(404, "Not found");
+            }
+
+            if (!AccountTypeEnum.IsAdmin(currentUser.PrivilegeIds))
+            {
+                var isAssistedRequest = technicalServiceRequest.TechnicalServiceTypeId.HasValue &&
+                  !TechnicalServiceTypeEnum.IsNonAssistedRequest(technicalServiceRequest.TechnicalServiceTypeId.Value);
+
+                var isRequestClient = AccountTypeEnum.IsStandard(currentUser.PrivilegeIds) &&
+                    currentUser.Email == technicalServiceRequest.ClientEmailAddress;
+
+                // IT can view if: (non-assisted) OR (assisted AND involved)
+                var isIT = AccountTypeEnum.IsIT(currentUser.PrivilegeIds);
+                var isInvolvedTechnician = isAssistedRequest && isIT && technicalServiceRequestHistory.ActionTakenByRegistrationId == currentUser.Id;
+                var isNonAssistedAndIT = !isAssistedRequest && isIT;
+
+                if (!isRequestClient && !isInvolvedTechnician && !isNonAssistedAndIT)
+                {
+                    return RedirectToAction("Index");
+                }
+            }
 
             return View(new TechnicalServiceRequestFormViewModel
             {
-                TechnicalServiceRequest = technicalServiceRequestHistory.TechnicalServiceRequest,
+                TechnicalServiceRequest = technicalServiceRequest,
                 TechnicalServiceRequestHistory = technicalServiceRequestHistory
             });
         }
@@ -101,7 +151,7 @@ namespace TROUBLESHOOTING_REPAIR_SERVICE_REQUEST_SYSTEM.Controllers
             var currentUser = GetUserSession();
             if (currentUser == null)
             {
-                return HttpNotFound();
+                throw new HttpException(404, "Not found");
             }
 
             ViewBag.CurrentUser = currentUser;
@@ -125,7 +175,7 @@ namespace TROUBLESHOOTING_REPAIR_SERVICE_REQUEST_SYSTEM.Controllers
             var currentUser = GetUserSession();
             if (currentUser == null)
             {
-                return HttpNotFound();
+                throw new HttpException(404, "Not found");
             }
             ViewBag.CurrentUser = currentUser;
 
@@ -165,14 +215,17 @@ namespace TROUBLESHOOTING_REPAIR_SERVICE_REQUEST_SYSTEM.Controllers
                     technicalServiceRequest.ClientPosition = technicalServiceRequest.ClientPosition?.Trim().ToUpperInvariant();
                     technicalServiceRequest.ClientOffice = technicalServiceRequest.ClientOffice.Trim().ToUpperInvariant();
                     technicalServiceRequest.ClientPosition = technicalServiceRequest.ClientPosition.Trim().ToUpperInvariant();
-                    technicalServiceRequest.Others = !string.IsNullOrWhiteSpace(technicalServiceRequest.Others) 
-                            ? technicalServiceRequest.Others.Trim().ToUpperInvariant() 
+                    technicalServiceRequest.Others = !string.IsNullOrWhiteSpace(technicalServiceRequest.Others)
+                            ? technicalServiceRequest.Others.Trim().ToUpperInvariant()
                             : string.Empty;
 
                     var selectedTechnicalServiceType = technicalServiceRequest.TechnicalServiceTypeId;
 
                     if (selectedTechnicalServiceType.HasValue)
                     {
+                        // Invalidate "Others" if service type is specified
+                        technicalServiceRequest.Others = string.Empty;
+
                         // Implement different logic based on the selected technical service type
                         if (TechnicalServiceTypeEnum.IsRepairTroubleshootingRequest(selectedTechnicalServiceType.Value))
                         {
@@ -200,6 +253,10 @@ namespace TROUBLESHOOTING_REPAIR_SERVICE_REQUEST_SYSTEM.Controllers
                     }
                     else if (!string.IsNullOrEmpty(technicalServiceRequestCreateViewModel.Others))
                     {
+                        // Invalidate service type if "Others" is specified
+                        technicalServiceRequest.TechnicalServiceTypeId = null;
+                        technicalServiceRequest.TechnicalServiceType = null;
+
                         // If "Others" is not specified, default to Equipment Repair Troubleshooting logic
                         CreateEquipmentRepairTroubleshootingRequest(ref technicalServiceRequest, ref isQueued);
                     }
@@ -356,7 +413,7 @@ namespace TROUBLESHOOTING_REPAIR_SERVICE_REQUEST_SYSTEM.Controllers
                 else if (associatedUserPrivilege == AccountTypeEnum.IT)
                 {
                     var nonAssistedServiceIds = TechnicalServiceTypeEnum.GetNonAssistedServiceIds();
-                    
+
                     /**
                      * IT can see requests:
                      * - They have taken action on (based on TechnicalServiceRequestHistories)
@@ -594,6 +651,11 @@ namespace TROUBLESHOOTING_REPAIR_SERVICE_REQUEST_SYSTEM.Controllers
         {
             try
             {
+                if (id < 1)
+                {
+                    throw new Exception("Invalid request ID.");
+                }
+
                 if (!ModelState.IsValid)
                 {
                     var errors = GetModelStateErrors();
@@ -606,13 +668,22 @@ namespace TROUBLESHOOTING_REPAIR_SERVICE_REQUEST_SYSTEM.Controllers
                     throw new Exception("Technical service request not found.");
                 }
 
-                var clientId = _db.Registrations
+                var client = _db.Registrations
                     .Where(i => i.Email == technicalServiceRequest.ClientEmailAddress)
-                    .Select(i => i.Id)
+                    .Select(i => new { i.Id, i.Email })
                     .FirstOrDefault();
-                if (clientId == 0)
+                if (client == null)
                 {
                     throw new Exception("Client not found.");
+                }
+
+                /**
+                 * Throw an error if the email address of the logged in user does not match the email 
+                 * address associated with the request, to prevent unauthorized cancellation of requests
+                 */
+                if (client.Email != technicalServiceRequest.ClientEmailAddress)
+                {
+                    throw new Exception("Your are not allowed to perform this action.");
                 }
 
                 var currentStatus = technicalServiceRequest.TechnicalServiceRequestStatusId;
@@ -716,23 +787,36 @@ namespace TROUBLESHOOTING_REPAIR_SERVICE_REQUEST_SYSTEM.Controllers
         {
             try
             {
-                if (!ModelState.IsValid)
-                {
-                    var errors = GetModelStateErrors();
-                    throw new Exception("An error occured.");
-                }
-
                 if (severityId < TechnicalServicRequestSeverityEnum.LOW ||
                     severityId > TechnicalServicRequestSeverityEnum.CRITICAL)
                 {
                     throw new Exception("Invalid severity level.");
                 }
 
+                var currentUser = GetUserSession();
+                if (currentUser == null)
+                {
+                    throw new Exception("User not found.");
+                }
+
                 var technicalServiceRequest = _db.TechnicalServiceRequests
-                    .FirstOrDefault(i => i.Id == id);
+                    .Include(t => t.TechnicalServiceRequestHistories)
+                    .FirstOrDefault(t => t.Id == id);
                 if (technicalServiceRequest == null)
                 {
                     throw new Exception("Technical service request not found.");
+                }
+
+                /**
+                 * Check if the current user has acted on the technical service request,
+                 * if not, throw an error to prevent unauthorized severity update.
+                 */
+                var involvedTechnicianIds = technicalServiceRequest.TechnicalServiceRequestHistories
+                    .Select(h => h.ActionTakenByRegistrationId)
+                    .ToList();
+                if (!involvedTechnicianIds.Contains(currentUser.Id))
+                {
+                    throw new Exception("You are not allowed to perform this action.");
                 }
 
                 var currentSeverityId = technicalServiceRequest.TechnicalServiceRequestSeverityId;
@@ -796,6 +880,162 @@ namespace TROUBLESHOOTING_REPAIR_SERVICE_REQUEST_SYSTEM.Controllers
                 success = false,
                 message = "Your request cannot be cancelled.",
             });
+        }
+
+        [Authorize2]
+        [HttpGet]
+        [AuthenticateUserPrivilege(new int[] { AccountTypeEnum.STANDARD })]
+        public ActionResult GetFullyBookedDayByLimit(int scheduleServiceTypeId)
+        {
+            try
+            {
+                var validScheduleServiceTypeIds = new int[]
+                {
+                    TechnicalServiceTypeEnum.AUDIO_VISUAL_SETUP,
+                    TechnicalServiceTypeEnum.LIVESTREAM_SETUP,
+                    TechnicalServiceTypeEnum.ZOOM_WEBEX_LINK
+                };
+                if (!validScheduleServiceTypeIds.Contains(scheduleServiceTypeId))
+                {
+                    throw new Exception("Invalid schedule service proccess Id.");
+                }
+
+                var startDate = DateTime.Today;
+                var endDate = startDate.AddDays(30);     // Check for the next 30 days
+
+                // Check per-day-limit
+                var selectedTypeId = 0;
+                var selectedTypeLimit = 0;
+                switch (scheduleServiceTypeId)
+                {
+                    case TechnicalServiceTypeEnum.AUDIO_VISUAL_SETUP:
+                        selectedTypeId = (int)TechnicalServiceTypeEnum.AUDIO_VISUAL_SETUP;
+                        selectedTypeLimit = (int)TechnicalServiceRequestScheduleLimitEnum.AUDIO_VISUAL_SETUP;
+                        break;
+                    case TechnicalServiceTypeEnum.LIVESTREAM_SETUP:
+                        selectedTypeId = (int)TechnicalServiceTypeEnum.LIVESTREAM_SETUP;
+                        selectedTypeLimit = (int)TechnicalServiceRequestScheduleLimitEnum.LIVESTREAM_SETUP;
+                        break;
+                    case TechnicalServiceTypeEnum.ZOOM_WEBEX_LINK:
+                        selectedTypeId = (int)TechnicalServiceTypeEnum.ZOOM_WEBEX_LINK;
+                        selectedTypeLimit = (int)TechnicalServiceRequestScheduleLimitEnum.ZOOM_WEBEX_LINK;
+                        break;
+                    default:
+                        throw new Exception("Invalid service type.");
+                }
+
+                /**
+                 * Get fully booked days based on the count of scheduled requests for the selected
+                 * service type, within the next 30 days, that have reached the per-day limit
+                 */
+                var fullyBookedStringDates = _db.TechnicalServiceRequests
+                    .Where(r => r.TechnicalServiceTypeId == selectedTypeId
+                        && r.TechnicalServiceRequestScheduledDate >= startDate
+                        && r.TechnicalServiceRequestScheduledDate < endDate)
+                    .GroupBy(r => DbFunctions.TruncateTime(r.TechnicalServiceRequestScheduledDate))
+                    .Where(g => g.Count() >= selectedTypeLimit)
+                    .Select(g => g.Key)
+                    .Where(date => date.HasValue)
+                    .ToList()
+                    .Select(date => date.Value.ToString("yyyy-MM-dd"))
+                    .ToList();
+
+                return Json(new
+                {
+                    success = true,
+                    dates = fullyBookedStringDates
+                }, JsonRequestBehavior.AllowGet);
+            }
+            catch (Exception ex)
+            {
+                return Json(new
+                {
+                    success = false,
+                    Message = ex.Message
+                }, JsonRequestBehavior.AllowGet);
+            }
+        }
+
+        [Authorize2]
+        [HttpGet]
+        [AuthenticateUserPrivilege(new int[] { AccountTypeEnum.STANDARD })]
+        public ActionResult GetFullyBookedDayBySchedule()
+        {
+            try
+            {
+                // FIXME:
+                var startDate = DateTime.Today;
+                var endDate = startDate.AddDays(30);     // Check for the next 30 days
+                var startTime = TimeSpan.FromHours(8);   // 8:00 AM
+                var endTime = TimeSpan.FromHours(16);    // 4:00 PM
+
+                var fullyBookedStringDates = new List<string>();
+
+                /**
+                 * Get fully booked days based on the schedule of requests for the selected service type, 
+                 * within the next 30 days, that have no available time slots between 8:00 AM to 4:00 PM
+                 */
+                for (var date = startDate; date < endDate; date = date.AddDays(1))
+                {
+                        var thisDate = date;
+                        var events = _db.TechnicalServiceRequests
+                            .Where(r =>
+                                DbFunctions.TruncateTime(r.TechnicalServiceRequestScheduledDate) ==
+                                DbFunctions.TruncateTime(thisDate)
+                            )
+                            .Select(r => new
+                            {
+                                Start = r.TechnicalServiceRequestScheduledStartTime,
+                                End = r.TechnicalServiceRequestScheduledEndTime
+                            })
+                            .OrderBy(e => e.Start)
+                            .ToList();
+
+                        var current = startTime;
+                        bool hasGap = false;
+                        foreach (var e in events)
+                        {
+                            /**
+                             * If there is a gap of 1 hour or more between the current time and the start of the next event,
+                             * consider the day as not fully booked and break the loop to check the next day
+                             */
+                            var totalGap = e.Start.Value.Subtract(current);
+                            if (totalGap.TotalHours > 1)
+                            {
+                                hasGap = true;
+                                break;
+                            }
+
+                            /**
+                             * Move the current time to the end of the event
+                             * if it is greater than the current time
+                             */
+                            if (e.End > current)
+                            {
+                                current = e.End.Value;
+                            }
+
+                        }
+                        if (!hasGap && events.Any() && current >= endTime)
+                        {
+                            fullyBookedStringDates.Add(thisDate.ToString("yyyy-MM-dd"));
+                        }
+                    }
+
+                return Json(new
+                {
+                    success = true,
+                    dates = fullyBookedStringDates
+                }, JsonRequestBehavior.AllowGet);
+            }
+            catch (Exception ex)
+            {
+                return Json(new
+                {
+                    success = false,
+                    Message = ex.Message
+                }, JsonRequestBehavior.AllowGet);
+            }
         }
 
         #endregion
@@ -896,7 +1136,7 @@ namespace TROUBLESHOOTING_REPAIR_SERVICE_REQUEST_SYSTEM.Controllers
                     r.TechnicalServiceRequestStatusId.HasValue &&
                     activeStatusIds.Contains(r.TechnicalServiceRequestStatusId.Value) &&
                     (r.TechnicalServiceTypeId.HasValue && !nonAssistedRequestIds.Contains(r.TechnicalServiceRequestStatusId.Value)) && // Exclude non-assisted requests
-                    // Check if the request is scheduled on the same date as the new request
+                                                                                                                                       // Check if the request is scheduled on the same date as the new request
                     (DbFunctions.TruncateTime(r.TechnicalServiceRequestScheduledDate) == DbFunctions.TruncateTime(scheduleDate) &&
                         (
                             r.TechnicalServiceRequestScheduledStartTime.HasValue &&
@@ -1013,19 +1253,22 @@ namespace TROUBLESHOOTING_REPAIR_SERVICE_REQUEST_SYSTEM.Controllers
             switch (serviceType)
             {
                 case (int)TechnicalServiceTypeEnum.ZOOM_WEBEX_LINK:
-                    if (sameDaySchedules.Count(i => i.TechnicalServiceTypeId == serviceType) > 4)
+                    if (sameDaySchedules.Count(i => i.TechnicalServiceTypeId == serviceType) >=
+                        TechnicalServiceRequestScheduleLimitEnum.ZOOM_WEBEX_LINK)
                     {
                         throw new Exception("The maximum number of requests for Zoom/Webex Link on the selected date has been reached. Please select another schedule.");
                     }
                     break;
                 case (int)TechnicalServiceTypeEnum.LIVESTREAM_SETUP:
-                    if (sameDaySchedules.Count(i => i.TechnicalServiceTypeId == serviceType) >= 2)
+                    if (sameDaySchedules.Count(i => i.TechnicalServiceTypeId == serviceType) >=
+                        TechnicalServiceRequestScheduleLimitEnum.LIVESTREAM_SETUP)
                     {
                         throw new Exception("The maximum number of requests for Livestream Setup on the selected date has been reached. Please select another schedule.");
                     }
                     break;
                 case (int)TechnicalServiceTypeEnum.AUDIO_VISUAL_SETUP:
-                    if (sameDaySchedules.Count(i => i.TechnicalServiceTypeId == serviceType) >= 3)
+                    if (sameDaySchedules.Count(i => i.TechnicalServiceTypeId == serviceType) >=
+                        TechnicalServiceRequestScheduleLimitEnum.AUDIO_VISUAL_SETUP)
                     {
                         throw new Exception("The maximum number of requests for Audio Visual Setup on the selected date has been reached. Please select another schedule.");
                     }

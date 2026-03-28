@@ -30,7 +30,7 @@ namespace TROUBLESHOOTING_REPAIR_SERVICE_REQUEST_SYSTEM.Controllers
             var technicalServiceRequest = _db.TechnicalServiceRequests.Find(technicalServiceRequestId);
             if (technicalServiceRequest == null)
             {
-                return HttpNotFound();
+                throw new HttpException(404, "Not found");
             }
 
             if (ModelState.IsValid)

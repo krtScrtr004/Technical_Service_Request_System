@@ -41,7 +41,7 @@ $(document).ready(function () {
                 return {
                     enabled: false,
                     classes: 'disabled-date',
-                    tootltip: 'Future dates are not selectable'
+                    tootltip: 'Cannot schedule dates later than 30 days from now'
                 }
             }
 

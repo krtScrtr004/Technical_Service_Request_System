@@ -23,7 +23,7 @@ namespace TROUBLESHOOTING_REPAIR_SERVICE_REQUEST_SYSTEM.Controllers
             var currentUser = GetUserSession();
             if (currentUser == null)
             {
-                return new HttpStatusCodeResult(HttpStatusCode.Forbidden);
+                throw new HttpException(403, "Forbidden");
             }
 
             var blockedDates = _db.ITAvailabilities
