@@ -3175,6 +3175,7 @@
     <Content Include="Content\Site.css" />
     <Content Include="Scripts\App\Dashboard\InitializeDashboard.js" />
     <Content Include="Scripts\App\ITAvailability\InitializeDatetimePicker.js" />
+    <Content Include="Scripts\App\ITAvailability\InitializeHistory.js" />
     <Content Include="Scripts\App\ITAvailability\SaveChanges.js" />
     <Content Include="Scripts\App\Notification\LiveReloadNotification.js" />
     <Content Include="Scripts\App\Notification\LiveReloadNotificationBadge.js" />

@@ -26,6 +26,11 @@ namespace TROUBLESHOOTING_REPAIR_SERVICE_REQUEST_SYSTEM.Controllers
                 throw new HttpException(403, "Forbidden");
             }
 
+            var currentUserRegistrationDate = _db.Registrations
+                .Where(r => r.Id == currentUser.Id)
+                .Select(r => r.RegistrationDate)
+                .FirstOrDefault();
+
             var blockedDates = _db.ITAvailabilities
                .Where(b => b.RegistrationId == currentUser.Id)
                .OrderBy(d => d.BlockDate)
@@ -41,6 +46,7 @@ namespace TROUBLESHOOTING_REPAIR_SERVICE_REQUEST_SYSTEM.Controllers
             ViewBag.CurrentUser = currentUser;
             return View(new ITAvailabilityManageViewModel
             {
+                UserRegistrationDate = currentUserRegistrationDate ?? DateTime.Now,
                 SelectedStringDates = joinedStringBlockedDates
             });
         }
@@ -135,11 +141,7 @@ namespace TROUBLESHOOTING_REPAIR_SERVICE_REQUEST_SYSTEM.Controllers
                     {
                         success = true,
                         message = "Your schedule has been updated successfully.",
-                        redirectLink = Url.Action(
-                            "Index", 
-                            "Home", 
-                            new { id = currentUser.Id }
-                        )
+                        redirectLink = Url.Action("Index", "Home")
                     });
                 }
                 catch (Exception ex)
@@ -159,6 +161,57 @@ namespace TROUBLESHOOTING_REPAIR_SERVICE_REQUEST_SYSTEM.Controllers
                     success = false,
                     message = "Your schedule cannot be modified.",
                 });
+            }
+        }
+
+        [HttpGet]
+        public ActionResult GetBlockedDates(int month, int year)
+        {
+            try
+            {
+                var currentUser = GetUserSession();
+                if (currentUser == null)
+                {
+                    throw new Exception("User not found.");
+                }
+                var currentUserRegistratioDate = _db.Registrations
+                    .Where(r => r.Id == currentUser.Id)
+                    .Select(r => r.RegistrationDate)
+                    .FirstOrDefault();
+
+                // Validate month
+                if (month < 1 || month > 12)
+                {
+                    throw new Exception("Invalid month value.");
+                }
+
+                // Validate year (must be between user's registration year and current year)
+                if (year < currentUserRegistratioDate.Value.Year || year > DateTime.Now.Year)
+                {
+                    throw new Exception("Invalid year value.");
+                }
+
+                var blockedDates = _db.ITAvailabilities
+                    .Where(b => b.RegistrationId == currentUser.Id &&
+                                b.BlockDate.Month == month &&
+                                b.BlockDate.Year == year)
+                    .Select(b => b.BlockDate)
+                    .ToList()
+                    .Select(d => d.ToString("yyyy-MM-dd"))
+                    .ToList();
+
+                return Json(new { 
+                    success = true, 
+                    dates = blockedDates 
+                }, JsonRequestBehavior.AllowGet);
+            }
+            catch (Exception ex)
+            {
+                return Json(new
+                {
+                    success = false,
+                    message = "An error occurred while making a request: " + ex.Message
+                }, JsonRequestBehavior.AllowGet);
             }
         }
 

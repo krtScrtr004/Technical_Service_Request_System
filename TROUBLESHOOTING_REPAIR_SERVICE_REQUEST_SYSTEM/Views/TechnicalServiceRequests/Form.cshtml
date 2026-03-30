@@ -115,8 +115,14 @@
                                     <div class="name-row">
                                         <p>@Model.TechnicalServiceRequest.ClientLastName</p>
                                         <p>@Model.TechnicalServiceRequest.ClientFirstName</p>
-                                        <p>@Model.TechnicalServiceRequest.ClientMiddleName[0]</p>
-                                        <p>@Model.TechnicalServiceRequest.ClientExtensionName</p>
+                                        @if (!string.IsNullOrEmpty(Model.TechnicalServiceRequest.ClientMiddleName))
+                                        {
+                                            <p>@Model.TechnicalServiceRequest.ClientMiddleName[0]</p>
+                                        }
+                                        @if (!string.IsNullOrEmpty(Model.TechnicalServiceRequest.ClientExtensionName))
+                                        {
+                                            <p>@Model.TechnicalServiceRequest.ClientExtensionName</p>
+                                        }
                                     </div>
 
                                     <div class="name-row">

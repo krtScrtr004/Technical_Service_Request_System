@@ -11,8 +11,7 @@
     <link rel="stylesheet" href="~/Content/App/ITAvailability/Manage.css" type="text/css" />
 }
 
-
-<section class="container center-child">
+<section class="container availaibility-container flex-row">
 
     <section class="content-panel panel panel-default">
         <section class="panel-heading">
@@ -61,15 +60,47 @@
         </section>
     </section>
 
+    <section class="container availability-history-container bg-light panel">
+        <section class="">
+            <div>
+                <h4 class="text-primary">
+                    <i class="glyphicon glyphicon-time"></i>
+                    History
+                </h4>
+
+                <p class="text-default">You may view your availability history below.</p>
+            </div>
+
+            <div class="history-selects-container">
+
+                <div class="form-group">
+                    <label for="history_year_select">Year:</label>
+                    <select id="history_year_select" class="form-control input-sm"></select>
+                </div>
+
+                <div class="form-group">
+                    <label for="history_month_select">Month:</label>
+                    <select id="history_month_select" class="form-control input-sm"></select>
+                </div>
+
+            </div>
+
+            <div id="history_calendar_container"></div>
+        </section>
+    </section>
+
 </section>
 
 @section Scripts {
     <script>
-        const submitUrl = '@Url.Action("Manage", "ITAvailability", new { id = currentUser.Id })';
+        const registrationYear = "@Model.UserRegistrationDate.Year";
+        const submitUrl = "@Url.Action("Manage", "ITAvailability", new { id = currentUser.Id })";
+        const getBlockedDatesUrl = "@Url.Action("GetBlockedDates", "ITAvailability")";
     </script>
 
     <script src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-datepicker/1.10.0/js/bootstrap-datepicker.min.js"></script>
     <script type="module" src="~/Scripts/App/ITAvailability/InitializeDatetimePicker.js" defer></script>
     <script type="module" src="~/Scripts/App/ITAvailability/SaveChanges.js" defer></script>
+    <script type="module" src="~/Scripts/App/ITAvailability/InitializeHistory.js" defer></script>
 }
 
