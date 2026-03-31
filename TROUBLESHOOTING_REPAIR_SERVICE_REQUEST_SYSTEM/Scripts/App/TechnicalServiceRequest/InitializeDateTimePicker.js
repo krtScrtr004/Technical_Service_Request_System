@@ -33,12 +33,15 @@
 
     // On service type change (limit-based)
     selectedServiceTypeId.on("change", function () {
-        createGetRequest(fullyBookedDayByLimitUrl, {
-            scheduleServiceTypeId: selectedServiceTypeId.val()
-        }, function (dates) {
-            fullyBookedDaysByLimit = dates ?? [];
-            initializeDateTimePicker();
-        });
+        const val = parseInt(selectedServiceTypeId.val());
+        if (requiredScheduleTypeIds.includes(val)) {
+            createGetRequest(fullyBookedDayByLimitUrl, {
+                scheduleServiceTypeId: selectedServiceTypeId.val()
+            }, function (dates) {
+                fullyBookedDaysByLimit = dates ?? [];
+                initializeDateTimePicker();
+            });
+        }
     });
 
     function createGetRequest(url, payload, callback) {
@@ -55,7 +58,8 @@
                 Swal.fire({
                     title: "Error",
                     text: "An error occured. Please try again.",
-                    icon: "error"
+                    icon: "error",
+                    confirmButtonText: 'Understood',
                 });
                 console.error(error);
             }
@@ -114,7 +118,8 @@
             Swal.fire({
                 title: "Error",
                 text: "An error occured. Please try again.",
-                icon: "error"
+                icon: "error",
+                confirmButtonText: 'Understood',
             });
             console.error("Hidden schedule input is not found.");
             return;

@@ -141,7 +141,6 @@ namespace TROUBLESHOOTING_REPAIR_SERVICE_REQUEST_SYSTEM.Controllers
                     {
                         success = true,
                         message = "Your schedule has been updated successfully.",
-                        redirectLink = Url.Action("Index", "Home")
                     });
                 }
                 catch (Exception ex)

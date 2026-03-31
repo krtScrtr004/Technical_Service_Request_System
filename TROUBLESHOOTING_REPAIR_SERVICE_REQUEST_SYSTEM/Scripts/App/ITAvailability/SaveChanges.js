@@ -31,7 +31,7 @@ $('document').ready(function () {
                         text: response.message,
                         icon: 'success',
                     }).then(() => {
-                        window.location.href = response.redirectUrl;
+                        window.location.reload();
                     });
                 } else {
                     Swal.fire('Error!', response.message, 'error');

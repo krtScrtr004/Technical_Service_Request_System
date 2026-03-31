@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
+using System.ComponentModel.DataAnnotations.Schema;
 using System.Linq;
 using System.Web;
 
@@ -16,6 +17,8 @@ namespace TROUBLESHOOTING_REPAIR_SERVICE_REQUEST_SYSTEM.Models
 
         // Account Information
         public string UserName { get; set; }
+        [MaxLength(255)]
+        [Index(IsUnique = true)]
         public string Email { get; set; }
         public string ContactNumber { get; set; }
         public DateTime? RegistrationDate { get; set; }
@@ -31,7 +34,7 @@ namespace TROUBLESHOOTING_REPAIR_SERVICE_REQUEST_SYSTEM.Models
         public int? RegistrationRequestId { get; set; }
         public int? DeactivatedByRegistrationId { get; set; }
         public string DeactivatedRemarks { get; set; }
-         public int? SessionPrivilegeId { get; set; }
+        public int? SessionPrivilegeId { get; set; }
 
         // Navigation Props
         public virtual ICollection<UserPrivilege> UserPrivileges { get; set; }

@@ -11,6 +11,12 @@
                 d.requestDateFilter = $("#request_date_filter").val()
             },
             error: function (xhr, error, thrown) {
+                Swal.fire({
+                    title: "Error",
+                    text: "An error occured. Please try again.",
+                    icon: "error",
+                    confirmButtonText: 'Understood',
+                });
                 console.error('Error loading data:', error);
             }
         },

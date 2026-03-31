@@ -34,15 +34,20 @@ namespace TROUBLESHOOTING_REPAIR_SERVICE_REQUEST_SYSTEM.Models
         public string ClientOffice { get; set; }
         public string ClientPosition { get; set; }
         public string ClientContactNumber { get; set; }
+        [MaxLength(255)]
+        [Index]
         public string ClientEmailAddress { get; set; }
 
         // TECHNICAL SERVICE
+        [Index]
         public int? TechnicalServiceTypeId { get; set; }
         public virtual TechnicalServiceType TechnicalServiceType { get; set; }
 
+        [Index]
         public int? TechnicalServiceRequestSeverityId { get; set; }
         public virtual TechnicalServiceRequestSeverity TechnicalServiceRequestSeverity { get; set; }
 
+        [Index]
         public int? TechnicalServiceRequestStatusId { get; set; }
         public virtual TechnicalServiceRequestStatus TechnicalServiceRequestStatus { get; set; }
 
@@ -50,6 +55,7 @@ namespace TROUBLESHOOTING_REPAIR_SERVICE_REQUEST_SYSTEM.Models
         public string TechnicalServiceRequestDescription { get; set; }
 
         // CONDITIONAL PROP: If the service requested is either Zoom/Webex Link, Livestream Setup, or Audio/Visual Setup
+        [Index]
         public DateTime? TechnicalServiceRequestScheduledDate { get; set; }
         public TimeSpan? TechnicalServiceRequestScheduledStartTime { get; set; }
         public TimeSpan? TechnicalServiceRequestScheduledEndTime { get; set; }

@@ -10,6 +10,12 @@
                 d.accountTypeFilter = $("#account_type_filter").val()
             },
             error: function (xhr, error, thrown) {
+                Swal.fire({
+                    title: "Error",
+                    text: "An error occured. Please try again.",
+                    icon: "error",
+                    confirmButtonText: 'Understood',
+                });
                 console.error('Error loading data:', error);
             }
         },
@@ -33,7 +39,15 @@
                 data: null,
                 name: 'AccountType',
                 render: function (data, type, row) {
-                    return row.AccountType.toUpperCase();
+                    const userPrivilegeName = row.AccountType.toUpperCase();
+
+                    let htmlClass = "label-default";
+                    if (userPrivilegeName === "ADMINISTRATOR" || userPrivilegeName === "ADMIN") {
+                        htmlClass = 'label-success'
+                    } else if (userPrivilegeName === "IT") {
+                        htmlClass = 'label-warning'
+                    }
+                    return `<span class="label ${htmlClass}">${userPrivilegeName}</span>`;
                 }
             },
             {

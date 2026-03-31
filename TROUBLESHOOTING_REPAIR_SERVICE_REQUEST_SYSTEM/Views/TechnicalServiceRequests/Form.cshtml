@@ -2,6 +2,8 @@
 @using TROUBLESHOOTING_REPAIR_SERVICE_REQUEST_SYSTEM.Enumerables
 @using TROUBLESHOOTING_REPAIR_SERVICE_REQUEST_SYSTEM.Utilities
 
+@{ ViewBag.Title = "Form"; }
+
 @section Styles {
     <link rel="stylesheet" href="~/Content/App/TechnicalServiceRequest/Form.css" type="text/css" />
 }
@@ -478,7 +480,12 @@
     @* Print Button *@
     <section class="print-button-container float-right">
         <div>
-            <button class="btn btn-sm btn-primary" type="button" onclick="window.print()">
+            <button class="btn btn-danger" type="button" onclick="history.back()">
+                <i class="glyphicon glyphicon-arrow-left"></i>
+                Return
+            </button>
+
+            <button class="btn btn-primary" type="button" onclick="window.print()">
                 <i class="glyphicon glyphicon-print"></i>
                 Print
             </button>

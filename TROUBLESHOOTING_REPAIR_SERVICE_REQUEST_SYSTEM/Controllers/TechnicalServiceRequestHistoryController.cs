@@ -90,10 +90,23 @@ namespace TROUBLESHOOTING_REPAIR_SERVICE_REQUEST_SYSTEM.Controllers
                         var nonAssistedRequestIds = TechnicalServiceTypeEnum.GetNonAssistedServiceIds();
 
                         var isCompleted = completedTaskIds.Contains(technicalServiceRequest.TechnicalServiceRequestStatusId.Value);
-                        var isNonAssisted = technicalServiceRequest.TechnicalServiceTypeId.HasValue && nonAssistedRequestIds.Contains(technicalServiceRequest.TechnicalServiceTypeId.Value);
+                        var isNonAssisted = technicalServiceRequest.TechnicalServiceTypeId.HasValue && 
+                                            nonAssistedRequestIds.Contains(technicalServiceRequest.TechnicalServiceTypeId.Value);
 
-                        // When status is completed, closed or cancelled and service type is not non-assisted, assign the top request from the queue to the IT
-                        if (technicalServiceRequest.TechnicalServiceRequestStatusId.HasValue && isCompleted && !isNonAssisted)
+                        // Check if technician is available now
+                        var isAvailableNow = !_db.ITAvailabilities
+                            .Where(i => i.Id == technician.Id)
+                            .Any(i => DbFunctions.TruncateTime(i.BlockDate) == 
+                                      DbFunctions.TruncateTime(DateTime.Now));
+
+                        // When status is completed, closed, or cancelled and service type is not assisted, assign the top request from the queue to the IT
+                        if (isAvailableNow && 
+                            technicalServiceRequest
+                                .TechnicalServiceRequestStatusId
+                                .HasValue && 
+                            isCompleted && 
+                            !isNonAssisted
+                        )
                         {
                             var queuedRequest = AssignTechnicianToPendingRequest(technician.Id);
                             if (queuedRequest != null)
@@ -123,7 +136,13 @@ namespace TROUBLESHOOTING_REPAIR_SERVICE_REQUEST_SYSTEM.Controllers
                         transaction.Commit();
 
                         TechnicalServiceRequestHub.RefreshTechnicalServiceRequestList();
+                        TechnicalServiceRequestHub.RefreshTechnicalServiceRequestStatus(
+                               TechnicalServiceRequestStatusEnum.DisplayName(
+                                   technicalServiceRequestHistory.TechnicalServiceRequestStatusId.Value
+                                )
+                        );
                         TechnicalServiceRequestHub.RefreshTechnicalServiceRequestActionHistory(technicalServiceRequestHistory.Id);
+
                         // Notify the client
                         notificationService.RefreshUserUi(clientId.Value);
                         // Notify the IT
@@ -167,7 +186,7 @@ namespace TROUBLESHOOTING_REPAIR_SERVICE_REQUEST_SYSTEM.Controllers
                 return null;
             }
 
-            // RELOAD using controller _db (same context used in this controller)
+            // Reload using controller _db (same context used in this controller)
             var queuedRequest = _db.TechnicalServiceRequests
                 .Include(r => r.TechnicalServiceRequestHistories)
                 .FirstOrDefault(r => r.Id == poppedRequest.Id);

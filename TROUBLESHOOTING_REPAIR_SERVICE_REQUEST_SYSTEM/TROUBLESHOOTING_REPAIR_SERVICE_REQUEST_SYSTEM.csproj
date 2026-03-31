@@ -290,9 +290,9 @@
     <Compile Include="Migrations\202603170626155_addGroupSpecificNotificationProperties.Designer.cs">
       <DependentUpon>202603170626155_addGroupSpecificNotificationProperties.cs</DependentUpon>
     </Compile>
-    <Compile Include="Migrations\202603250053492_removeUnusedProperties.cs" />
-    <Compile Include="Migrations\202603250053492_removeUnusedProperties.Designer.cs">
-      <DependentUpon>202603250053492_removeUnusedProperties.cs</DependentUpon>
+    <Compile Include="Migrations\202603310522292_addIndexesToTables.cs" />
+    <Compile Include="Migrations\202603310522292_addIndexesToTables.Designer.cs">
+      <DependentUpon>202603310522292_addIndexesToTables.cs</DependentUpon>
     </Compile>
     <Compile Include="Migrations\Configuration.cs" />
     <Compile Include="Models\AccountViewModels.cs" />
@@ -3722,8 +3722,8 @@
     <EmbeddedResource Include="Migrations\202603170626155_addGroupSpecificNotificationProperties.resx">
       <DependentUpon>202603170626155_addGroupSpecificNotificationProperties.cs</DependentUpon>
     </EmbeddedResource>
-    <EmbeddedResource Include="Migrations\202603250053492_removeUnusedProperties.resx">
-      <DependentUpon>202603250053492_removeUnusedProperties.cs</DependentUpon>
+    <EmbeddedResource Include="Migrations\202603310522292_addIndexesToTables.resx">
+      <DependentUpon>202603310522292_addIndexesToTables.cs</DependentUpon>
     </EmbeddedResource>
   </ItemGroup>
   <PropertyGroup>

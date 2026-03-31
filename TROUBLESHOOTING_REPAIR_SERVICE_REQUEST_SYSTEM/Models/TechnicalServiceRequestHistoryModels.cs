@@ -14,15 +14,18 @@ namespace TROUBLESHOOTING_REPAIR_SERVICE_REQUEST_SYSTEM.Models
     {
         public int Id { get; set; }
 
+        [Index]
         public int? TechnicalServiceRequestId { get; set; }
         public virtual TechnicalServiceRequest TechnicalServiceRequest { get; set; }
 
+        [Index]
         public int? TechnicalServiceRequestStatusId { get; set; }
         public virtual TechnicalServiceRequestStatus TechnicalServiceRequestStatus { get; set; }
 
         public DateTime? DateAction { get; set; }
         public string ActionTaken { get; set; }
 
+        [Index]
         public int? ActionTakenByRegistrationId { get; set; }
         [ForeignKey("ActionTakenByRegistrationId")]
         public virtual Registration ActionTakenByRegistration { get; set; }

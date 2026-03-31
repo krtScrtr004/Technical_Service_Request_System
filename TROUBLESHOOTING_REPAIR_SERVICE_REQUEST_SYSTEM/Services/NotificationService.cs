@@ -19,24 +19,24 @@ namespace TROUBLESHOOTING_REPAIR_SERVICE_REQUEST_SYSTEM.Services
 
         public void NotifyTechnicianAssignment(int technicianId, string referenceCode)
         {
-            var _db = new ApplicationDbContext();
-            _db.Notifications.Add(new Notification()
+            using (var _db = new ApplicationDbContext())
             {
-                RecipientRegistrationId = technicianId,
-                Title = "New Request Assignment",
-                Message = "You have been assigned to a new request (" + referenceCode + "). Please check your assigned requests for details.",
-                ForAdmin = false,
-                ForIT = false,
-                IsActive = true,
-                IsRead = false,
-                CreatedAt = DateTime.Now,
-            });
-            _db.SaveChanges();
+                _db.Notifications.Add(new Notification()
+                {
+                    RecipientRegistrationId = technicianId,
+                    Title = "New Request Assignment",
+                    Message = "You have been assigned to a new request (" + referenceCode + "). Please check your assigned requests for details.",
+                    ForAdmin = false,
+                    ForIT = false,
+                    IsActive = true,
+                    IsRead = false,
+                    CreatedAt = DateTime.Now,
+                });
+                _db.SaveChanges();
 
-            RefreshUserUi(technicianId);
-            TechnicalServiceRequestHub.RefreshTechnicalServiceRequestList();
-
-            _db.Dispose();
+                RefreshUserUi(technicianId);
+                TechnicalServiceRequestHub.RefreshTechnicalServiceRequestList();
+            }
         }
 
         public void NotifyTechnicianNonAssistedService(string referenceCode)
@@ -86,23 +86,23 @@ namespace TROUBLESHOOTING_REPAIR_SERVICE_REQUEST_SYSTEM.Services
 
         public void NotifyClientOnEnqueuedRequest(int clientId, string refenceCode, string technicianFirstName)
         {
-            var _db = new ApplicationDbContext();
-            _db.Notifications.Add(new Notification()
+            using (var _db = new ApplicationDbContext())
             {
-                RecipientRegistrationId = clientId,
-                Title = "Queued Request Status Update",
-                Message = "Your queued (" + refenceCode + ") request is now on processed." + (string.IsNullOrEmpty(technicianFirstName) ? (" Assigned technician: " + technicianFirstName + ".") : ""),
-                ForAdmin = false,
-                ForIT = false,
-                IsActive = true,
-                IsRead = false,
-                CreatedAt = DateTime.Now,
-            });
-            _db.SaveChanges();
+                _db.Notifications.Add(new Notification()
+                {
+                    RecipientRegistrationId = clientId,
+                    Title = "Queued Request Status Update",
+                    Message = "Your queued (" + refenceCode + ") request is now on processed." + (string.IsNullOrEmpty(technicianFirstName) ? (" Assigned technician: " + technicianFirstName + ".") : ""),
+                    ForAdmin = false,
+                    ForIT = false,
+                    IsActive = true,
+                    IsRead = false,
+                    CreatedAt = DateTime.Now,
+                });
+                _db.SaveChanges();
 
-            RefreshUserUi(clientId);
-
-            _db.Dispose();
+                RefreshUserUi(clientId);
+            }
         }
 
         public string BuildRecipientMessageFromRequestStatus(int statusId, string referenceCode, string technicianFirstName)

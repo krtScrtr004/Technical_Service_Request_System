@@ -21,6 +21,10 @@
     background: #fff;
 }
 
+.tsr-form-section input:read-only {
+    cursor: not-allowed;
+}
+
 .tsr-section-title {
     margin-top: 0;
     margin-bottom: 15px;

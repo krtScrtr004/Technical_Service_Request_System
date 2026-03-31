@@ -17,10 +17,6 @@
     gap: 2rem;
 }
 
-    .content-panel-body > div {
-        flex: 1;
-    }
-
 #datetime_picker .datepicker {
     font-size: 14px;
 }
@@ -59,7 +55,7 @@
 }
 
     .selected-date-badge h3 {
-        font-size: 1.5rem;
+        font-size: 1.2rem;
         margin: 0;
     }
 

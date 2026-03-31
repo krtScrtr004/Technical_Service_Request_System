@@ -1,6 +1,26 @@
 ﻿$(document).ready(function () {
     const hub = $.connection.technicalServiceRequestHub;
 
+    function buildRequestSeverityLabel(severity) {
+        const normalizedSeverity = (severity || "").toString().trim().toUpperCase();
+        let labelClass = "label-default"
+
+        switch (normalizedSeverity) {
+            case "LOW":
+                labelClass = "label-success";
+                break;
+            case "MEDIM":
+                labelClass = "label-warning";
+                break;
+            case "HIGH":
+            case "CRITICAL":
+                labelClass = "label-success";
+                break;
+        }
+
+        return `<span class="label ${labelClass}">${normalizedSeverity || "N/A"}</span>`
+    }
+
     function buildRequestStatusLabel(status) {
         const normalizedStatus = (status || "").toString().trim().toUpperCase();
         let labelClass = "label-default";
@@ -42,7 +62,7 @@
         console.warn('Severity container not found');
     } else {
         hub.client.refreshTechnicalServiceRequestSeverity = function (severityName) {
-            severityContainer.text(severityName);
+            severityContainer.html(buildRequestSeverityLabel(severityName));
         };
     }
 
@@ -62,4 +82,5 @@
             }
         };
     }
+
 })

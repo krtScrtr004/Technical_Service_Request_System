@@ -96,8 +96,9 @@
             const dateStr = `${year}-${String(month + 1).padStart(2, '0')}-${String(day).padStart(2, '0')}`;
 
             // Check if the date is blocked and apply the appropriate class
-            const isBlocked = blockedDates.includes(dateStr) ? 'blocked-date' : '';
-            html += `<td class="${isBlocked} text-center" title="You have blocked this date">
+            const isBlockedClass = blockedDates.includes(dateStr) ? "blocked-date" : "";
+            const isBlockedTitle = blockedDates.includes(dateStr) ? "You have blocked this date" : "";
+            html += `<td class="${isBlockedClass} text-center" title="${isBlockedTitle}">
                         ${day}
                     </td>`;
 

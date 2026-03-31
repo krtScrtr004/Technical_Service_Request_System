@@ -39,21 +39,21 @@
                         @* Last Name *@
                         <div class="col-sm-3 form-group relative">
                             @Html.LabelFor(model => model.ClientLastName)
-                            @Html.EditorFor(model => model.ClientLastName, new { htmlAttributes = new { @class = "form-control text-uppercase" } })
+                            @Html.EditorFor(model => model.ClientLastName, new { htmlAttributes = new { @class = "form-control text-uppercase", @readonly = "readonly" } })
                             @Html.ValidationMessageFor(model => model.ClientLastName, "", new { @class = "text-danger" })
                         </div>
 
                         @* First Name *@
                         <div class="col-sm-3 form-group relative">
                             @Html.LabelFor(model => model.ClientFirstName)
-                            @Html.EditorFor(model => model.ClientFirstName, new { htmlAttributes = new { @class = "form-control text-uppercase" } })
+                            @Html.EditorFor(model => model.ClientFirstName, new { htmlAttributes = new { @class = "form-control text-uppercase", @readonly = "readonly" } })
                             @Html.ValidationMessageFor(model => model.ClientFirstName, "", new { @class = "text-danger" })
                         </div>
 
                         @* Middle Name *@
                         <div class="col-sm-3 form-group relative">
                             @Html.LabelFor(model => model.ClientMiddleName)
-                            @Html.EditorFor(model => model.ClientMiddleName, new { htmlAttributes = new { @class = "form-control text-uppercase" } })
+                            @Html.EditorFor(model => model.ClientMiddleName, new { htmlAttributes = new { @class = "form-control text-uppercase", @readonly = "readonly" } })
                             @Html.ValidationMessageFor(model => model.ClientMiddleName, "", new { @class = "text-danger" })
                         </div>
 
@@ -85,14 +85,14 @@
                         @* Contact Number *@
                         <div class="col-sm-6 form-group relative">
                             @Html.LabelFor(model => model.ClientContactNumber)
-                            @Html.EditorFor(model => model.ClientContactNumber, new { htmlAttributes = new { @class = "form-control" } })
+                            @Html.EditorFor(model => model.ClientContactNumber, new { htmlAttributes = new { @class = "form-control", @readonly = "readonly" } })
                             @Html.ValidationMessageFor(model => model.ClientContactNumber, "", new { @class = "text-danger" })
                         </div>
 
                         @* Email *@
                         <div class="col-sm-6 form-group relative">
                             @Html.LabelFor(model => model.ClientEmailAddress)
-                            @Html.EditorFor(model => model.ClientEmailAddress, new { htmlAttributes = new { @class = "form-control" } })
+                            @Html.EditorFor(model => model.ClientEmailAddress, new { htmlAttributes = new { @class = "form-control", @readonly = "readonly" } })
                             @Html.ValidationMessageFor(model => model.ClientEmailAddress, "", new { @class = "text-danger" })
                         </div>
                     </div>
@@ -150,7 +150,7 @@
                             <div class="input-group date form-group relative" id="datetime_picker"></div>
                             @Html.HiddenFor(model => model.TechnicalServiceRequestScheduledDate)
 
-                            <p class="text-muted">
+                            <p class="text-primary">
                                 <i class="glyphicon glyphicon-info-sign"></i>
                                 You may only schedule activities 7 days in advance.
                             </p>

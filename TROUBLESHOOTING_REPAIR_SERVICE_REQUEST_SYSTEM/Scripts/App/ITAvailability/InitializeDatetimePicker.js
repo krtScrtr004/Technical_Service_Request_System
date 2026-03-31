@@ -27,6 +27,7 @@ $(document).ready(function () {
         inline: true,
         container: "#datetime_picker",
         startDate: "+1d",
+        yearRange: `${registrationYear}:2030`,
         beforeShowDay: function (date) {
             const d = new Date(date);
             d.setHours(0, 0, 0, 0); // Normalize time for comparison
@@ -75,7 +76,7 @@ $(document).ready(function () {
             if (!previousSelected.has(date)) {
                 const badgeId = preloadedDates.get(date);
                 if (!badgeId) {
-                   // Only add to selectedDates if it"s not a preloaded date
+                    // Only add to selectedDates if it"s not a preloaded date
                     selectedDates.set(date, renderBadge(date));
                 } else {
                     renderBadge(date, badgeId);

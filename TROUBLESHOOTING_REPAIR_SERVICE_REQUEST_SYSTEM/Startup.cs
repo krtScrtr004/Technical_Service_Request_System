@@ -16,19 +16,27 @@ namespace TROUBLESHOOTING_REPAIR_SERVICE_REQUEST_SYSTEM
             // Map SignalR hubs
             app.MapSignalR();
 
-
             // Schedule the job to delete old notifications daily at 2:00 AM
             IScheduler scheduler = StdSchedulerFactory.GetDefaultScheduler().Result;
             scheduler.Start();
 
-            IJobDetail job = JobBuilder.Create<DeleteOldNotificationsJob>().Build();
-            ITrigger trigger = TriggerBuilder.Create()
+            // Schedule the job to assign queued requests daily at 1:00 AM
+            var assignedQueuedRequestJob = JobBuilder.Create<AssignedQueuedRequestJob>().Build();
+            var assignedQueuedRequestTrigger = TriggerBuilder.Create()
+                .WithDailyTimeIntervalSchedule(s =>
+                    s.OnEveryDay()
+                    .StartingDailyAt(TimeOfDay.HourAndMinuteOfDay(1, 0))) // Schedule for 1:00 AM daily
+                    .Build();
+            scheduler.ScheduleJob(assignedQueuedRequestJob, assignedQueuedRequestTrigger);
+
+            // Schedule the job to delete old notifications daily at 2:00 AM
+            var deleteOldNotificationJob = JobBuilder.Create<DeleteOldNotificationsJob>().Build();
+            var deleteOldNotificationTrigger = TriggerBuilder.Create()
                 .WithDailyTimeIntervalSchedule(s =>
                     s.OnEveryDay()
                     .StartingDailyAt(TimeOfDay.HourAndMinuteOfDay(2, 0))) // Schedule for 2:00 AM daily
                 .Build();
-
-            scheduler.ScheduleJob(job, trigger);
+            scheduler.ScheduleJob(deleteOldNotificationJob, deleteOldNotificationTrigger);
         }
     }
 }

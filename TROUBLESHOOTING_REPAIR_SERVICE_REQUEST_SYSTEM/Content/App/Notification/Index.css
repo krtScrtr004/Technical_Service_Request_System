@@ -2,8 +2,9 @@
     width: 75rem;
 }
 
-.content-panel-heading > h3 {
-    gap: 1rem;
+.content-panel-heading > div > p {
+    margin: 0 !important;
+    margin-top: 5px !important;
 }
 
 .notification-box-container:hover,

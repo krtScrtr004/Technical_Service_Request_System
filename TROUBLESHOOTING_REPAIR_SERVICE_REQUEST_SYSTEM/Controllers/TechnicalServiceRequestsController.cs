@@ -253,11 +253,11 @@ namespace TROUBLESHOOTING_REPAIR_SERVICE_REQUEST_SYSTEM.Controllers
                     }
                     else if (!string.IsNullOrEmpty(technicalServiceRequestCreateViewModel.Others))
                     {
-                        // Invalidate service type if "Others" is specified
+                        // Invalidate service type
                         technicalServiceRequest.TechnicalServiceTypeId = null;
                         technicalServiceRequest.TechnicalServiceType = null;
 
-                        // If "Others" is not specified, default to Equipment Repair Troubleshooting logic
+                        // Default to Equipment Repair Troubleshooting logic
                         CreateEquipmentRepairTroubleshootingRequest(ref technicalServiceRequest, ref isQueued);
                     }
                     else
@@ -1070,7 +1070,7 @@ namespace TROUBLESHOOTING_REPAIR_SERVICE_REQUEST_SYSTEM.Controllers
             return $"{currentYear}-{nextNumber:D6}";
         }
 
-        private int? GetAvailableTechnician()
+        public int? GetAvailableTechnician()
         {
             var itAccountTypeName = AccountTypeEnum.DisplayName(AccountTypeEnum.IT);
 
@@ -1116,7 +1116,7 @@ namespace TROUBLESHOOTING_REPAIR_SERVICE_REQUEST_SYSTEM.Controllers
             return availableTechnicianId;
         }
 
-        private int? GetAvailableTechnicianOnSchedule(DateTime? scheduleDate, TimeSpan? startTime, TimeSpan? endTime)
+        public int? GetAvailableTechnicianOnSchedule(DateTime? scheduleDate, TimeSpan? startTime, TimeSpan? endTime)
         {
             if (scheduleDate == null || startTime == null || endTime == null)
             {

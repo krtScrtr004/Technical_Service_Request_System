@@ -7,13 +7,13 @@ namespace TROUBLESHOOTING_REPAIR_SERVICE_REQUEST_SYSTEM.Migrations
     using System.Resources;
     
     [GeneratedCode("EntityFramework.Migrations", "6.5.1")]
-    public sealed partial class removeUnusedProperties : IMigrationMetadata
+    public sealed partial class addIndexesToTables : IMigrationMetadata
     {
-        private readonly ResourceManager Resources = new ResourceManager(typeof(removeUnusedProperties));
+        private readonly ResourceManager Resources = new ResourceManager(typeof(addIndexesToTables));
         
         string IMigrationMetadata.Id
         {
-            get { return "202603250053492_removeUnusedProperties"; }
+            get { return "202603310522292_addIndexesToTables"; }
         }
         
         string IMigrationMetadata.Source

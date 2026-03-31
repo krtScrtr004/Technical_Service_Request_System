@@ -53,10 +53,18 @@
             },
             success: function (response) {
                 if (response.success) {
-                    Swal.fire('Success', response.message, 'success');
+                    Swal.fire({
+                        title: 'Success',
+                        text: response.message,
+                        icon: "success"
+                    });
                     window.location.href = response.redirectUrl;
                 } else {
-                    Swal.fire('Error!', response.message, 'error');
+                    Swal.fire({
+                        title: 'Error',
+                        text: response.message,
+                        icon: "error"
+                    });
                 }
             },
             error: function (xhr, status, error) {
@@ -64,6 +72,7 @@
                     title: "Error",
                     text: "An error occured. Please try again.",
                     icon: "error",
+                    confirmButtonText: 'Understood',
                 });
                 console.error(error)
             }
