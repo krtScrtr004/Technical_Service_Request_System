@@ -1,5 +1,11 @@
-﻿.notification-page-panel {
+﻿.notification-index-page {
+    width: 100%;
+    min-width: 0;
+}
+
+.notification-page-panel {
     width: 75rem;
+    max-width: 100%;
 }
 
 .content-panel-heading > div > p {
@@ -7,11 +13,16 @@
     margin-top: 5px !important;
 }
 
-.notification-box-container:hover,
-.notification-box-container:focus,
-.notification-box-container:focus-within {
-    text-decoration: none;
+.notification-box-container {
+    width: 100%;
+    text-align: left;
 }
+
+    .notification-box-container:hover,
+    .notification-box-container:focus,
+    .notification-box-container:focus-within {
+        text-decoration: none;
+    }
 
 .notification-box {
     border: 1px solid var(--default);
@@ -36,9 +47,55 @@
 }
 
     .content-panel-footer .pagination {
-        margin: 0;
+        margin: 1rem 0;
+        display: flex;
+        align-items: center;
+        gap: 4px;
     }
 
+        .content-panel-footer .pagination > li > a,
+        .content-panel-footer .pagination > li > span {
+            padding: 1rem 1.5rem;
+            border-radius: 2px;
+            cursor: pointer;
+            color: #000000;
+            background: transparent;
+            margin-left: 0;
+            float: none;
+        }
+
+            .content-panel-footer .pagination > li > a:hover,
+            .content-panel-footer .pagination > li > span:hover,
+            .content-panel-footer .pagination > li > a:focus,
+            .content-panel-footer .pagination > li > span:focus {
+                background: #0f7864;
+                color: #ffffff;
+            }
+
+        .content-panel-footer .pagination > .active > a,
+        .content-panel-footer .pagination > .active > spa,
+        .content-panel-footer .pagination > .active > a:hover,
+        .content-panel-footer .pagination > .active > span:hover,
+        .content-panel-footer .pagination > .active > a:focus,
+        .content-panel-footer .pagination > .active > span:focus {
+            background: var(--success);
+            color: #000000;
+            font-weight: bold;
+            cursor: default;
+        }
+
+        .content-panel-footer .pagination > .disabled > a,
+        .content-panel-footer .pagination > .disabled > span,
+        .content-panel-footer .pagination > .disabled > a:hover,
+        .content-panel-footer .pagination > .disabled > span:hover,
+        .content-panel-footer .pagination > .disabled > a:focus,
+        .content-panel-footer .pagination > .disabled > span:focus {
+            opacity: 0.4;
+            cursor: not-allowed;
+            color: #ffffff;
+            background: var(--success);
+            border: 1px solid var(--success);
+        }
 /* Notification Detail Modal */
 
 .notification-detail-modal td:first-child {
@@ -48,4 +105,47 @@
 .notification-detail-modal .message-row > td:last-child > div {
     max-height: 20rem;
     overflow-y: auto;
+}
+
+@media (max-width: 767px) {
+    .notification-index-page {
+        padding-left: 0;
+        padding-right: 0;
+    }
+
+    .notification-page-panel {
+        width: 100%;
+    }
+
+    .content-panel-heading,
+    .notification-list-body,
+    .notification-pagination-wrap {
+        padding-left: 10px;
+        padding-right: 10px;
+    }
+
+        .content-panel-heading .panel-title {
+            font-size: 1.8rem;
+        }
+
+    .notification-content-row {
+        display: block;
+    }
+
+    .notification-box .date {
+        width: auto;
+        text-align: left;
+        margin-top: 6px;
+    }
+
+    .notification-pagination-wrap {
+        display: block;
+    }
+
+        .notification-pagination-wrap .pagination {
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: center;
+            gap: 4px;
+        }
 }

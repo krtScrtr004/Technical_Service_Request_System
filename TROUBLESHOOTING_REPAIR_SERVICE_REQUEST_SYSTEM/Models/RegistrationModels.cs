@@ -4,6 +4,7 @@ using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
 using System.Linq;
 using System.Web;
+using TROUBLESHOOTING_REPAIR_SERVICE_REQUEST_SYSTEM.Enumerables;
 
 namespace TROUBLESHOOTING_REPAIR_SERVICE_REQUEST_SYSTEM.Models
 {
@@ -79,12 +80,14 @@ namespace TROUBLESHOOTING_REPAIR_SERVICE_REQUEST_SYSTEM.Models
         [EmailAddress]
         [DataType(DataType.EmailAddress)]
         [Display(Name = "Email")]
+        [RegularExpression(ValueConstants.VALID_EMAIL_REGEX, ErrorMessage = "Input contains invalid character(s)")]
         public string Email { get; set; }
 
         [Required]
         [Display(Name = "Contact Number")]
         [DataType(DataType.PhoneNumber)]
         [Phone(ErrorMessage = "Invalid phone number format.")]
+        [RegularExpression(ValueConstants.VALID_CONTACT_NUMBER_REGEX, ErrorMessage = "Input contains invalid character(s)")]
         public string ContactNumber { get; set; }
         
         public string Code { get; set; }

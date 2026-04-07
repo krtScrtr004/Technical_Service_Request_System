@@ -2,12 +2,8 @@
 @using TROUBLESHOOTING_REPAIR_SERVICE_REQUEST_SYSTEM.Enumerables
 @using TROUBLESHOOTING_REPAIR_SERVICE_REQUEST_SYSTEM.Core
 
-@section Styles {
-    <link rel="stylesheet" href="~/Content/App/Registration/Details.css" type="text/css" />
-}
-
 @{
-    ViewBag.Title = "Manage Profile";
+    ViewBag.Title = "Details";
 
     var currentUser = ViewBag.CurrentUser as UserSession;
     var isCurrentUser = currentUser.Id == Model.User.Id ? true : false;
@@ -30,13 +26,15 @@
     }
 }
 
+@section Styles {
+    <link rel="stylesheet" href="~/Content/App/Registration/Details.css" type="text/css" />
+}
+
 <section class="container registration-details-page">
     <div class="row">
-        <div class="col-md-2 col-sm-1"></div>
-
-        <div class="col-md-8 col-sm-10">
+        <div class="col-xs-12 col-sm-10 col-sm-offset-1 col-md-8 col-md-offset-2">
             <div class="panel panel-default content-panel bg-light">
-                <section class="panel-heading profile-header flex-row">
+                <section class="panel-heading profile-header flex-row flex-wrap">
                     <img src="~/Content/Images/logo.png" height="40" />
 
                     <div>
@@ -152,7 +150,7 @@
 
                 @if (AccountTypeEnum.IsAdmin(currentUserPrivilegeIds) || AccountTypeEnum.IsIT(currentUserPrivilegeIds))
                 {
-                    <section class="panel-footer management-buttons-container float-right">
+                    <section class="panel-footer management-buttons-container">
                         <p class="text-primary options-label light-text text-right">More Options</p>
 
                         <div class="buttons-container">
@@ -183,7 +181,5 @@
                 }
             </div>
         </div>
-
-        <div class="col-md-2 col-sm-1"></div>
     </div>
 </section>

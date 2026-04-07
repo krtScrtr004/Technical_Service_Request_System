@@ -135,7 +135,8 @@ namespace TROUBLESHOOTING_REPAIR_SERVICE_REQUEST_SYSTEM.Controllers
                 FirstName = registrationCreateViewModel.FirstName,
                 MiddleName = registrationCreateViewModel.MiddleName,
                 LastName = registrationCreateViewModel.LastName,
-                Email = registrationCreateViewModel.Email
+                Email = registrationCreateViewModel.Email,
+                ContactNumber = registrationCreateViewModel.ContactNumber
             };
 
             if (id < 1)
@@ -709,7 +710,18 @@ namespace TROUBLESHOOTING_REPAIR_SERVICE_REQUEST_SYSTEM.Controllers
 
             // Create a new user in the ASP.NET Identity system with the generated username and password
             var user = new ApplicationUser() { UserName = username, Email = model.Email };
+
+            // Allow special characters in Username
+            UserManager.UserValidator = new UserValidator<ApplicationUser>(UserManager)
+            {
+                AllowOnlyAlphanumericUserNames = false,
+                RequireUniqueEmail = true
+            };
             var result = UserManager.Create(user, pass);
+            if (!result.Succeeded)
+            {
+                throw new Exception("Failed to create user: " + string.Join(", ", result.Errors));
+            }
 
             // If the user creation is successful, proceed to assign roles and privileges
             var officerNew = _db.Registrations.Find(registration.Id);

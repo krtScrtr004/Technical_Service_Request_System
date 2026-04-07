@@ -1,5 +1,7 @@
 ﻿.availaibility-container {
     gap: var(--space);
+    width: 100%;
+    min-width: 0;
 }
 
 .content-panel,
@@ -9,24 +11,38 @@
 
 .content-panel {
     width: 70%;
+    min-width: 0;
 }
 
 .content-panel-body {
     width: 100%;
     height: 40rem;
     gap: 2rem;
+    min-width: 0;
+}
+
+.content-panel-body > section:first-child {
+    flex: 1;
+    min-width: 0;
+}
+
+#datetime_picker {
+    width: 100%;
 }
 
 #datetime_picker .datepicker {
     font-size: 14px;
+    width: 100%;
 }
 
+    #datetime_picker .datepicker-inline,
     #datetime_picker .datepicker table {
         width: 100%;
     }
 
 .selected-date-badge-container {
     flex: 1;
+    min-width: 0;
 }
 
     .selected-date-badge-container > div {
@@ -62,7 +78,17 @@
 .availability-history-container {
     width: 30%;
     flex: 1;
+    min-width: 0;
 }
+
+.history-selects-container {
+    gap: 0.75rem;
+}
+
+    .history-selects-container .form-group {
+        flex: 1;
+        min-width: 0;
+    }
 
 .calendar-table {
     table-layout: fixed;
@@ -73,3 +99,65 @@
         background: #979797;
         color: #edf1f2;
     }
+
+@media (max-width: 991px) {
+    .availaibility-container {
+        padding-left: 0;
+        padding-right: 0;
+    }
+
+    .content-panel,
+    .availability-history-container {
+        width: 100%;
+    }
+
+    .content-panel-body {
+        height: auto;
+        min-height: 0;
+        display: block;
+    }
+
+    .selected-date-badge-container {
+        margin-top: 12px;
+    }
+
+    .availability-history-container {
+        margin-top: 10px !important;
+    }
+}
+
+@media (max-width: 767px) {
+    .content-panel .panel-heading,
+    .content-panel .panel-body,
+    .availability-history-container {
+        padding-left: 10px;
+        padding-right: 10px;
+    }
+
+    .selected-date-badge-container > div {
+        max-height: 18rem;
+        padding: 0.5rem;
+    }
+
+    .selected-date-badge-container .buttons {
+        display: block;
+    }
+
+        .selected-date-badge-container .buttons .btn {
+            display: block;
+            width: 100%;
+            margin: 0 0 8px;
+        }
+
+        .selected-date-badge-container .buttons .btn:last-child {
+            margin-bottom: 0;
+        }
+
+    .history-selects-container {
+        display: block;
+    }
+
+        .history-selects-container .form-group {
+            margin-bottom: 8px;
+        }
+}

@@ -1,5 +1,13 @@
-﻿.tsr-create-panel {
+﻿.tsr-create-panel-container {
+    width: 100%;
+    min-width: 0;
+    padding: 0 10px;
+}
+
+.tsr-create-panel {
     width: 90rem;
+    max-width: 100%;
+    min-width: 0;
     margin-top: 20px;
 }
 
@@ -64,4 +72,59 @@
 
 .tsr-form-actions .btn + .btn {
     margin-left: 6px;
+}
+
+@media (max-width: 991px) {
+    .tsr-create-panel-container {
+        align-items: flex-start;
+        padding: 0 8px;
+    }
+
+    .tsr-create-panel {
+        width: 100%;
+    }
+}
+
+@media (max-width: 767px) {
+    .tsr-create-panel-container {
+        padding: 0 4px;
+    }
+
+    .tsr-create-panel {
+        margin-top: 12px;
+    }
+
+    .tsr-create-panel .panel-heading,
+    .tsr-create-panel .panel-body,
+    .tsr-form-section {
+        padding-left: 10px;
+        padding-right: 10px;
+    }
+
+    .tsr-form-section .row.flex-child-center-h {
+        display: block;
+    }
+
+    .schedule-inputs .col-sm-7.flex-col {
+        display: block;
+    }
+
+    .tsr-form-actions {
+        display: block;
+        text-align: left;
+    }
+
+        .tsr-form-actions .btn {
+            display: block;
+            width: 100%;
+            margin: 0 0 8px;
+        }
+
+        .tsr-form-actions .btn + .btn {
+            margin-left: 0;
+        }
+
+        .tsr-form-actions .btn:last-child {
+            margin-bottom: 0;
+        }
 }

@@ -1,9 +1,24 @@
 ﻿.tsr-detail-page-container {
     width: 85rem;
+    max-width: 100%;
+    min-width: 0;
+}
+
+.tsr-detail-page-container .panel,
+.tsr-detail-page-container .panel-body,
+.tsr-detail-page-container .container-fluid,
+.tsr-detail-page-container .table-responsive {
+    min-width: 0;
 }
 
 .detail-table {
-    table-layout: fixed;
+    table-layout: auto;
+    width: 100%;
+}
+
+.detail-table th,
+.detail-table td {
+    min-width: 140px;
 }
 
 .request-information-table tr td:first-child {
@@ -64,7 +79,7 @@
 
 .action-history-table-container {
     max-height: 50rem;
-    overflow-y: auto;
+    overflow-y: auto !important;
 }
 
 #cancel_request_button {
@@ -89,3 +104,93 @@
         border-right: 1px solid #B9C1C2;
         border-left: 1px solid #B9C1C2;
     }
+
+@media (max-width: 991px) {
+    .tsr-detail-page-container {
+        width: 100%;
+        padding-left: 8px;
+        padding-right: 8px;
+    }
+
+    .request-information-table tr td:first-child {
+        width: 30ch;
+    }
+}
+
+@media (max-width: 767px) {
+    .section-heading-title {
+        font-size: 16px;
+        line-height: 1.3;
+    }
+
+    .table-responsive {
+        display: block;
+        width: 100%;
+        max-width: 100%;
+        overflow-y: hidden;
+        -webkit-overflow-scrolling: touch;
+        margin-bottom: 0;
+    }
+
+    .stack-on-mobile {
+        width: 100% !important;
+        table-layout: auto;
+    }
+
+        .stack-on-mobile tbody,
+        .stack-on-mobile tr,
+        .stack-on-mobile td,
+        .stack-on-mobile th {
+            display: block;
+            width: 100% !important;
+        }
+
+        .stack-on-mobile td,
+        .stack-on-mobile th {
+            min-width: 0;
+            white-space: normal;
+        }
+
+        .stack-on-mobile tr.active > td {
+            font-weight: 700;
+        }
+
+    .detail-history-heading-row {
+        align-items: flex-start;
+    }
+
+    #add_action_history_button {
+        width: 100%;
+        margin-top: 4px;
+    }
+
+    .request-information-table tr td:first-child {
+        width: auto;
+    }
+
+    .schedule-date {
+        display: block;
+    }
+
+        .schedule-date > div {
+            display: block;
+            border-bottom: 1px solid #B9C1C2;
+        }
+
+        .schedule-date > div:last-child {
+            border-bottom: none;
+        }
+
+        .schedule-date > div > div:first-child {
+            border-right: none;
+        }
+
+    .detail-cancel-row {
+        display: block;
+    }
+
+    #cancel_request_button {
+        width: 100%;
+        margin: 12px 0 0;
+    }
+}

@@ -30,6 +30,8 @@
     var table = $("#technical_request_table").DataTable({
         processing: true,
         serverSide: true,
+        responsive: true,
+        autoWidth: false,
         ajax: {
             url: requestUrl,
             type: 'GET',

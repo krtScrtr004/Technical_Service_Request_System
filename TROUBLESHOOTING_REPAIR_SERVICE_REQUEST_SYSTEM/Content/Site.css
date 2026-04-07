@@ -1,4 +1,12 @@
-﻿
+﻿@font-face {
+    font-family: "Glyphicons Halflings";
+    src: url("Glyphicons/glyphicons-halflings-regular.eot?#iefix") format("embedded-opentype"),
+         url("Glyphicons/glyphicons-halflings-regular.woff2") format("woff2"),
+         url("Glyphicons/glyphicons-halflings-regular.woff") format("woff"),
+         url("Glyphicons/glyphicons-halflings-regular.ttf") format("truetype"),
+         url("Glyphicons/glyphicons-halflings-regular.svg#glyphicons_halflingsregular") format("svg");
+}
+
 .dropdown-submenu > a:after {
   content: "";
 }

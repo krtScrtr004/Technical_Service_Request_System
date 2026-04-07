@@ -1,8 +1,6 @@
 ﻿@model TROUBLESHOOTING_REPAIR_SERVICE_REQUEST_SYSTEM.Models.RegistrationCreateViewModel
 
-@{
-    ViewBag.Title = "Registration Success";
-}
+@{ ViewBag.Title = "Registration Success"; }
 
 @section Styles
 {
@@ -11,9 +9,7 @@
 
 <section class="container registration-success-page">
     <div class="row">
-        <div class="col-md-2 col-sm-1"></div>
-
-        <div class="col-md-8 col-sm-10">
+        <div class="col-xs-12 col-sm-10 col-sm-offset-1 col-md-8 col-md-offset-2">
             <div class="panel panel-primary success-panel">
 
                 @* Heading *@
@@ -35,7 +31,7 @@
                     </h4>
 
                     <div class="table-responsive">
-                        <table class="table table-bordered table-striped success-table">
+                        <table class="table table-bordered table-striped success-table stack-on-mobile">
                             <tbody>
 
                                 @* Full Name *@
@@ -90,7 +86,7 @@
                 </section>
 
                 @* Footer *@
-                <section class="panel-footer">
+                <section class="panel-footer success-footer-actions">
                     <div class="text-right">
                         <a href="@Url.Action("Details", "Registration", new { id = Model.Registration.Id })" class="btn btn-primary">
                             Done
@@ -100,8 +96,6 @@
 
             </div>
         </div>
-
-        <div class="col-md-2 col-sm-1"></div>
     </div>
 </section>
 

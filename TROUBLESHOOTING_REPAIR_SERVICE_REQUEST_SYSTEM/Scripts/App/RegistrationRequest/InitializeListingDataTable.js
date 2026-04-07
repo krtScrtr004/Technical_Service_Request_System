@@ -2,6 +2,13 @@
     var table = $("#registration_request_table").DataTable({
         processing: true,
         serverSide: true,
+        responsive: {
+            details: {
+                type: "column",
+                target: "td.dtr-control"
+            }
+        },
+        autoWidth: false,
         ajax: {
             url: requestUrl,
             type: 'GET',
@@ -24,6 +31,7 @@
             {
                 data: null,
                 name: "LastName",
+                className: "dtr-control all",
                 render: function (data, type, row) {
                     return row.LastName + ", " + row.FirstName + " " + (row.MiddleName ? row.MiddleName : "");
                 }
@@ -47,6 +55,7 @@
             {
                 data: null,
                 orderable: false,
+                className: "all",
                 render: function (data, type, row) {
                     const parse = (val) => val === true || val === 1 || val?.toString().toLowerCase().trim() === "true";
 
@@ -74,6 +83,11 @@
                     return null;
                 }
             }
+        ],
+        columnDefs: [
+            { responsivePriority: 1, targets: 0 },
+            { responsivePriority: 2, targets: 3 },
+            { responsivePriority: 100, targets: [1, 2, 4] }
         ],
         order: [[2, 'desc']], // Sort by date requested descending
         pageLength: 10,

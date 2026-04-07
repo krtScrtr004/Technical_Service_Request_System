@@ -91,10 +91,27 @@ namespace TROUBLESHOOTING_REPAIR_SERVICE_REQUEST_SYSTEM.Controllers
 
                         var currentUser = _db.Registrations
                             .Include(r => r.UserPrivileges)
-                            .FirstOrDefault(i => i.Email == model.Email);
+                            .Where(r =>
+                                r.Email == model.Email &&
+                                (r.DeactivatedByRegistrationId == null ||
+                                r.DeactivatedByRegistrationId == 0)
+                            )
+                            .FirstOrDefault();
                         if (currentUser == null)
                         {
-                            throw new HttpException(404, "Not found");
+                            model.Alert = new Dictionary<string, AlertBaseUtility>()
+                            {
+                                { "invalidLogin", new AlertBoxUtility()
+                                    {
+                                        Status = "danger",
+                                        Message = "Invalid login attempt.",
+                                        Dismissible = true
+                                    }
+                                }
+                            };
+                            ModelState.AddModelError("", "Invalid login attempt.");
+
+                            return View(model);
                         }
 
                         new UserSession(

@@ -53,6 +53,15 @@
     .registration-success-page {
         padding-top: 1.5rem;
         padding-bottom: 1.5rem;
+        padding-left: 0;
+        padding-right: 0;
+    }
+
+    .success-panel .panel-heading,
+    .success-panel .panel-body,
+    .success-panel .panel-footer {
+        padding-left: 12px;
+        padding-right: 12px;
     }
 
     .success-subtitle {
@@ -61,5 +70,30 @@
 
     .credential-chip {
         font-size: 1.1rem;
+    }
+
+    .stack-on-mobile,
+    .stack-on-mobile tbody,
+    .stack-on-mobile tr,
+    .stack-on-mobile th,
+    .stack-on-mobile td {
+        display: block;
+        width: 100% !important;
+    }
+
+    .stack-on-mobile th {
+        margin-bottom: 4px;
+    }
+
+    .stack-on-mobile td {
+        margin-bottom: 10px;
+    }
+
+    .success-footer-actions .text-right {
+        text-align: left;
+    }
+
+    .success-footer-actions .btn {
+        width: 100%;
     }
 }

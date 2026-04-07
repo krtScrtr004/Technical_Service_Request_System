@@ -61,11 +61,21 @@
     .deactivate-page {
         padding-top: 1.5rem;
         padding-bottom: 1.5rem;
+        padding-left: 0;
+        padding-right: 0;
     }
 
     .deactivate-panel .panel-body,
     .deactivate-panel .panel-footer,
     .deactivate-panel .panel-heading {
         padding: 1.25rem;
+    }
+
+    .deactivate-actions-footer .col-xs-6 {
+        width: 100%;
+    }
+
+    .deactivate-actions-footer .col-xs-6 + .col-xs-6 {
+        margin-top: 8px;
     }
 }

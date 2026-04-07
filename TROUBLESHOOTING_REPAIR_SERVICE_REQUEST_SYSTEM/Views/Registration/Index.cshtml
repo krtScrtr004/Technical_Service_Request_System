@@ -1,19 +1,17 @@
 ﻿@using TROUBLESHOOTING_REPAIR_SERVICE_REQUEST_SYSTEM.Enumerables
 @using TROUBLESHOOTING_REPAIR_SERVICE_REQUEST_SYSTEM.Core
 
+@{
+    ViewBag.Title = "List";
+    var currentUser = ViewBag.CurrentUser as UserSession;
+}
+
 @section Styles
 {
     <link rel="stylesheet" href="~/Content/App/Registration/Index.css" type="text/css" />
 }
 
-@{
-    ViewBag.Title = "Registrations List";
-    var currentUser = ViewBag.CurrentUser as UserSession;
-
-
-}
-
-<section class="container">
+<section class="container registration-index-page">
     <div class="panel panel-default">
 
         <section class="panel-heading">
@@ -25,7 +23,7 @@
                 @* Type Filter *@
                 <div class="filter-selection">
                     <label for="account_type_filter">Account Type:</label>
-                    <select id="account_type_filter">
+                    <select id="account_type_filter" class="form-control">
                         <option value="0">All</option>
                         <optgroup label="Account Type">
                             <option value="@AccountTypeEnum.ADMIN">
@@ -85,8 +83,8 @@
 
 @section Scripts {
     <script>
-        var userId = "@currentUser.Id";
-        var requestUrl = "@Url.Action("GetRegistrations", "Registration")";
+        const userId = "@currentUser.Id";
+        const requestUrl = "@Url.Action("GetRegistrations", "Registration")";
     </script>
 
     <script src="~/Scripts/App/Registration/InitializeListingDataTable.js" defer></script>

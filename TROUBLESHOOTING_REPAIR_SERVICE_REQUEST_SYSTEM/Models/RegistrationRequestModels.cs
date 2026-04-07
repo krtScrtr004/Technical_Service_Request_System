@@ -1,9 +1,11 @@
-﻿using System;
+﻿using Microsoft.AspNet.Identity;
+using System;
 using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
 using System.Linq;
 using System.Web;
+using TROUBLESHOOTING_REPAIR_SERVICE_REQUEST_SYSTEM.Enumerables;
 
 namespace TROUBLESHOOTING_REPAIR_SERVICE_REQUEST_SYSTEM.Models
 {
@@ -63,6 +65,7 @@ namespace TROUBLESHOOTING_REPAIR_SERVICE_REQUEST_SYSTEM.Models
         [Required]
         [EmailAddress]
         [DataType(DataType.EmailAddress)]
+        [RegularExpression(ValueConstants.VALID_EMAIL_REGEX, ErrorMessage = "Input contains invalid character(s)")]
         [Display(Name = "Email")]
         public string Email { get; set; }
 
@@ -70,6 +73,7 @@ namespace TROUBLESHOOTING_REPAIR_SERVICE_REQUEST_SYSTEM.Models
         [Display(Name = "Contact Number")]
         [DataType(DataType.PhoneNumber)]
         [Phone(ErrorMessage = "Invalid phone number format.")]
+        [RegularExpression(ValueConstants.VALID_CONTACT_NUMBER_REGEX, ErrorMessage = "Input contains invalid character(s)")]
         public string ContactNumber { get; set; }
     }
 }

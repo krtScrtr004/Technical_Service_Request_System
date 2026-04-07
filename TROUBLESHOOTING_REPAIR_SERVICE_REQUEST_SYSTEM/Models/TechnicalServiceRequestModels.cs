@@ -9,6 +9,7 @@ using System.Linq;
 using System.Web;
 using System.Web.Mvc;
 using TROUBLESHOOTING_REPAIR_SERVICE_REQUEST_SYSTEM.Attributes;
+using TROUBLESHOOTING_REPAIR_SERVICE_REQUEST_SYSTEM.Enumerables;
 using TROUBLESHOOTING_REPAIR_SERVICE_REQUEST_SYSTEM.Utilities;
 
 namespace TROUBLESHOOTING_REPAIR_SERVICE_REQUEST_SYSTEM.Models
@@ -130,11 +131,13 @@ namespace TROUBLESHOOTING_REPAIR_SERVICE_REQUEST_SYSTEM.Models
         [Phone]
         [DataType(DataType.PhoneNumber)]
         [DisplayName("Contact Number")]
+        [RegularExpression(ValueConstants.VALID_CONTACT_NUMBER_REGEX, ErrorMessage = "Input contains invalid character(s)")]
         public string ClientContactNumber { get; set; }
         [Required]
         [EmailAddress]
         [DataType(DataType.EmailAddress)]
         [DisplayName("Email Address")]
+        [RegularExpression(ValueConstants.VALID_EMAIL_REGEX, ErrorMessage = "Input contains invalid character(s)")]
         public string ClientEmailAddress { get; set; }
 
         // TECHNICAL SERVICE
@@ -158,13 +161,13 @@ namespace TROUBLESHOOTING_REPAIR_SERVICE_REQUEST_SYSTEM.Models
 
         // CONDITIONAL PROP: If the service requested is either Zoom/Webex Link, Livestream Setup, or Audio/Visual Setup
         [DataType(DataType.Date)]
-        [DisplayName("Scheduled Date")]
+        [DisplayName("Date")]
         [DateRange(0, 30)]
         [ValidLivestreamSchedule(serviceTypeProperty: "TechnicalServiceTypeId")]
         public DateTime? TechnicalServiceRequestScheduledDate { get; set; }
 
         [DataType(DataType.Time)]
-        [DisplayName("Scheduled Start Time")]
+        [DisplayName("Start")]
         // 4:00 PM is the latest time allowed for scheduling a service request on the same day
         [TimeAllowed(minimumHourFromNow: 1, maximumHour: "16:00")]
         [ScheduledTime(scheduleDatePropertyName: "TechnicalServiceRequestScheduledDate", minimumHours: "8:00", maximumHours: "16:00")]
@@ -172,7 +175,7 @@ namespace TROUBLESHOOTING_REPAIR_SERVICE_REQUEST_SYSTEM.Models
         public TimeSpan? TechnicalServiceRequestScheduledStartTime { get; set; }
 
         [DataType(DataType.Time)]
-        [DisplayName("Scheduled End Time")]
+        [DisplayName("End")]
         [StartEndTimeCollision(startTimePropertyName: "TechnicalServiceRequestScheduledStartTime", endTimePropertyName: "TechnicalServiceRequestScheduledEndTime")]
         public TimeSpan? TechnicalServiceRequestScheduledEndTime { get; set; }
 

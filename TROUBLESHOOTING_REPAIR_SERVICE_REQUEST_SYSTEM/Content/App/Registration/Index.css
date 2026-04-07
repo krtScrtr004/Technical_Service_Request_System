@@ -1,0 +1,52 @@
+.registration-index-page {
+    width: 100%;
+    min-width: 0;
+}
+
+#registration_table {
+    width: 100% !important;
+}
+
+@media (min-width: 768px) {
+    #registration_table {
+        min-width: 760px;
+    }
+}
+
+@media (max-width: 767px) {
+    .registration-index-page {
+        padding-left: 0;
+        padding-right: 0;
+    }
+
+    .registration-index-page .panel-body {
+        padding: 10px;
+    }
+
+    .filter-selection-container {
+        display: block;
+        padding: 0;
+        margin-bottom: 10px;
+    }
+
+    .filter-selection {
+        display: block;
+        width: 100%;
+        margin-bottom: 8px;
+    }
+
+    .filter-selection > label {
+        display: block;
+        margin-bottom: 4px;
+    }
+
+    .filter-selection > select {
+        width: 100% !important;
+    }
+
+    .table-responsive {
+        width: 100%;
+        overflow-x: auto;
+        -webkit-overflow-scrolling: touch;
+    }
+}

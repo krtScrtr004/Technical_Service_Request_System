@@ -10,7 +10,7 @@
     ViewBag.Title = "Notifications";
 }
 
-<section class="container center-child">
+<section class="container center-child notification-index-page">
 
     <div class="panel panel-default notification-page-panel">
         @* Heading *@
@@ -27,18 +27,19 @@
         </section>
 
         @* Body *@
-        <section id="notification_list" class="panel-body flex-col">
+        <section id="notification_list" class="panel-body flex-col notification-list-body">
             @Html.Partial("~/Views/Notification/Partial/_NotificationList.cshtml", Model.Notifications)
         </section>
 
         @* Pagination *@
-        <section class="content-panel-footer panel-footer flex-row-reverse">
+        <section class="content-panel-footer panel-footer flex-row-reverse notification-pagination-wrap">
             @Html.PagedListPager(Model.Notifications, page => Url.Action("Index", new { page }),
                 new PagedListRenderOptions
                 {
                     LiElementClasses = new[] { "" },
-                    //PageClasses = new[] { "" },
                     UlElementClasses = new[] { "pagination" },
+                    LinkToPreviousPageFormat = "Previous",
+                    LinkToNextPageFormat = "Next",
                     DisplayLinkToFirstPage = PagedListDisplayMode.Never,
                     DisplayLinkToLastPage = PagedListDisplayMode.Never,
                 })

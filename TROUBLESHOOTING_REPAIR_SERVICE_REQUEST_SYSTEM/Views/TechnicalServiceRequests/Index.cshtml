@@ -4,7 +4,7 @@
 @using TROUBLESHOOTING_REPAIR_SERVICE_REQUEST_SYSTEM.Core;
 
 @{
-    ViewBag.Title = "Technical Service Requests List";
+    ViewBag.Title = "List";
 
     var currentUser = ViewBag.CurrentUser as UserSession;
 }
@@ -15,7 +15,7 @@
     <link rel="stylesheet" href="~/Content/App/TechnicalServiceRequest/Index.css" type="text/css" />
 }
 
-<section class="container">
+<section class="container tsr-index-page">
     <div class="table-panel panel panel-default">
 
         <section class="panel-heading">
@@ -171,7 +171,7 @@
                 @* Date Request Filter *@
                 <div class="filter-selection">
                     <label for="date_request_filter">Date Request:</label>
-                    <select id="date_request_filter">
+                    <select id="date_request_filter" class="form-control">
                         <option value="0" selected>All</option>
                         <optgroup label="Request Date">
                             <option value="1">

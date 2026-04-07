@@ -1,5 +1,11 @@
+.registration-request-create-page {
+    margin-top: 20px;
+    margin-bottom: 20px;
+}
+
 .registration-request-create-panel {
     width: 70rem;
+    max-width: 100%;
     padding: 30px;
     border-radius: 8px;
     min-height: 750px;
@@ -25,7 +31,7 @@
     margin-top: 30px;
 }
 
-.form-group {
+.registration-request-create-row {
     margin-bottom: 18px;
 }
 
@@ -33,6 +39,10 @@
     text-align: right;
     padding-top: 7px;
     font-weight: 500;
+}
+
+.registration-request-create-input-wrap {
+    min-width: 0;
 }
 
 .registration-request-create-input {
@@ -46,16 +56,69 @@
 }
 
 @media (max-width: 991px) {
+    .registration-request-create-page {
+        margin-top: 12px;
+        margin-bottom: 12px;
+    }
+
     .registration-request-create-panel {
         width: 100%;
-        padding: 10px;
+        min-height: 0;
+        padding: 16px;
     }
+
     .registration-request-create-input {
         width: 100%;
         margin-left: 0;
     }
+
     .control-label {
         text-align: left;
         padding-top: 0;
+    }
+}
+
+@media (max-width: 767px) {
+    .registration-request-create-panel {
+        padding: 12px;
+    }
+
+    .registration-request-create-title {
+        font-size: 2rem;
+        margin-top: 12px;
+    }
+
+    .registration-request-create-form-body,
+    .registration-request-create-actions {
+        padding-left: 15px;
+        padding-right: 15px;
+    }
+
+    .registration-request-create-form-body {
+        margin-top: 18px;
+    }
+
+    .registration-request-create-row {
+        display: block;
+        margin-bottom: 12px;
+    }
+
+    .registration-request-create-row .control-label {
+        display: block;
+        width: 100%;
+        margin-bottom: 4px;
+    }
+
+    .registration-request-create-row .registration-request-create-input-wrap {
+        width: 100%;
+    }
+
+    .registration-request-create-actions .col-md-12 {
+        padding-left: 0;
+        padding-right: 0;
+    }
+
+    .registration-request-create-submit {
+        width: 100%;
     }
 }

@@ -1,7 +1,7 @@
 ﻿@model TROUBLESHOOTING_REPAIR_SERVICE_REQUEST_SYSTEM.Models.TechnicalServiceRequestHistory
 @using TROUBLESHOOTING_REPAIR_SERVICE_REQUEST_SYSTEM.Enumerables
 
-@{ 
+@{
     Func<int, string> getStatusLabelClass = (status) =>
     {
         switch (status)
@@ -26,7 +26,7 @@
 
 
 @* Action Taken By *@
-<tr>
+<tr class="action-history-row">
     <td class="text-primary light-text active">
         TAKEN BY
     </td>
@@ -48,7 +48,7 @@
 
     </td>
 
-    <td rowspan="3" class="generate-srf-button-container">
+    <td rowspan="3" class="generate-srf-button-container hidden-xs hidden-sm">
         <a class="btn btn-success btn-sm" href="@Url.Action("Form", "TechnicalServiceRequests", new { id = Model.Id })">
             <i class="glyphicon glyphicon-file"></i>
             Generate TSRF
@@ -95,13 +95,25 @@
     </td>
 
     <td colspan="3" class="text-primary">
-        @(string.IsNullOrEmpty(Model.ActionTaken)
+        <p class="action-taken-text wrap-text">
+            @(string.IsNullOrEmpty(Model.ActionTaken)
               ? "N/A"
               : Model.ActionTaken)
+        </p>
+    </td>
+</tr>
+
+<tr class="hidden-lg hidden-md">
+    <td class="generate-srf-button-container">
+        <a class="btn btn-success btn-sm" href="@Url.Action("Form", "TechnicalServiceRequests", new { id = Model.Id })">
+            <i class="glyphicon glyphicon-file"></i>
+            Generate TSRF
+        </a>
     </td>
 </tr>
 
 <tr>
-    <td colspan="4">
+    <td colspan="5" class="minified-text light-text text-center">
+        -- END --
     </td>
 </tr>

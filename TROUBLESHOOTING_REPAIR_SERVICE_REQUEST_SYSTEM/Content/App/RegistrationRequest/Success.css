@@ -22,6 +22,10 @@
     margin-right: 0.75rem;
 }
 
+.success-panel .panel-body {
+    padding: 24px;
+}
+
 .success-icon-wrap {
     margin-bottom: 1.5rem;
 }
@@ -52,6 +56,14 @@
     .registration-request-success-page {
         padding-top: 1.5rem;
         padding-bottom: 1.5rem;
+        padding-left: 0;
+        padding-right: 0;
+    }
+
+    .success-panel .panel-body,
+    .success-panel .panel-footer {
+        padding-left: 12px;
+        padding-right: 12px;
     }
 
     .success-message {

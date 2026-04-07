@@ -61,7 +61,7 @@ namespace TROUBLESHOOTING_REPAIR_SERVICE_REQUEST_SYSTEM.Controllers
             {
                 try
                 {
-                    var isEmailTaken = _db.Registrations
+                    var isEmailTaken = _db.RegistrationRequests
                         .Count(i => i.Email == registrationRequestCreateViewModel.Email);
                     if (isEmailTaken > 0)
                     {

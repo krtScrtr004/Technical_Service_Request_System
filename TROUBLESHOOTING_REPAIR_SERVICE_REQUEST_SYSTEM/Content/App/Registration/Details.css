@@ -75,7 +75,8 @@
     gap: 1rem;
 }
 
-    .buttons-container > button {
+    .buttons-container > button,
+    .buttons-container > a {
         min-width: 24ch;
     }
 
@@ -85,15 +86,29 @@
 
 @media (max-width: 767px) {
     .registration-details-page {
+        margin: 0;
         padding-top: 1.5rem;
         padding-bottom: 1.5rem;
+        padding-left: 0;
+        padding-right: 0;
+    }
+
+    .content-panel .panel-heading,
+    .content-panel .panel-body,
+    .content-panel .panel-footer {
+        padding: 12px;
+    }
+
+    .profile-header {
+        align-items: center;
     }
 
     .section-table .first-col {
         width: 40%;
     }
 
-    .buttons-container > button {
+    .buttons-container > button,
+    .buttons-container > a {
         width: 100%;
         min-width: 100%;
     }

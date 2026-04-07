@@ -1,4 +1,9 @@
-﻿.client-sub-info {
+﻿.tsr-index-page {
+    width: 100%;
+    min-width: 0;
+}
+
+.client-sub-info {
     gap: 0.5rem;
 }
 
@@ -27,4 +32,59 @@
 .dataTables_wrapper th:last-child,
 .dataTables_wrapper td:last-child {
     width: fit-content;
+}
+
+#technical_request_table {
+    width: 100% !important;
+}
+
+@media (max-width: 998px) {
+    .filter-selection-container {
+        display: block;
+        padding: 0;
+        margin-bottom: 10px;
+    }
+
+    .filter-selection {
+        display: block;
+        width: 100%;
+        margin-bottom: 8px;
+    }
+
+        .filter-selection:last-child {
+            margin-bottom: 0;
+        }
+
+        .filter-selection > label {
+            display: block;
+            margin-bottom: 4px;
+        }
+
+        .filter-selection > select,
+        #date_request_filter {
+            width: 100% !important;
+        }
+}
+
+@media (min-width: 768px) {
+    #technical_request_table {
+        min-width: 860px;
+    }
+}
+
+@media (max-width: 767px) {
+    .tsr-index-page {
+        padding-left: 0;
+        padding-right: 0;
+    }
+
+    .table-panel .panel-body {
+        padding: 10px;
+    }
+
+    .table-responsive {
+        width: 100%;
+        overflow-x: auto;
+        -webkit-overflow-scrolling: touch;
+    }
 }

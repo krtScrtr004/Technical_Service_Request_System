@@ -2,6 +2,13 @@
     var table = $("#registration_table").DataTable({
         processing: true,
         serverSide: true,
+        responsive: {
+            details: {
+                type: "column",
+                target: "td.dtr-control"
+            }
+        },
+        autoWidth: false,
         ajax: {
             url: requestUrl,
             type: 'GET',
@@ -23,6 +30,7 @@
             {
                 data: null,
                 name: "LastName",
+                className: "dtr-control all",
                 render: function (data, type, row) {
                     return row.LastName + ", " + row.FirstName + " " + (row.MiddleName ? row.MiddleName : "");
                 },
@@ -38,6 +46,7 @@
             {
                 data: null,
                 name: 'AccountType',
+                className: "all",
                 render: function (data, type, row) {
                     const userPrivilegeName = row.AccountType.toUpperCase();
 
@@ -59,6 +68,11 @@
                             </a>`;
                 }
             }
+        ],
+        columnDefs: [
+            { responsivePriority: 1, targets: 0 },
+            { responsivePriority: 2, targets: 3 },
+            { responsivePriority: 100, targets: [1, 2, 4] }
         ],
         order: [[0, 'asc']], // Sort by last name asc
         pageLength: 10,

@@ -26,7 +26,7 @@ namespace TROUBLESHOOTING_REPAIR_SERVICE_REQUEST_SYSTEM
                 .WithDailyTimeIntervalSchedule(s =>
                     s.OnEveryDay()
                     .StartingDailyAt(TimeOfDay.HourAndMinuteOfDay(1, 0))) // Schedule for 1:00 AM daily
-                    .Build();
+                .Build();
             scheduler.ScheduleJob(assignedQueuedRequestJob, assignedQueuedRequestTrigger);
 
             // Schedule the job to delete old notifications daily at 2:00 AM

@@ -9,78 +9,73 @@
     <link rel="stylesheet" href="~/Content/App/RegistrationRequest/Create.css" type="text/css" />
 }
 
-<section class="registration-request-create-page">
-    <div class="col-md-5"></div>
+<section class="registration-request-create-page container">
+    <div class="row">
+        <div class="col-xs-12 col-sm-10 col-sm-offset-1 col-md-8 col-md-offset-2 center-child">
+            <div class="panel panel-default registration-request-create-panel">
+                <div class="center-text">
+                    <img src="~/Content/Images/logo.png" class="registration-request-create-logo" alt="DOH MMCHD - Technical Service Request System" title="DOH MMCHD - Technical Service Request System" />
 
-    <div class="col-md-12 center-child">
+                    <h3 class="registration-request-create-title">
+                        Request Account
+                    </h3>
 
-        <div class="panel panel-default registration-request-create-panel">
-            <center>
-                <img src="~/Content/Images/logo.png" class="registration-request-create-logo" alt="DOH MMCHD - Technical Service Request System" title="DOH MMCHD - Technical Service Request System"/>
-            </center>
+                    <hr class="bg-primary" />
 
-            <center>
-                <h3 class="registration-request-create-title">
-                    Request Account
-                </h3>
-
-                <hr class="bg-primary"/>
-
-                <p class="registration-request-create-description text-center">
-                    Before proceeding to <strong>DOH MMCHD - TECHNICAL SERVICE REQUEST SYSTEM</strong>, you may request an account for your transactions by filling up the form below. You may use the account for future transaction to this system.
-                </p>
+                    <p class="registration-request-create-description text-center">
+                        Before proceeding to <strong>DOH MMCHD - TECHNICAL SERVICE REQUEST SYSTEM</strong>, you may request an account for your transactions by filling up the form below. You may use the account for future transaction to this system.
+                    </p>
+                </div>
 
                 @using (Html.BeginForm(
-                    "Create", 
+                    "Create",
                     "RegistrationRequest",
                     FormMethod.Post,
-                    new { @class = "form-horizontal" }
+                    new { @class = "form-horizontal registration-request-create-form" }
                 ))
                 {
                     @Html.AntiForgeryToken()
 
                     <div class="form-horizontal">
                         <div class="container-fluid registration-request-create-form-body">
-                            <div class="">
-
-                                <div class="form-group flex-row">
+                            <div>
+                                <div class="form-group flex-row flex-wrap registration-request-create-row">
                                     @Html.LabelFor(model => model.FirstName, new { @class = "control-label col-md-4" })
-                                    <div class="flex-1">
+                                    <div class="flex-1 registration-request-create-input-wrap">
                                         @Html.TextBoxFor(model => model.FirstName, new { @class = "form-control input-sm alpha req text-uppercase registration-request-create-input" })
                                         @Html.ValidationMessageFor(model => model.FirstName)
                                     </div>
                                 </div>
 
-                                <div class="form-group flex-row">
+                                <div class="form-group flex-row flex-wrap registration-request-create-row">
                                     @Html.LabelFor(model => model.MiddleName, new { @class = "control-label col-md-4" })
-                                    <div class="flex-1">
+                                    <div class="flex-1 registration-request-create-input-wrap">
                                         @Html.TextBoxFor(model => model.MiddleName, new { @class = "form-control input-sm alpha req text-uppercase registration-request-create-input" })
                                         @Html.ValidationMessageFor(model => model.MiddleName)
                                     </div>
                                 </div>
 
-                                <div class="form-group flex-row">
+                                <div class="form-group flex-row flex-wrap registration-request-create-row">
                                     @Html.LabelFor(model => model.LastName, new { @class = "control-label col-md-4" })
-                                    <div class="flex-1">
+                                    <div class="flex-1 registration-request-create-input-wrap">
                                         @Html.TextBoxFor(model => model.LastName, new { @class = "form-control input-sm text-uppercase registration-request-create-input" })
                                         @Html.ValidationMessageFor(model => model.LastName)
                                     </div>
                                 </div>
-
                             </div>
 
-                            <div class="">
-                                <div class="form-group flex-row">
+                            <div>
+                                <div class="form-group flex-row flex-wrap registration-request-create-row">
                                     @Html.LabelFor(model => model.ContactNumber, new { @class = "control-label col-md-4" })
-                                    <div class="flex-1">
+                                    <div class="flex-1 registration-request-create-input-wrap">
                                         @Html.TextBoxFor(model => model.ContactNumber, new { @class = "input-sm form-control req registration-request-create-input", @required = true })
                                         @Html.ValidationMessageFor(model => model.ContactNumber)
                                     </div>
                                 </div>
 
-                                <div class="form-group flex-row">
+                                <div class="form-group flex-row flex-wrap registration-request-create-row">
                                     @Html.LabelFor(model => model.Email, new { @class = "control-label col-md-4" })
-                                    <div class="flex-1">
+                                    <div class="flex-1 registration-request-create-input-wrap">
                                         @Html.TextBoxFor(model => model.Email, new { @class = "form-control input-sm req registration-request-create-input", @required = true })
                                         <span class="text-danger">
                                             @ViewBag.email
@@ -89,10 +84,9 @@
                                     </div>
                                 </div>
                             </div>
-
                         </div>
 
-                        <div class="form-group">
+                        <div class="form-group registration-request-create-actions center-text">
                             <div class="col-md-12">
                                 <button type="submit" class="btn btn-success registration-request-create-submit">
                                     <i class="glyphicon glyphicon-save"></i>
@@ -101,21 +95,13 @@
                             </div>
 
                             <div class="col-md-12">
-                                <a class="" href="@Url.Action("Login", "Account")">Login</a>
+                                <a href="@Url.Action("Login", "Account")">Login</a>
                             </div>
                         </div>
                     </div>
-
-
                 }
-            </center>
+            </div>
         </div>
-
-
-
-    </div>
-    <div class="col-md-1">
-
     </div>
 </section>
 
@@ -123,4 +109,4 @@
 @section Scripts {
     <script src="~/Scripts/App/RegistrationRequest/DenyNonLetterKey.js" defer></script>
     @*<script src="~/Scripts/App/RegistrationRequest/Psgc.js" defer></script>*@
-}
+}    

@@ -19,15 +19,15 @@
 <section class="dashboard-page container">
     <section class="dashboard-header panel panel-default">
         <section class="panel-body">
-            <h3 class="text-primary dashboard-title">Welcome, @currentUser.FirstName @currentUser.LastName</h3>
-            <p class="dashboard-subtitle">
+            <h3 class="text-primary dashboard-title wrap-text">Welcome, @currentUser.FirstName @currentUser.LastName</h3>
+            <p class="dashboard-subtitle wrap-text">
                 Role: <span class="label label-info">@roleName</span>
             </p>
         </section>
     </section> 
 
     <section class="row dashboard-cards-row">
-        <div class="col-md-3 col-sm-6">
+        <div class="col-xs-12 col-sm-6 col-md-3">
             <section class="panel panel-default dashboard-card">
                 <section class="panel-body">
                     <p class="dashboard-card-label">Total Requests</p>
@@ -36,7 +36,7 @@
             </section>
         </div>
 
-        <div class="col-md-3 col-sm-6">
+        <div class="col-xs-12 col-sm-6 col-md-3">
             <section class="panel panel-default dashboard-card">
                 <section class="panel-body">
                     <p class="dashboard-card-label">Active Requests</p>
@@ -45,7 +45,7 @@
             </section>
         </div>
 
-        <div class="col-md-3 col-sm-6">
+        <div class="col-xs-12 col-sm-6 col-md-3">
             <section class="panel panel-default dashboard-card">
                 <section class="panel-body">
                     <p class="dashboard-card-label">Resolved Requests</p>
@@ -54,7 +54,7 @@
             </section>
         </div>
 
-        <div class="col-md-3 col-sm-6">
+        <div class="col-xs-12 col-sm-6 col-md-3">
             <section class="panel panel-default dashboard-card">
                 <section class="panel-body">
                     <p class="dashboard-card-label">Unread Notifications</p>
@@ -65,7 +65,7 @@
     </section>
 
     <section class="row dashboard-cards-row">
-        <div class="col-md-4 col-sm-6">
+        <div class="col-xs-12 col-sm-6 col-md-4">
             <section class="panel panel-default dashboard-card dashboard-extra-card">
                 <section class="panel-body">
                     <p id="extra_label_1" class="dashboard-card-label">-</p>
@@ -74,7 +74,7 @@
             </section>
         </div>
 
-        <div class="col-md-4 col-sm-6">
+        <div class="col-xs-12 col-sm-6 col-md-4">
             <section class="panel panel-default dashboard-card dashboard-extra-card">
                 <section class="panel-body">
                     <p id="extra_label_2" class="dashboard-card-label">-</p>
@@ -83,7 +83,7 @@
             </section>
         </div>
 
-        <div class="col-md-4 col-sm-12">
+        <div class="col-xs-12 col-sm-12 col-md-4">
             <section class="panel panel-default dashboard-card dashboard-extra-card">
                 <section class="panel-body">
                     <p id="extra_label_3" class="dashboard-card-label">-</p>
@@ -94,7 +94,7 @@
     </section>
 
     <section class="row dashboard-chart-row">
-        <div class="col-md-6 col-sm-12">
+        <div class="col-xs-12 col-sm-12 col-md-6">
             <section class="panel panel-default dashboard-chart-panel">
                 <section class="panel-heading">
                     <b>Requests by Status</b>
@@ -105,7 +105,7 @@
             </section>
         </div>
 
-        <div class="col-md-6 col-sm-12">
+        <div class="col-xs-12 col-sm-12 col-md-6">
             <section class="panel panel-default dashboard-chart-panel">
                 <section class="panel-heading">
                     <b>Top Service Types</b>
@@ -118,7 +118,7 @@
     </section>
 
     <section class="row dashboard-chart-row">
-        <div class="col-md-12">
+        <div class="col-xs-12 col-md-12">
             <section class="panel panel-default dashboard-chart-panel">
                 <section class="panel-heading">
                     <b>Request Trend (Last 6 Months)</b>
@@ -135,40 +135,40 @@
             <b>Quick Actions</b>
         </section>
         <section class="panel-body">
-            <div class="dashboard-action-buttons">
+            <div class="dashboard-action-buttons flex-row flex-wrap">
                 @if (AccountTypeEnum.IsStandard(currentUser.PrivilegeIds))
                 {
-                    <a href="@Url.Action("Create", "TechnicalServiceRequests")" class="btn btn-primary">
+                    <a href="@Url.Action("Create", "TechnicalServiceRequests")" class="btn btn-primary dashboard-action-btn">
                         <i class="glyphicon glyphicon-plus"></i>
                         Create Request
                     </a>
-                    <a href="@Url.Action("Index", "TechnicalServiceRequests")" class="btn btn-default">
+                    <a href="@Url.Action("Index", "TechnicalServiceRequests")" class="btn btn-default dashboard-action-btn">
                         <i class="glyphicon glyphicon-list"></i>
                         My Requests
                     </a>
                 }
                 else if (AccountTypeEnum.IsIT(currentUser.PrivilegeIds))
                 {
-                    <a href="@Url.Action("Index", "TechnicalServiceRequests")" class="btn btn-primary">
+                    <a href="@Url.Action("Index", "TechnicalServiceRequests")" class="btn btn-primary dashboard-action-btn">
                         <i class="glyphicon glyphicon-briefcase"></i>
                         View Work Queue
                     </a>
-                    <a href="@Url.Action("Manage", "ITAvailability")" class="btn btn-warning">
+                    <a href="@Url.Action("Manage", "ITAvailability")" class="btn btn-warning dashboard-action-btn">
                         <i class="glyphicon glyphicon-calendar"></i>
                         Manage Availability
                     </a>
                 }
                 else
                 {
-                    <a href="@Url.Action("Index", "RegistrationRequest")" class="btn btn-primary">
+                    <a href="@Url.Action("Index", "RegistrationRequest")" class="btn btn-primary dashboard-action-btn">
                         <i class="glyphicon glyphicon-user"></i>
                         Registration Requests
                     </a>
-                    <a href="@Url.Action("Index", "Registration")" class="btn btn-default">
+                    <a href="@Url.Action("Index", "Registration")" class="btn btn-default dashboard-action-btn">
                         <i class="glyphicon glyphicon-th-list"></i>
                         Manage Accounts
                     </a>
-                    <a href="@Url.Action("Index", "TechnicalServiceRequests")" class="btn btn-info">
+                    <a href="@Url.Action("Index", "TechnicalServiceRequests")" class="btn btn-info dashboard-action-btn">
                         <i class="glyphicon glyphicon-stats"></i>
                         All Service Requests
                     </a>

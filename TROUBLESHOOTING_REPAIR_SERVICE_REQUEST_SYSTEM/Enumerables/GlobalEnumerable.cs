@@ -5,6 +5,12 @@ using System.Web;
 
 namespace TROUBLESHOOTING_REPAIR_SERVICE_REQUEST_SYSTEM.Enumerables
 {
+    public static class ValueConstants
+    {
+        public const string VALID_EMAIL_REGEX = "^[a-zA-Z0-9._%+\\-!#$&'*\\/=?^{|}~]+@[a-zA-Z0-9-]+(\\.[a-zA-Z0-9-]+)*\\.[a-zA-Z]{2,}$";
+        public const string VALID_CONTACT_NUMBER_REGEX = "^(\\+639|09)\\d{9}$|^(0\\d{2})[-.\\s]?\\d{3}[-.\\s]?\\d{4}$";
+    }
+
     public static class AccountTypeEnum
     {
         public const int ADMIN = 1;

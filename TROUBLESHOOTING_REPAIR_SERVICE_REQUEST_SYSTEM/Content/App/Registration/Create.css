@@ -60,7 +60,13 @@
     border-radius: var(--input-border-radius);
     border: 1px solid #ddd;
     background: #fff;
+    gap: 1rem;
 }
+
+    .account-type-well > div {
+        flex: 1;
+        min-width: 18ch;
+    }
 
     .account-type-well label {
         display: flex;
@@ -78,8 +84,12 @@
     .account-type-well input[type="radio"] {
         width: 15px;
         height: 15px;
-        accent-color: var(--primary); 
+        accent-color: var(--primary);
         margin: 0;
+    }
+
+    .account-type-well .field-validation-error {
+        width: 100%;
     }
 
 .panel-footer {
@@ -91,9 +101,46 @@
     .registration-create-page {
         padding-top: 1.5rem;
         padding-bottom: 1.5rem;
+        padding-left: 0;
+        padding-right: 0;
+    }
+
+    .registration-panel .panel-heading,
+    .registration-panel .panel-body,
+    .registration-panel .panel-footer {
+        padding-left: 12px;
+        padding-right: 12px;
     }
 
     .registration-panel .panel-body {
-        padding: 1.5rem;
+        padding-top: 1.5rem;
+        padding-bottom: 1.5rem;
     }
+
+    .account-type-well {
+        display: block;
+    }
+
+        .account-type-well > div {
+            width: 100%;
+            margin-bottom: 10px;
+        }
+
+        .account-type-well > div:last-of-type {
+            margin-bottom: 0;
+        }
+
+    .panel-footer {
+        display: block;
+    }
+
+        .panel-footer .btn {
+            display: block;
+            width: 100%;
+            margin: 0 0 8px;
+        }
+
+        .panel-footer .btn:last-child {
+            margin-bottom: 0;
+        }
 }

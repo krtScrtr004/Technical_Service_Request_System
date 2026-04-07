@@ -1,83 +1,69 @@
-﻿
-@model TROUBLESHOOTING_REPAIR_SERVICE_REQUEST_SYSTEM.Models.LoginViewModel
+﻿@model TROUBLESHOOTING_REPAIR_SERVICE_REQUEST_SYSTEM.Models.LoginViewModel
 
-@{
-    ViewBag.Title = "Log in";
+@{ ViewBag.Title = "Log in"; }
+
+@section Styles
+{
+    <link rel="stylesheet" href="~/Content/App/Account/Login.css" type="text/css" />
 }
 
-<div class="container-fluid" style="height:100vh; padding-top:50px; ">
+<section class="container-fluid login-page center-child">
+    <section class="row login-page-row">
+        <section class="login-header flex-col flex-child-center-h flex-child-center-v">
+            <img src="~/Content/Images/logo.png" class="login-logo" alt="TSR Logo" />
 
-    <div class="col-md-1"></div>
+            <section class="login-headings">
+                <h5 class="login-subheading text-center">DEPARTMENT OF HEALTH <span class="block">METRO MANILA CENTER FOR HEALTH DEVELOPMENT</span></h5>
+                <h2 class="login-heading text-center">TECHNICAL SERVICE REQUEST SYSTEM</h2>
+            </section>
+        </section>
 
-    <div class="col-md-9">
+        <section class="col-xs-12 col-sm-10 col-sm-offset-1 col-md-6 col-md-offset-3">
+            <section class="login-card center-text">
+                @using (Html.BeginForm("Login", "Account", new { ReturnUrl = ViewBag.ReturnUrl }))
+                {
+                    @Html.AntiForgeryToken()
 
-        <center>
-            <img src="~/Content/Images/logo.png" style="width:13em;" />
-        </center>
+                    <section class="login-form-wrap center-text">
+                        @if (Model != null && Model.Alert != null && Model.Alert.ContainsKey("invalidLogin"))
+                        {
+                            <div class="alert alert-danger login-alert">
+                                @Model.Alert["invalidLogin"].Message
+                            </div>
+                        }
 
-        <br />
+                        <div class="form-group">
+                            @Html.TextBoxFor(m => m.Email, new
+                            {
+                                @class = "form-control login-input",
+                                @placeholder = "EMAIL"
+                            })
+                        </div>
 
-        <center>
-            <h5>
-                DEPARTMENT OF HEALTH <br />METRO MANILA CENTER FOR HEALTH DEVELOPMENT
-            </h5>
+                        <div class="form-group">
+                            @Html.PasswordFor(m => m.Password, new
+                            {
+                                @class = "form-control login-input",
+                                @placeholder = "PASSWORD"
+                            })
+                        </div>
 
-            <h2>TECHNICAL SERVICE REQUEST SYSTEM</h2>
+                        <div class="form-group">
+                            <input type="submit" value="Log in" class="btn login-btn" />
+                        </div>
 
-        </center>
+                        <div class="form-group login-remember-wrap">
+                            <label>
+                                @Html.CheckBoxFor(m => m.RememberMe) Remember Me
+                            </label>
+                        </div>
 
-        <br />
-
-        @using (Html.BeginForm("Login", "Account", new { ReturnUrl = ViewBag.ReturnUrl }))
-        {
-            @Html.AntiForgeryToken()
-
-        <center>
-
-            @if (Model != null && Model.Alert != null && Model.Alert.ContainsKey("invalidLogin"))
-            {
-                <div class="alert alert-danger" style="width:100%;">
-                    @Model.Alert["invalidLogin"].Message
-                </div>
-            }
-
-            <div class="form-group">
-                @Html.TextBoxFor(m => m.Email, new {
-               @class = "form-control",
-               @placeholder = "EMAIL",
-               style = "height:40px; width:300px; font-size:14px;"
-           })
-            </div>
-
-            <div class="form-group">
-                @Html.PasswordFor(m => m.Password, new {
-                  @class = "form-control",
-                   @placeholder = "PASSWORD",
-                    style = "height:40px; width:300px; font-size:14px;"
-})
-            </div>
-
-
-            <div class="form-group">
-                <input type="submit" value="Log in"
-                       class="btn"
-                       style="width:300px; height:40px; font-size17px; background-color:#009688; color:white;" />
-            </div>
-
-            <div class="form-group">
-                <label>
-                    @Html.CheckBoxFor(m => m.RememberMe) Remember Me
-                </label>
-            </div>
-
-            <a href="@Url.Action("Create", "RegistrationRequest")"
-               style="color:#00a65a; font-size:14px; font-weight:500; text-decoration:none;">
-                Register as a new user
-            </a>
-
-        </center>
-        }
-    </div>
-
-    <div class="col-md-3"></div>
-</div>
+                        <a href="@Url.Action("Create", "RegistrationRequest")" class="login-register-link">
+                            Register as a new user
+                        </a>
+                    </section>
+                }
+            </section>
+        </section>
+    </section>
+</section>

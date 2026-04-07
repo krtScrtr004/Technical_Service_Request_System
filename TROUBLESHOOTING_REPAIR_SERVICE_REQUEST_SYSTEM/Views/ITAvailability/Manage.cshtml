@@ -2,7 +2,7 @@
 @using TROUBLESHOOTING_REPAIR_SERVICE_REQUEST_SYSTEM.Core
 
 @{
-    ViewBag.Title = "Schedule Availability Management";
+    ViewBag.Title = "Manage";
 
     var currentUser = ViewBag.CurrentUser as UserSession;
 }
@@ -11,7 +11,7 @@
     <link rel="stylesheet" href="~/Content/App/ITAvailability/Manage.css" type="text/css" />
 }
 
-<section class="container availaibility-container flex-row">
+<section class="container availaibility-container flex-row flex-wrap">
 
     <section class="content-panel panel panel-default">
         <section class="panel-heading">
@@ -25,7 +25,7 @@
             </p>
         </section>
 
-        <section class="content-panel-body panel-body flex-row">
+        <section class="content-panel-body panel-body flex-row flex-wrap">
             <section>
                 @Html.AntiForgeryToken()
                 @Html.HiddenFor(model => model.SelectedStringDates, new { id = "preloaded_blocked_dates" })
@@ -42,7 +42,7 @@
                 <section class="buttons-container flex-col flex-child-end-v">
                     <hr class="bg-default" />
 
-                    <div class="buttons flex-row-reverse">
+                    <div class="buttons flex-row-reverse flex-wrap">
                         <button id="modify_availability_button" type="button" class="btn btn-primary btn-sm">
                             <i class="glyphicon glyphicon glyphicon-floppy-disk"></i>
                             Save Changes
@@ -71,7 +71,7 @@
                 <p class="text-default">You may view your availability history below.</p>
             </div>
 
-            <div class="history-selects-container">
+            <div class="history-selects-container flex-row flex-wrap">
 
                 <div class="form-group">
                     <label for="history_year_select">Year:</label>

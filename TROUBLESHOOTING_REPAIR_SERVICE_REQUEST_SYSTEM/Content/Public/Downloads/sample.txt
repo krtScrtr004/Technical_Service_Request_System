@@ -1,5 +1,0 @@
-            List<string> EstadongSibil = new List<string>();
-            EstadongSibil.Add("Single"); EstadongSibil.Add("Married"); EstadongSibil.Add("Widowed");
-            EstadongSibil.Add("Live-in"); EstadongSibil.Add("Separated");
-
-            ViewBag.EstadongSibil = new SelectList(EstadongSibil);

@@ -48,7 +48,7 @@ function ensureDetailModal(modalId) {
         <section id="${modalId}" class="modal fade notification-detail-modal" role="dialog" tabindex="-1" aria-hidden="true">
             <section class="modal-dialog">
                 <section class="modal-content">
-                    <section class="content-panel-heading modal-header bg-info">
+                    <section class="content-panel-heading modal-header bg-primary">
                         <button type="button" class="close" data-dismiss="modal" aria-label="Close">
                             <span aria-hidden="true">&times;</span>
                         </button>
@@ -74,9 +74,6 @@ function ensureDetailModal(modalId) {
                                 </tr>
                             </tbody>
                         </table>
-                    </section>
-                    <section class="content-panel-footer modal-footer">
-                        <button type="button" class="btn btn-danger" data-dismiss="modal">Close</button>
                     </section>
                 </section>
             </section>
