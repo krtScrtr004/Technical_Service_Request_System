@@ -162,12 +162,26 @@ table.table-bordered {
         border: 1px solid #B9C1C2 !important;
     }
 
-.dataTables_paginate {
-    margin-top: 12px;
-    display: flex;
-    align-items: center;
-    gap: 4px;
+.dataTables_wrapper table.dataTable {
+    box-shadow: 0 0 5px 2px rgba(0, 0, 0, 0.1);
 }
+
+.dataTables_wrapper table.dataTable thead th {
+    background: var(--primary);
+    color: #ffffff !important;
+}
+
+.dataTables_wrapper table.dataTable thead th,
+.dataTables_wrapper table.dataTable tbody td {
+    border: unset !important;
+}
+
+    .dataTables_paginate {
+        margin-top: 12px;
+        display: flex;
+        align-items: center;
+        gap: 4px;
+    }
 
     .dataTables_paginate .paginate_button {
         padding: 6px 12px;
@@ -302,6 +316,35 @@ table.table-bordered {
 
 .panel {
     box-shadow: var(--box-shadow);
+}
+
+
+.datepicker .table-condensed thead th,
+.datepicker .table-condensed thead th.prev,
+.datepicker .table-condensed thead th.next,
+.datepicker .table-condensed thead th.datepicker-switch {
+    background: var(--primary) !important;
+    color: #fff !important;
+    border-radius: 0 !important;
+}
+
+    .datepicker .table-condensed thead th.prev > span,
+    .datepicker .table-condensed thead th.next > span {
+        background: transparent !important;
+        box-shadow: none !important;
+        color: #fff !important;
+    }
+
+.datepicker table tr td.active.active,
+.datepicker table tr td.active.disabled.active,
+.datepicker table tr td.active.disabled:active,
+.datepicker table tr td.active.disabled:hover.active,
+.datepicker table tr td.active.disabled:hover:active,
+.datepicker table tr td.active:active,
+.datepicker table tr td.active:hover.active,
+.datepicker table tr td.active:hover:active {
+    background: var(--primary) !important;
+    border-radius: 0;
 }
 
 @media (max-width: 767px) {

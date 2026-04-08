@@ -4,6 +4,7 @@
 
 @{
     ViewBag.Title = "Dashboard";
+
     var currentUser = ViewBag.CurrentUser as UserSession;
     var roleName = AccountTypeEnum.IsAdmin(currentUser.PrivilegeIds)
         ? "Administrator"
