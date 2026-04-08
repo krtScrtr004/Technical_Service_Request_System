@@ -19,13 +19,13 @@
     gap: 0.25rem;
 }
 
-.dataTables_wrapper th:first-child,
-.dataTables_wrapper td:first-child {
+.dataTables_wrapper th.reference-code,
+.dataTables_wrapper td.reference-code {
     width: 11rem;
 }
 
-.dataTables_wrapper th:nth-child(2),
-.dataTables_wrapper td:nth-child(2) {
+.dataTables_wrapper th.client-info,
+.dataTables_wrapper td.client-info {
     width: 25rem;
 }
 

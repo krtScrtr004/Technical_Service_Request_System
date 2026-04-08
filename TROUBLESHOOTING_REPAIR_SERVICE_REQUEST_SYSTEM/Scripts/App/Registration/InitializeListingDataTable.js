@@ -27,10 +27,18 @@
             }
         },
         columns: [
+             {
+                data: null,
+                name: "",
+                orderable: false,
+                className: "dtr-control all",
+                render: function(data, type, row) {
+                    return "";
+                }
+            },
             {
                 data: null,
                 name: "LastName",
-                className: "dtr-control all",
                 render: function (data, type, row) {
                     return row.LastName + ", " + row.FirstName + " " + (row.MiddleName ? row.MiddleName : "");
                 },
@@ -70,11 +78,11 @@
             }
         ],
         columnDefs: [
-            { responsivePriority: 1, targets: 0 },
-            { responsivePriority: 2, targets: 3 },
-            { responsivePriority: 100, targets: [1, 2, 4] }
+            { responsivePriority: 1, targets: 1 },
+            { responsivePriority: 2, targets: 4 },
+            { responsivePriority: 100, targets: [2, 3, 5] }
         ],
-        order: [[0, 'asc']], // Sort by last name asc
+        order: [[1, 'asc']], // Sort by last name asc
         pageLength: 10,
         lengthMenu: [[5, 10, 25, 50], [5, 10, 25, 50]],
         ordering: true,

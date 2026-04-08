@@ -30,7 +30,12 @@
     var table = $("#technical_request_table").DataTable({
         processing: true,
         serverSide: true,
-        responsive: true,
+        responsive: {
+            details: {
+                type: "column",
+                target: "td.dtr-control"
+            }
+        },
         autoWidth: false,
         ajax: {
             url: requestUrl,
@@ -43,16 +48,27 @@
             },
             error: function (xhr, error, thrown) {
                 console.error('Error loading data:', error);
-            }
+            }   
         },
         columns: [
+              {
+                data: null,
+                name: "",
+                orderable: false,
+                className: "dtr-control all",
+                render: function(data, type, row) {
+                    return "";
+                }
+            },
             {
                 data: 'ReferenceCode',
-                name: 'ReferenceCode'
+                name: 'ReferenceCode',
+                className: "reference-code"
             },
             {
                 data: null,
                 orderable: false,
+                className: "client-info",
                 render: function (data, type, row) {
                     var fullName = row.ClientFirstName + ' ';
                     if (row.ClientMiddleName) {
@@ -75,6 +91,7 @@
             {
                 data: null,
                 orderable: false,
+                className: "wrap-text",
                 render: function (data, type, row) {
                     return row.TechnicalServiceTypeName !== null
                         ? row.TechnicalServiceTypeName
@@ -84,6 +101,7 @@
             {
                 data: 'TechnicalServiceRequestStatusName',
                 name: 'TechnicalServiceRequestStatusName',
+                orderable: false,
                 render: function (data) {
                     return buildRequestStatusLabel(data);
                 }
@@ -112,7 +130,11 @@
                 }
             }
         ],
-        order: [[4, 'desc']], // Sort by date requested descending
+        columnDefs: [
+            { responsivePriority: 1, targets: [1, 2, 3] },
+            { responsivePriority: 100, targets: [4, 5, 6] }
+        ],
+        order: [[5, 'desc']], // Sort by date requested descending
         pageLength: 10,
         lengthMenu: [[5, 10, 25, 50], [5, 10, 25, 50]],
         ordering: true,

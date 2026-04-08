@@ -153,7 +153,7 @@
                     <section class="panel-footer management-buttons-container">
                         <p class="text-primary options-label light-text text-right">More Options</p>
 
-                        <div class="buttons-container">
+                        <div class="buttons-container flex-row flex-child-end-v">
                             @if (isCurrentUser && AccountTypeEnum.IsIT(currentUserPrivilegeIds))
                             {
                                 <a id="block_dates_button" href="@Url.Action("Manage", "ITAvailability")" class="btn btn-warning btn-sm center-child">

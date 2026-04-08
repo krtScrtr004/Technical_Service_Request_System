@@ -66,7 +66,7 @@ namespace TROUBLESHOOTING_REPAIR_SERVICE_REQUEST_SYSTEM.Controllers
 
             ViewBag.ReturnUrl = returnUrl;
 
-            return View(new LoginViewModel()); 
+            return View(new LoginViewModel());
         }
 
         // POST: /Account/Login
@@ -80,65 +80,74 @@ namespace TROUBLESHOOTING_REPAIR_SERVICE_REQUEST_SYSTEM.Controllers
                 return View(model);
             }
 
-            // This doesn't count login failures towards account lockout
-            // To enable password failures to trigger account lockout, change to shouldLockout: true
-            var result = await SignInManager.PasswordSignInAsync(model.Email, model.Password, model.RememberMe, shouldLockout: false);
-            switch (result)
+            using (var db = new ApplicationDbContext())
             {
-                case SignInStatus.Success:
+                /**
+                 * Check if the user:
+                 *  - exists
+                 *  - active 
+                 *  - not expired
+                 */
+                var currentUser = db.Registrations
+                    .Include(r => r.UserPrivileges)
+                    .Where(r =>
+                        r.Email == model.Email &&
+                        r.DeactivatedByRegistrationId == null &&
+                        (
+                            !r.ExpiryDate.HasValue ||
+                            DbFunctions.TruncateTime(DateTime.Now) < DbFunctions.TruncateTime(r.ExpiryDate.Value)
+                        )
+                    )
+                    .FirstOrDefault();
+                if (currentUser == null)
+                {
+                    model.Alert = new Dictionary<string, AlertBaseUtility>()
                     {
-                        var _db = new ApplicationDbContext();
+                        { "invalidLogin", new AlertBoxUtility()
+                            {
+                                Status = "danger",
+                                Message = "Invalid login attempt.",
+                                Dismissible = true
+                            }
+                        }
+                    };
+                    ModelState.AddModelError("", "Invalid login attempt.");
 
-                        var currentUser = _db.Registrations
-                            .Include(r => r.UserPrivileges)
-                            .Where(r =>
-                                r.Email == model.Email &&
-                                (r.DeactivatedByRegistrationId == null ||
-                                r.DeactivatedByRegistrationId == 0)
-                            )
-                            .FirstOrDefault();
-                        if (currentUser == null)
+                    return View(model);
+                }
+
+                // This doesn't count login failures towards account lockout
+                // To enable password failures to trigger account lockout, change to shouldLockout: true
+                var result = await SignInManager.PasswordSignInAsync(model.Email, model.Password, model.RememberMe, shouldLockout: false);
+                switch (result)
+                {
+                    case SignInStatus.Success:
+                        {
+                            new UserSession(
+                                id: currentUser.Id,
+                                firstName: currentUser.FirstName,
+                                lastName: currentUser.LastName,
+                                middleName: currentUser.MiddleName,
+                                extensionName: string.Empty,
+                                userName: currentUser.UserName,
+                                email: currentUser.Email,
+                                contactNumber: currentUser.ContactNumber,
+                                privilegeIds: currentUser.UserPrivileges
+                                    .Where(p => p.PrivilegeId.HasValue)
+                                    .Select(p => p.PrivilegeId.Value)
+                                    .ToArray()
+                            );
+
+                            return RedirectToLocal(returnUrl);
+                        }
+                    case SignInStatus.LockedOut:
+                        return View("Lockout");
+                    case SignInStatus.RequiresVerification:
+                        return RedirectToAction("SendCode", new { ReturnUrl = returnUrl, RememberMe = model.RememberMe });
+                    case SignInStatus.Failure:
+                    default:
                         {
                             model.Alert = new Dictionary<string, AlertBaseUtility>()
-                            {
-                                { "invalidLogin", new AlertBoxUtility()
-                                    {
-                                        Status = "danger",
-                                        Message = "Invalid login attempt.",
-                                        Dismissible = true
-                                    }
-                                }
-                            };
-                            ModelState.AddModelError("", "Invalid login attempt.");
-
-                            return View(model);
-                        }
-
-                        new UserSession(
-                            id: currentUser.Id,
-                            firstName: currentUser.FirstName,
-                            lastName: currentUser.LastName,
-                            middleName: currentUser.MiddleName,
-                            extensionName: string.Empty,
-                            userName: currentUser.UserName,
-                            email: currentUser.Email,
-                            contactNumber: currentUser.ContactNumber,
-                            privilegeIds: currentUser.UserPrivileges
-                                .Where(p => p.PrivilegeId.HasValue)
-                                .Select(p => p.PrivilegeId.Value)
-                                .ToArray()
-                        );
-
-                        return RedirectToLocal(returnUrl);
-                    }
-                case SignInStatus.LockedOut:
-                    return View("Lockout");
-                case SignInStatus.RequiresVerification:
-                    return RedirectToAction("SendCode", new { ReturnUrl = returnUrl, RememberMe = model.RememberMe });
-                case SignInStatus.Failure:
-                default:
-                    {
-                        model.Alert = new Dictionary<string, AlertBaseUtility>()
                         {
                             { "invalidLogin", new AlertBoxUtility()
                                 {
@@ -148,11 +157,11 @@ namespace TROUBLESHOOTING_REPAIR_SERVICE_REQUEST_SYSTEM.Controllers
                                 }
                             }
                         };
-                        ModelState.AddModelError("", "Invalid login attempt.");
+                            ModelState.AddModelError("", "Invalid login attempt.");
 
-                        return View(model);
-                    }
-
+                            return View(model);
+                        }
+                }
             }
         }
 

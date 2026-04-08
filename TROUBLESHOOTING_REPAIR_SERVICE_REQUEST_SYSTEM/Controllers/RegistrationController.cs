@@ -195,7 +195,7 @@ namespace TROUBLESHOOTING_REPAIR_SERVICE_REQUEST_SYSTEM.Controllers
 
                     var registration = new Registration
                     {
-                        Email = registrationCreateViewModel.Email,
+                        Email = registrationCreateViewModel.Email.Trim(),
                         FirstName = registrationCreateViewModel.FirstName.Trim().ToUpper(),
                         MiddleName = registrationCreateViewModel.MiddleName?.Trim().ToUpper(),
                         LastName = registrationCreateViewModel.LastName.Trim().ToUpper(),
@@ -203,7 +203,7 @@ namespace TROUBLESHOOTING_REPAIR_SERVICE_REQUEST_SYSTEM.Controllers
                         ExpiryDate = registrationCreateViewModel.ExpiryDate,
                         AccountType = registrationCreateViewModel.AccountType,
                         RegistrationRequestId = registrationRequest.Id,
-                        ContactNumber = registrationRequest.ContactNumber,
+                        ContactNumber = registrationCreateViewModel.ContactNumber.Trim(),
                         IsActive = true,
                     };
 
@@ -258,14 +258,11 @@ namespace TROUBLESHOOTING_REPAIR_SERVICE_REQUEST_SYSTEM.Controllers
 
                     transaction.Commit();
 
-                    var registrationRequestService = new NotificationService();
-                    registrationRequestService.NotifyAdminNewRegistrationRequest();
-
                     var enc = Custom.Controllers.EncryptionHelper.Encrypt(registration.Id.ToString());
                     return RedirectToAction(
                         "Success",
                         "Registration",
-                        new { registrationId = /* enc */ 1 }
+                        new { registrationId = enc }
                     );
 
                 }
@@ -594,22 +591,22 @@ namespace TROUBLESHOOTING_REPAIR_SERVICE_REQUEST_SYSTEM.Controllers
                     int columnIndex = int.Parse(sortColumn);
                     switch (columnIndex)
                     {
-                        case 0:
+                        case 1:
                             query = sortDirection == "asc"
                                 ? query.OrderBy(i => i.LastName)
                                 : query.OrderByDescending(i => i.LastName);
                             break;
-                        case 1:
+                        case 2:
                             query = sortDirection == "asc"
                                 ? query.OrderBy(i => i.Email)
                                 : query.OrderByDescending(i => i.Email);
                             break;
-                        case 2:
+                        case 3:
                             query = sortDirection == "asc"
                                 ? query.OrderBy(i => i.ContactNumber)
                                 : query.OrderByDescending(i => i.ContactNumber);
                             break;
-                        case 3:
+                        case 4:
                             query = sortDirection == "asc"
                                 ? query.OrderBy(i => i.AccountType)
                                 : query.OrderByDescending(i => i.AccountType);

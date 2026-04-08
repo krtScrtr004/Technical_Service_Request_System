@@ -33,6 +33,12 @@ namespace TROUBLESHOOTING_REPAIR_SERVICE_REQUEST_SYSTEM.Controllers
                 throw new HttpException(404, "Not found");
             }
 
+            if (technicalServiceRequest.TechnicalServiceRequestStatusId.HasValue &&
+                technicalServiceRequest.TechnicalServiceRequestStatusId.Value == (int)TechnicalServiceRequestStatusEnum.CANCELLED)
+            {
+                throw new Exception("You cannot add a new action history when the status is already cancelled.");
+            }
+
             if (ModelState.IsValid)
             {
                 var notificationService = new NotificationService();
@@ -142,6 +148,14 @@ namespace TROUBLESHOOTING_REPAIR_SERVICE_REQUEST_SYSTEM.Controllers
                                 )
                         );
                         TechnicalServiceRequestHub.RefreshTechnicalServiceRequestActionHistory(technicalServiceRequestHistory.Id);
+
+                        // If the new status is cancelled, refresh the details page
+                        if (technicalServiceRequest.TechnicalServiceRequestStatusId == (int)TechnicalServiceRequestStatusEnum.CANCELLED)
+                        {
+                            TechnicalServiceRequestHub.RefreshTechnicalServiceRequestStatus(
+                                technicalServiceRequest.TechnicalServiceRequestStatus.TechnicalServiceRequestStatusName
+                            );
+                        }
 
                         // Notify the client
                         notificationService.RefreshUserUi(clientId.Value);

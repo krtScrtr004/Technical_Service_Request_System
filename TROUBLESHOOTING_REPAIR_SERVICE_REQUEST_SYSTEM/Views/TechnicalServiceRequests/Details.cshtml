@@ -9,6 +9,7 @@
     var currentUser = ViewBag.CurrentUser as UserSession;
     var userAccountType = currentUser.PrivilegeIds;
     var currentStatus = Model.TechnicalServiceRequestStatusId;
+    var isCancelled = currentStatus == (int)TechnicalServiceRequestStatusEnum.CANCELLED;
     var isCancellable = TechnicalServiceRequestStatusEnum
         .GetCancellableStatusIds()
         .Any(s => s == currentStatus);
@@ -244,7 +245,7 @@
                                             }
                                         </p>
 
-                                        @if (AccountTypeEnum.IsIT(userAccountType))
+                                        @if (AccountTypeEnum.IsIT(userAccountType) && !isCancelled)
                                         {
                                             Html.RenderPartial("~/Views/TechnicalServiceRequests/Partial/_UpdateSeverityModal.cshtml");
                                             <button 
@@ -341,7 +342,7 @@
                         ACTION HISTORY
                     </h4>
 
-                    @if (AccountTypeEnum.IsIT(userAccountType))
+                    @if (AccountTypeEnum.IsIT(userAccountType) && !isCancelled)
                     {
                         Html.RenderPartial("~/Views/TechnicalServiceRequests/Partial/_AddActionHistoryModal.cshtml");
                         <button 

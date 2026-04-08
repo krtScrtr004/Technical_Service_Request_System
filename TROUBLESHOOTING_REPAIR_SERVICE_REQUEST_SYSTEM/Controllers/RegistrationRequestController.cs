@@ -61,9 +61,11 @@ namespace TROUBLESHOOTING_REPAIR_SERVICE_REQUEST_SYSTEM.Controllers
             {
                 try
                 {
-                    var isEmailTaken = _db.RegistrationRequests
+                    var isEmailTakenRR = _db.RegistrationRequests
                         .Count(i => i.Email == registrationRequestCreateViewModel.Email);
-                    if (isEmailTaken > 0)
+                    var isEmailTakenR = _db.Registrations
+                        .Count(i => i.Email == registrationRequestCreateViewModel.Email);
+                    if (isEmailTakenRR > 0 || isEmailTakenR > 0)
                     {
                         TempData["alertModal"] = new AlertModalUtility()
                         {
@@ -288,17 +290,17 @@ namespace TROUBLESHOOTING_REPAIR_SERVICE_REQUEST_SYSTEM.Controllers
                     int columnIndex = int.Parse(sortColumn);
                     switch (columnIndex)
                     {
-                        case 0:
+                        case 1:
                             query = sortDirection == "asc"
                                 ? query.OrderBy(i => i.LastName)
                                 : query.OrderByDescending(i => i.LastName);
                             break;
-                        case 1:
+                        case 2:
                             query = sortDirection == "asc"
                                 ? query.OrderBy(i => i.Email)
                                 : query.OrderByDescending(i => i.Email);
                             break;
-                        case 2:
+                        case 3:
                             query = sortDirection == "asc"
                                 ? query.OrderBy(i => i.RequestDate)
                                 : query.OrderByDescending(i => i.RequestDate);

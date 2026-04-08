@@ -111,7 +111,7 @@ namespace TROUBLESHOOTING_REPAIR_SERVICE_REQUEST_SYSTEM.Controllers
             var technicalServiceRequestHistory = _db.TechnicalServiceRequestHistories
                 .Include(h => h.TechnicalServiceRequest)
                 .FirstOrDefault(h => h.Id == id);
-            var technicalServiceRequest = technicalServiceRequestHistory.TechnicalServiceRequest;
+            var technicalServiceRequest = technicalServiceRequestHistory?.TechnicalServiceRequest;
             if (technicalServiceRequest == null || technicalServiceRequestHistory == null)
             {
                 throw new HttpException(404, "Not found");
@@ -288,7 +288,12 @@ namespace TROUBLESHOOTING_REPAIR_SERVICE_REQUEST_SYSTEM.Controllers
                     if (!isQueued)
                     {
                         var notificationService = new NotificationService();
-                        if (TechnicalServiceTypeEnum.IsNonAssistedRequest(selectedTechnicalServiceType.Value))
+                        if (
+                            selectedTechnicalServiceType.HasValue &&
+                            TechnicalServiceTypeEnum.IsNonAssistedRequest(
+                                selectedTechnicalServiceType.Value
+                            )
+                        )
                         {
                             notificationService.NotifyTechnicianNonAssistedService(
                                 technicalServiceRequest.ReferenceCode
@@ -569,27 +574,27 @@ namespace TROUBLESHOOTING_REPAIR_SERVICE_REQUEST_SYSTEM.Controllers
                     int columnIndex = Convert.ToInt32(sortColumn);
                     switch (columnIndex)
                     {
-                        case 0: // Reference Code
+                        case 1: // Reference Code
                             query = sortDirection == "asc"
                                 ? query.OrderBy(t => t.ReferenceCode)
                                 : query.OrderByDescending(t => t.ReferenceCode);
                             break;
-                        case 1: // Client Name
+                        case 2: // Client Name
                             query = sortDirection == "asc"
                                 ? query.OrderBy(t => t.ClientFirstName)
                                 : query.OrderByDescending(t => t.ClientFirstName);
                             break;
-                        case 2: // Service Type
+                        case 3: // Service Type
                             query = sortDirection == "asc"
                                 ? query.OrderBy(t => t.TechnicalServiceType.TechnicalServiceTypeName)
                                 : query.OrderByDescending(t => t.TechnicalServiceType.TechnicalServiceTypeName);
                             break;
-                        case 3: // Status
+                        case 4: // Status
                             query = sortDirection == "asc"
                                 ? query.OrderBy(t => t.TechnicalServiceRequestStatus.TechnicalServiceRequestStatusName)
                                 : query.OrderByDescending(t => t.TechnicalServiceRequestStatus.TechnicalServiceRequestStatusName);
                             break;
-                        case 4: // Date Requested
+                        case 5: // Date Requested
                             query = sortDirection == "asc"
                                 ? query.OrderBy(t => t.DateRequest)
                                 : query.OrderByDescending(t => t.DateRequest);
@@ -705,26 +710,22 @@ namespace TROUBLESHOOTING_REPAIR_SERVICE_REQUEST_SYSTEM.Controllers
                     });
                 }
 
-                // If the current status is "Open", notify the assigned technician about the cancellation
-                if (currentStatus == (int)TechnicalServiceRequestStatusEnum.OPEN)
+                var history = _db.TechnicalServiceRequestHistories
+                    .Where(h => h.TechnicalServiceRequestId == technicalServiceRequest.Id)
+                    .OrderByDescending(h => h.UpdatedAt)
+                    .FirstOrDefault();
+                if (history != null)
                 {
-                    var history = _db.TechnicalServiceRequestHistories
-                        .Where(h => h.TechnicalServiceRequestId == technicalServiceRequest.Id)
-                        .OrderByDescending(h => h.UpdatedAt)
-                        .FirstOrDefault();
-                    if (history != null)
+                    var technicianId = history.ActionTakenByRegistrationId;
+                    _db.Notifications.Add(new Notification()
                     {
-                        var technicianId = history.ActionTakenByRegistrationId;
-                        _db.Notifications.Add(new Notification()
-                        {
-                            RecipientRegistrationId = technicianId.Value,
-                            Title = "Request Cancelled: " + technicalServiceRequest.ReferenceCode,
-                            Message = "The request with reference code " + technicalServiceRequest.ReferenceCode + " has been cancelled by the client. Please check the request details for more information.",
-                            IsRead = false,
-                            CreatedAt = DateTime.Now,
-                        });
-                        (new NotificationService()).RefreshUserUi(technicianId.Value);
-                    }
+                        RecipientRegistrationId = technicianId.Value,
+                        Title = "Request Cancelled: " + technicalServiceRequest.ReferenceCode,
+                        Message = "The request with reference code " + technicalServiceRequest.ReferenceCode + " has been cancelled by the client. Please check the request details for more information.",
+                        IsRead = false,
+                        CreatedAt = DateTime.Now,
+                    });
+                    (new NotificationService()).RefreshUserUi(technicianId.Value);
                 }
 
                 // Only status can be editted
@@ -822,6 +823,11 @@ namespace TROUBLESHOOTING_REPAIR_SERVICE_REQUEST_SYSTEM.Controllers
                 var currentSeverityId = technicalServiceRequest.TechnicalServiceRequestSeverityId;
                 if (severityId != currentSeverityId)
                 {
+                    if (currentSeverityId == (int)TechnicalServiceRequestStatusEnum.CANCELLED)
+                    {
+                        throw new Exception("You cannot update severity when the status is already cancelled.");
+                    } 
+
                     technicalServiceRequest.TechnicalServiceRequestSeverityId = severityId;
                     _db.Entry(technicalServiceRequest).State = EntityState.Modified;
 
@@ -929,7 +935,9 @@ namespace TROUBLESHOOTING_REPAIR_SERVICE_REQUEST_SYSTEM.Controllers
                  * service type, within the next 30 days, that have reached the per-day limit
                  */
                 var fullyBookedStringDates = _db.TechnicalServiceRequests
-                    .Where(r => r.TechnicalServiceTypeId == selectedTypeId
+                    .Where(r => 
+                        r.TechnicalServiceRequestStatusId != (int)TechnicalServiceRequestStatusEnum.CANCELLED &&
+                        r.TechnicalServiceTypeId == selectedTypeId
                         && r.TechnicalServiceRequestScheduledDate >= startDate
                         && r.TechnicalServiceRequestScheduledDate < endDate)
                     .GroupBy(r => DbFunctions.TruncateTime(r.TechnicalServiceRequestScheduledDate))
@@ -963,7 +971,6 @@ namespace TROUBLESHOOTING_REPAIR_SERVICE_REQUEST_SYSTEM.Controllers
         {
             try
             {
-                // FIXME:
                 var startDate = DateTime.Today;
                 var endDate = startDate.AddDays(30);     // Check for the next 30 days
                 var startTime = TimeSpan.FromHours(8);   // 8:00 AM
@@ -977,50 +984,50 @@ namespace TROUBLESHOOTING_REPAIR_SERVICE_REQUEST_SYSTEM.Controllers
                  */
                 for (var date = startDate; date < endDate; date = date.AddDays(1))
                 {
-                        var thisDate = date;
-                        var events = _db.TechnicalServiceRequests
-                            .Where(r =>
-                                DbFunctions.TruncateTime(r.TechnicalServiceRequestScheduledDate) ==
-                                DbFunctions.TruncateTime(thisDate)
-                            )
-                            .Select(r => new
-                            {
-                                Start = r.TechnicalServiceRequestScheduledStartTime,
-                                End = r.TechnicalServiceRequestScheduledEndTime
-                            })
-                            .OrderBy(e => e.Start)
-                            .ToList();
-
-                        var current = startTime;
-                        bool hasGap = false;
-                        foreach (var e in events)
+                    var thisDate = date;
+                    var events = _db.TechnicalServiceRequests
+                        .Where(r =>
+                            DbFunctions.TruncateTime(r.TechnicalServiceRequestScheduledDate) ==
+                            DbFunctions.TruncateTime(thisDate)
+                        )
+                        .Select(r => new
                         {
-                            /**
-                             * If there is a gap of 1 hour or more between the current time and the start of the next event,
-                             * consider the day as not fully booked and break the loop to check the next day
-                             */
-                            var totalGap = e.Start.Value.Subtract(current);
-                            if (totalGap.TotalHours > 1)
-                            {
-                                hasGap = true;
-                                break;
-                            }
+                            Start = r.TechnicalServiceRequestScheduledStartTime,
+                            End = r.TechnicalServiceRequestScheduledEndTime
+                        })
+                        .OrderBy(e => e.Start)
+                        .ToList();
 
-                            /**
-                             * Move the current time to the end of the event
-                             * if it is greater than the current time
-                             */
-                            if (e.End > current)
-                            {
-                                current = e.End.Value;
-                            }
-
-                        }
-                        if (!hasGap && events.Any() && current >= endTime)
+                    var current = startTime;
+                    bool hasGap = false;
+                    foreach (var e in events)
+                    {
+                        /**
+                         * If there is a gap of 1 hour or more between the current time and the start of the next event,
+                         * consider the day as not fully booked and break the loop to check the next day
+                         */
+                        var totalGap = e.Start.Value.Subtract(current);
+                        if (totalGap.TotalHours > 1)
                         {
-                            fullyBookedStringDates.Add(thisDate.ToString("yyyy-MM-dd"));
+                            hasGap = true;
+                            break;
                         }
+
+                        /**
+                         * Move the current time to the end of the event
+                         * if it is greater than the current time
+                         */
+                        if (e.End > current)
+                        {
+                            current = e.End.Value;
+                        }
+
                     }
+                    if (!hasGap && events.Any() && current >= endTime)
+                    {
+                        fullyBookedStringDates.Add(thisDate.ToString("yyyy-MM-dd"));
+                    }
+                }
 
                 return Json(new
                 {
@@ -1235,7 +1242,10 @@ namespace TROUBLESHOOTING_REPAIR_SERVICE_REQUEST_SYSTEM.Controllers
 
             // Get all schedules on the same day
             var sameDaySchedules = _db.TechnicalServiceRequests
-                .Where(i => DbFunctions.TruncateTime(i.TechnicalServiceRequestScheduledDate) == DbFunctions.TruncateTime(newScheduledDate))
+                .Where(i => 
+                    DbFunctions.TruncateTime(i.TechnicalServiceRequestScheduledDate) == DbFunctions.TruncateTime(newScheduledDate) &&
+                    i.TechnicalServiceRequestStatusId != (int)TechnicalServiceRequestStatusEnum.CANCELLED
+                )
                 .ToList();
 
             // Check whether the schedule is not conflictiing with other requests

@@ -39,8 +39,31 @@
                 labelClass = "label-success";
                 break;
             case "CANCELLED":
-                labelClass = "label-danger";
-                break;
+                {
+                    labelClass = "label-danger";
+
+                    // Remove the update severity button and modal once cancelled
+                    const updateSeverityButton = $("#update_severity_button");
+                    if (updateSeverityButton.length > 0) {
+                        updateSeverityButton.remove();
+                    }
+                    const updateSeverityModal = $("#update_severity_modal");
+                    if (updateSeverityModal.length > 0) {
+                        updateSeverityModal.remove();
+                    }
+
+                    // Remove the action history button and modal once cancelled
+                    const addActionHistoryButton = $("#add_action_history_button");
+                    if (addActionHistoryButton.length > 0) {
+                        addActionHistoryButton.remove();
+                    }
+                    const addActionHistoryModal = $("#add_action_history_modal");
+                    if (addActionHistoryModal.length > 0) {
+                        addActionHistoryModal.remove();
+                    }
+
+                    break;
+                }
             case "CLOSED":
                 labelClass = "label-default";
                 break;
