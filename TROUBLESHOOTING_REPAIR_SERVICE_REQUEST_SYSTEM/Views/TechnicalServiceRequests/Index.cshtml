@@ -34,18 +34,16 @@
                         <option value="0" selected>All</option>
                         @if (AccountTypeEnum.IsIT(currentUser.PrivilegeIds) || AccountTypeEnum.IsAdmin(currentUser.PrivilegeIds))
                         {
-                            @* Ownsership *@
-                            <optgroup label="Ownership">
-                                <option value="assigned">
-                                    Assigned
-                                </option>
-                                <option value="non-assisted">
-                                    Non Assisted
-                                </option>
-                                <option value="queued">
-                                    Queued
-                                </option>
-                            </optgroup>
+
+                            <option value="assigned">
+                                Assigned
+                            </option>
+                            <option value="non-assisted">
+                                Non Assisted
+                            </option>
+                            <option value="queued">
+                                Queued
+                            </option>
                         }
 
                         @* Type *@

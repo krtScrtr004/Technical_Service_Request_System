@@ -125,9 +125,9 @@ namespace TROUBLESHOOTING_REPAIR_SERVICE_REQUEST_SYSTEM.Enumerables
             switch (typeId)
             {
                 case 1:
-                    return "Equipment Repair/Troubleshooting";
+                    return "Equipment Repair / Troubleshooting";
                 case 2:
-                    return "Zoom/Webex Link";
+                    return "Zoom / Webex Link";
                 case 3:
                     return "Government Email Account";
                 case 4:
@@ -139,7 +139,7 @@ namespace TROUBLESHOOTING_REPAIR_SERVICE_REQUEST_SYSTEM.Enumerables
                 case 7:
                     return "Account Creation";
                 case 8:
-                    return "Password/Access Issue";
+                    return "Password / Access Issue";
                 case 9:
                     return "System Support";
                 case 10:
@@ -228,17 +228,17 @@ namespace TROUBLESHOOTING_REPAIR_SERVICE_REQUEST_SYSTEM.Enumerables
             switch (statusId)
             {
                 case 1:
-                    return "PENDING";
+                    return "Pending";
                 case 2:
-                    return "ON GOING";
+                    return "On Going";
                 case 3:
-                    return "RESOLVED";
+                    return "Resolved";
                 case 4:
-                    return "CANCELLED";
+                    return "Cancelled";
                 case 5:
-                    return "OPEN";
+                    return "Open";
                 case 6:
-                    return "CLOSED";
+                    return "Closed";
                 default:
                     return "Unknown Status";
             }
@@ -272,13 +272,13 @@ namespace TROUBLESHOOTING_REPAIR_SERVICE_REQUEST_SYSTEM.Enumerables
             switch (severityId)
             {
                 case 1:
-                    return "LOW";
+                    return "Low";
                 case 2:
-                    return "MEDIUM";
+                    return "Medium";
                 case 3:
-                    return "HIGH";
+                    return "High";
                 case 4:
-                    return "CRITICAL";
+                    return "Critical";
                 default:
                     return "Unknown Severity";
             }
