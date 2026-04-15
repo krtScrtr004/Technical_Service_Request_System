@@ -1,10 +1,17 @@
-.dashboard-page {
+dashboard-page {
     margin-top: 20px;
     margin-bottom: 30px;
+    width: 100%;
+}
+
+.dashboard-header,
+.dashboard-chart-row > [class*="col-"] {
+    padding-left: 6px;
+    padding-right: 6px;
 }
 
 .dashboard-header {
-    margin-bottom: 15px;
+    margin-bottom: 10px;
 }
 
 .dashboard-title {
@@ -19,6 +26,24 @@
 .dashboard-cards-row,
 .dashboard-chart-row {
     margin-bottom: 10px;
+}
+
+.dashboard-chart-row {
+    margin-left: -6px;
+    margin-right: -6px;
+}
+
+.dashboard-cards-row {
+    gap: 12px;
+}
+
+.dashboard-card-col {
+    flex: 1 1 100%;
+    min-width: 0;
+}
+
+.dashboard-card-col .panel {
+    margin: 0;
 }
 
 .dashboard-card {
@@ -71,10 +96,38 @@
     opacity: 0.75;
 }
 
+@media (min-width: 768px) {
+    .dashboard-card-col {
+        flex-basis: calc(50% - 6px);
+        max-width: calc(50% - 6px);
+    }
+}
+
+@media (min-width: 1200px) {
+    .dashboard-card-col {
+        flex-basis: calc(25% - 9px);
+        max-width: calc(25% - 9px);
+    }
+}
+
+@media (max-width: 1200px) {
+    .dashboard-chart-row {
+        margin: 0;
+    }
+
+    .dashboard-chart-row > [class*="col-"] {
+        margin-bottom: 10px;
+    }
+}
+
 @media (max-width: 767px) {
     .dashboard-page {
         margin-top: 12px;
         margin-bottom: 20px;
+    }
+
+    .dashboard-cards-row {
+        gap: 10px;
     }
 
     .dashboard-header .panel-body,
@@ -89,8 +142,7 @@
         line-height: 1.3;
     }
 
-    .dashboard-card,
-    .dashboard-extra-card {
+    .dashboard-card, .dashboard-extra-card {
         min-height: 0;
     }
 
@@ -103,6 +155,10 @@
         height: 250px;
     }
 
+    .dashboard-quick-actions {
+        margin: 0 !important;
+    }
+
     .dashboard-action-buttons {
         display: block;
     }
@@ -113,7 +169,13 @@
         margin-right: 0;
     }
 
-        .dashboard-action-btn:last-child {
-            margin-bottom: 0;
-        }
+    .dashboard-action-btn:last-child {
+        margin-bottom: 0;
+    }
+}
+
+@media (max-width: 670px) {
+    .dashboard-chart-row > [class*="col-"] {
+        margin-bottom: 10px;
+    }
 }

@@ -37,7 +37,7 @@
                         CLIENT INFORMATION
                     </h5>
 
-                    <div class="row flex-child-center-h flex-wrap">
+                    <div class="row flex-wrap flex-child-start-h">
                         @* Last Name *@
                         <div class="col-sm-3 form-group relative">
                             @Html.LabelFor(model => model.ClientLastName)
@@ -67,7 +67,7 @@
                         </div>
                     </div>
 
-                    <div class="row flex-child-center-h flex-wrap">
+                    <div class="row flex-child-start-h flex-wrap">
                         @* Office *@
                         <div class="col-sm-6 form-group relative">
                             @Html.LabelFor(model => model.ClientOffice)
@@ -83,7 +83,7 @@
                         </div>
                     </div>
 
-                    <div class="row flex-child-center-h flex-wrap">
+                    <div class="row flex-child-start-h flex-wrap">
                         @* Contact Number *@
                         <div class="col-sm-6 form-group relative">
                             @Html.LabelFor(model => model.ClientContactNumber)
@@ -106,7 +106,7 @@
                         TECHNICAL SERVICES
                     </h5>
 
-                    <div class="row flex-child-center-h flex-wrap">
+                    <div class="row flex-child-start-h flex-wrap">
                         @* Service Type *@
                         <div class="col-sm-4 form-group relative">
                             @Html.LabelFor(model => model.TechnicalServiceTypes)
@@ -127,7 +127,7 @@
                         </div>
                     </div>
 
-                    <div class="row flex-child-center-h flex-wrap">
+                    <div class="row flex-child-start-h flex-wrap">
                         @* Description *@
                         <div class="col-sm-12 form-group relative">
                             @Html.LabelFor(model => model.TechnicalServiceRequestDescription)
@@ -143,7 +143,7 @@
                             : "no-display";
                     }
 
-                    <div class="row schedule-inputs @scheduleInputsClass flex-child-center-h flex-wrap">
+                    <div class="row schedule-inputs @scheduleInputsClass flex-wrap">
 
                         @* Schedule Date *@
                         <div class="col-sm-5 form-group relative">

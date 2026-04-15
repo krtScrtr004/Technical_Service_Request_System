@@ -8,9 +8,9 @@
 
 @{ ViewBag.Title = "Notifications"; }
 
-<section class="container center-child notification-index-page">
+<section class="container flex-rwo flex-child-center-v notification-index-page">
 
-    <div class="panel panel-default notification-page-panel">
+    <div class="panel panel-default notification-page-panel flex-col">
         @* Heading *@
         <section class="content-panel-heading panel-heading">
             <div>
@@ -25,7 +25,7 @@
         </section>
 
         @* Body *@
-        <section id="notification_list" class="panel-body flex-col notification-list-body">
+        <section id="notification_list" class="panel-body flex-col flex-1 notification-list-body">
             @Html.Partial("~/Views/Notification/Partial/_NotificationList.cshtml", Model.Notifications)
         </section>
 

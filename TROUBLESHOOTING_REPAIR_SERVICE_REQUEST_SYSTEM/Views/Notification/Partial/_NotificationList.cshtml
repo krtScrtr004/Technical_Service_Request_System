@@ -14,7 +14,7 @@
                 data-is-read="@(notification.IsRead ? "true" : "false" )"
                 data-created-at="@notification.CreatedAt.ToString("MMMM dd yyyy, hh:mm tt")">
             <div class="notification-box well flex-col @isReadClass">
-                <h4 class="single-line-ellipsis text-primary bold-text" title="@notification.Title">
+                <h4 class="title single-line-ellipsis text-primary bold-text" title="@notification.Title">
                     @notification.Title
                 </h4>
 

@@ -21,12 +21,7 @@
 
 .dataTables_wrapper th.reference-code,
 .dataTables_wrapper td.reference-code {
-    width: 11rem;
-}
-
-.dataTables_wrapper th.client-info,
-.dataTables_wrapper td.client-info {
-    width: 25rem;
+    width: fit-content;
 }
 
 .dataTables_wrapper th:last-child,

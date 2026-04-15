@@ -45,7 +45,7 @@ body {
     width: 100%;
     min-height: 100vh;
     height: fit-content;
-}
+} 
 
 header,
 header .navbar {
@@ -61,6 +61,7 @@ header .navbar {
 
     header .navbar-brand .brand-text {
         margin: 0;
+        font-size: 1.8rem;
     }
 
     header .notification {
@@ -95,6 +96,27 @@ header .navbar {
             text-align: center;
         }
 
+main {
+    height: 100%;
+    width: 100%;
+    max-width: 100%;
+    margin: 0;
+    padding: var(--space);
+}
+
+    main > section {
+        min-height: calc(100vh - 150px);
+    }
+
+textarea {
+    resize: vertical;
+}
+
+hr {
+    border: none;
+    height: 1px;
+}
+
 @media (max-width: 767px) {
     header .navbar-brand.brand-link {
         max-width: calc(100% - 56px);
@@ -119,25 +141,12 @@ header .navbar {
 
     header #logoutForm {
         float: none !important;
-    }
+    } 
 
         header #logoutForm .navbar-right {
             float: none !important;
             margin-right: 0;
         }
-}
-
-main {
-    height: 100%;
-}
-
-textarea {
-    resize: vertical;
-}
-
-hr {
-    border: none;
-    height: 1px;
 }
 
 /* -- -- */
@@ -163,7 +172,7 @@ table.table-bordered {
     }
 
 .dataTables_wrapper table.dataTable {
-    box-shadow: 0 0 5px 2px rgba(0, 0, 0, 0.1);
+    box-shadow: 0 0 5px 5px rgba(0, 0, 0, 0.1);
 }
 
 .dataTables_wrapper table.dataTable thead th {
@@ -174,6 +183,7 @@ table.table-bordered {
 .dataTables_wrapper table.dataTable thead th,
 .dataTables_wrapper table.dataTable tbody td {
     border: unset !important;
+    padding: 12px !important;
 }
 
     .dataTables_paginate {
@@ -316,6 +326,7 @@ table.table-bordered {
 
 .panel {
     box-shadow: var(--box-shadow);
+    margin: 0;
 }
 
 

@@ -24,13 +24,12 @@
         @Html.Action("Header", "Layout");
     }
 
-    <main class="container body-content flex-1 flex-col">
+    <main>
         @RenderBody()
     </main>
 
     <footer class="container body-content">
         <hr class="bg-default" />
-
         <p>&copy; @DateTime.Now.Year - Technical Service Request System</p>
     </footer>
 

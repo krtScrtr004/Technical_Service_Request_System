@@ -7,66 +7,64 @@
     <link rel="stylesheet" href="~/Content/App/Registration/Deactivate.css" type="text/css" />
 }
 
-@using (Html.BeginForm(
-    "Deactivate",
-    "Registration",
-    new { id = Model.Registration.Id },
-    FormMethod.Post,
-    new { @class = "deactivate-form flex-1 center-child" }
-))
-{
-    @Html.AntiForgeryToken()
+<section class="container center-child">
+    @using (Html.BeginForm(
+        "Deactivate",
+        "Registration",
+        new { id = Model.Registration.Id },
+        FormMethod.Post,
+        new { @class = "deactivate-form flex-1 center-child" }
+    ))
+    {
+        @Html.AntiForgeryToken()
 
-    <section class="container deactivate-page">
-        <div class="row">
-            <div class="col-xs-12 col-sm-10 col-sm-offset-1 col-md-6 col-md-offset-3">
-                <div class="panel panel-danger deactivate-panel fade-in">
-                    <section class="panel-heading">
-                        <h3 class="panel-title">
-                            <i class="fa fa-exclamation-triangle"></i>
-                            Confirm Account Deactivation
-                        </h3>
-                    </section>
+        <section class="container deactivate-page">
+            <div class="panel panel-danger deactivate-panel fade-in">
+                <section class="panel-heading">
+                    <h3 class="panel-title">
+                        <i class="fa fa-exclamation-triangle"></i>
+                        Confirm Account Deactivation
+                    </h3>
+                </section>
 
-                    <section class="panel-body center-text">
-                        @if (!ViewData.ModelState.IsValid)
-                        {
-                            <div class="alert alert-danger text-left" role="alert">
-                                @Html.ValidationSummary(true)
-                            </div>
-                        }
-
-                        <div class="deactivate-icon-wrap center-child">
-                            <i class="glyphicon glyphicon-ban-circle deactivate-icon"></i>
+                <section class="panel-body center-text">
+                    @if (!ViewData.ModelState.IsValid)
+                    {
+                        <div class="alert alert-danger text-left" role="alert">
+                            @Html.ValidationSummary(true)
                         </div>
+                    }
 
-                        <h4 class="deactivate-title">Account Deactivation</h4>
-                        <p class="deactivate-message wrap-text">
-                            Are you sure you want to deactivate this account?<br />
-                            Click <strong>Deactivate</strong> to continue.
-                        </p>
+                    <div class="deactivate-icon-wrap center-child">
+                        <i class="glyphicon glyphicon-ban-circle deactivate-icon"></i>
+                    </div>
 
-                        <p class="light-text account-label">
-                            Account ID: @Model.Registration.Id
-                        </p>
-                    </section>
+                    <h4 class="deactivate-title">Account Deactivation</h4>
+                    <p class="deactivate-message wrap-text">
+                        Are you sure you want to deactivate this account?<br />
+                        Click <strong>Deactivate</strong> to continue.
+                    </p>
 
-                    <section class="panel-footer deactivate-actions-footer">
-                        <div class="row">
-                            <div class="col-xs-6">
-                                <a href="@Url.Action("Details", "Registration", new { id = Model.Registration.Id })" class="btn btn-primary btn-block">
-                                    Cancel
-                                </a>
-                            </div>
-                            <div class="col-xs-6">
-                                <button class="btn btn-danger btn-block" type="submit">
-                                    Deactivate
-                                </button>
-                            </div>
+                    <p class="light-text account-label">
+                        Account ID: @Model.Registration.Id
+                    </p>
+                </section>
+
+                <section class="panel-footer deactivate-actions-footer">
+                    <div class="row">
+                        <div class="col-xs-6">
+                            <a href="@Url.Action("Details", "Registration", new { id = Model.Registration.Id })" class="btn btn-primary btn-block">
+                                Cancel
+                            </a>
                         </div>
-                    </section>
-                </div>
+                        <div class="col-xs-6">
+                            <button class="btn btn-danger btn-block" type="submit">
+                                Deactivate
+                            </button>
+                        </div>
+                    </div>
+                </section>
             </div>
-        </div>
-    </section>
-}
+        </section>
+    }
+</section>

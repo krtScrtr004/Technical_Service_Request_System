@@ -8,7 +8,7 @@
     <link rel="stylesheet" href="~/Content/App/TechnicalServiceRequest/Form.css" type="text/css" />
 }
 
-<section class="tsr-form-page-container container">
+<section class="tsr-form-page-container container bg-light">
 
     @* Form *@
     <section class="container tsr-form flex-col flex-child-start-h">
@@ -74,7 +74,7 @@
         @* Client Information *@
         <section class="tsr-form-client-info flex-col">
 
-            <div class="flex-row flex-space-between">
+            <div class="tsr-form-meta-info flex-row flex-space-between">
                 <section>
                     <p class="inline">Reference Code: </p>
                     <p class="inline">
@@ -478,14 +478,14 @@
     </section>
 
     @* Print Button *@
-    <section class="print-button-container float-right">
-        <div>
-            <button class="btn btn-danger" type="button" onclick="history.back()">
+    <section class="print-button-container center-child">
+        <div class="flex-1 flex-row">
+            <button class="btn btn-danger flex-1" type="button" onclick="history.back()">
                 <i class="glyphicon glyphicon-arrow-left"></i>
                 Return
             </button>
 
-            <button class="btn btn-primary" type="button" onclick="window.print()">
+            <button class="btn btn-primary flex-1" type="button" onclick="window.print()">
                 <i class="glyphicon glyphicon-print"></i>
                 Print
             </button>

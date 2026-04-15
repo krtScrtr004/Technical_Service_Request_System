@@ -1,9 +1,6 @@
-﻿.registration-create-page {
-    padding-top: 2rem;
-    padding-bottom: 2rem;
-}
-
-.registration-panel {
+﻿.registration-panel {
+    width: 90%;
+    width: 90%;
     border-radius: var(--input-border-radius);
     overflow: hidden;
 }
@@ -104,6 +101,10 @@
         padding-left: 0;
         padding-right: 0;
         margin: 0;
+    }
+
+    .registration-panel {
+        width: 100%;
     }
 
     .registration-panel .panel-heading,

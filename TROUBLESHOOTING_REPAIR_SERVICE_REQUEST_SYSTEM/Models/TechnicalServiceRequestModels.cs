@@ -91,26 +91,30 @@ namespace TROUBLESHOOTING_REPAIR_SERVICE_REQUEST_SYSTEM.Models
         [DisplayName("Last Name")]
         [MinLength(1, ErrorMessage = "The minimum length is 1")]
         [MaxLength(100, ErrorMessage = "The maximum length is 100")]
-        [RegularExpression("^[A-Za-z\\s-]+$", ErrorMessage = "Input contains invalid character(s)")]
+        [RegularExpression(ValueConstants.VALID_NAME_REGEX, 
+            ErrorMessage = ValueConstants.VALID_NAME_REGEX_MESSAGE)]
         public string ClientLastName { get; set; }
         [Required]
         [DataType(DataType.Text)]
         [DisplayName("First Name")]
         [MinLength(1, ErrorMessage = "The minimum length is 1")]
         [MaxLength(100, ErrorMessage = "The maximum length is 100")]
-        [RegularExpression("^[A-Za-z\\s-]+$", ErrorMessage = "Input contains invalid character(s)")]
+        [RegularExpression(ValueConstants.VALID_NAME_REGEX,
+            ErrorMessage = ValueConstants.VALID_NAME_REGEX_MESSAGE)]
         public string ClientFirstName { get; set; }
         [DataType(DataType.Text)]
         [DisplayName("Middle Name")]
         [MinLength(1, ErrorMessage = "The minimum length is 1")]
         [MaxLength(100, ErrorMessage = "The maximum length is 100")]
-        [RegularExpression("^[A-Za-z\\s-]+$", ErrorMessage = "Input contains invalid character(s)")]
+        [RegularExpression(ValueConstants.VALID_NAME_REGEX,
+            ErrorMessage = ValueConstants.VALID_NAME_REGEX_MESSAGE)]
         public string ClientMiddleName { get; set; }
         [DataType(DataType.Text)]
         [DisplayName("Extension Name")]
         [MinLength(1, ErrorMessage = "The minimum length is 1")]
         [MaxLength(5, ErrorMessage = "The maximum length is 5")]
-        [RegularExpression("^[a-zA-Z]+$", ErrorMessage = "Input contains invalid character(s)")]
+        [RegularExpression(ValueConstants.VALID_NAME_REGEX, 
+            ErrorMessage = ValueConstants.VALID_NAME_REGEX_MESSAGE)]
         public string ClientExtensionName { get; set; }
 
         [Required]
@@ -118,26 +122,30 @@ namespace TROUBLESHOOTING_REPAIR_SERVICE_REQUEST_SYSTEM.Models
         [DisplayName("Office")]
         [MinLength(1, ErrorMessage = "The minimum length is 1")]
         [MaxLength(50, ErrorMessage = "The maximum length is 50")]
-        [RegularExpression("^[\\w\\s-_]+$", ErrorMessage = "Input contains invalid character(s)")]
+        [RegularExpression("^[\\w\\s-_]+$", 
+            ErrorMessage = "Office field must only contain letters, numbers, spaces, hyphens ( - ), and underscores ( _ ")]
         public string ClientOffice { get; set; }
         [Required]
         [DataType(DataType.Text)]
         [DisplayName("Position")]
         [MinLength(1, ErrorMessage = "The minimum length is 1")]
         [MaxLength(50, ErrorMessage = "The maximum length is 50")]
-        [RegularExpression("^[\\w\\s-_\\/]+$", ErrorMessage = "Input contains invalid character(s)")]
+        [RegularExpression("^[\\w\\s-_\\/]+$",
+            ErrorMessage = "Position field must only contain letters, numbers, spaces, hyphens ( - ), and underscores ( _ ")]
         public string ClientPosition { get; set; }
         [Required]
         [Phone]
         [DataType(DataType.PhoneNumber)]
         [DisplayName("Contact Number")]
-        [RegularExpression(ValueConstants.VALID_CONTACT_NUMBER_REGEX, ErrorMessage = "Input contains invalid character(s)")]
+        [RegularExpression(ValueConstants.VALID_CONTACT_NUMBER_REGEX,
+            ErrorMessage = ValueConstants.VALID_CONTACT_NUMBER_REGEX_MESSAGE)]
         public string ClientContactNumber { get; set; }
         [Required]
         [EmailAddress]
         [DataType(DataType.EmailAddress)]
         [DisplayName("Email Address")]
-        [RegularExpression(ValueConstants.VALID_EMAIL_REGEX, ErrorMessage = "Input contains invalid character(s)")]
+        [RegularExpression(ValueConstants.VALID_EMAIL_REGEX, 
+            ErrorMessage = ValueConstants.VALID_EMAIL_REGEX_MESSAGE)]
         public string ClientEmailAddress { get; set; }
 
         // TECHNICAL SERVICE
@@ -150,13 +158,15 @@ namespace TROUBLESHOOTING_REPAIR_SERVICE_REQUEST_SYSTEM.Models
         [DisplayName("Specify Other Request")]
         [MinLength(1, ErrorMessage = "The minimum length is 1")]
         [MaxLength(100, ErrorMessage = "The maximum length is 100")]
-        [RegularExpression("^[\\w\\s-_\\/]+$", ErrorMessage = "Input contains invalid character(s)")]
+        [RegularExpression("^[\\w\\s-_\\/]+$", 
+            ErrorMessage = "Others field must only contain letters, numbers, spaces, hyphens ( - ), underscores ( _ ), and slashes ( / )")]
         public string Others { get; set; } = null;
         [DataType(DataType.Text)]
         [DisplayName("Description")]
         [MinLength(1, ErrorMessage = "The minimum length is 1")]
         [MaxLength(500, ErrorMessage = "The maximum length is 500")]
-        [RegularExpression("^[\\w\\s-_\\/.,\\!\\?\\&\\(\\)\\\\{\\}\\[\\]]+$", ErrorMessage = "Input contains invalid character(s)")]
+        [RegularExpression("^[\\w\\s-_\\/.,\\!\\?\\&\\(\\)\\\\{\\}\\[\\]]+$", 
+            ErrorMessage = "Description field must only contain letters, numbers, spaces, hyphens ( - ), underscores ( _ ), slashes ( / ), dots ( . ), commas ( , ), exclamation marks ( ! ), question marks ( ? ), ampersands ( & ), parentheses ( ( ) ), curly braces ( {{ }} ), and square brackets ( [ ] )")]
         public string TechnicalServiceRequestDescription { get; set; } = null;
 
         // CONDITIONAL PROP: If the service requested is either Zoom/Webex Link, Livestream Setup, or Audio/Visual Setup

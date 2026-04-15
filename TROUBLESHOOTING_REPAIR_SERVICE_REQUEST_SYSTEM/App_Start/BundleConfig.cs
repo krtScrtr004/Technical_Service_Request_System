@@ -27,7 +27,9 @@ namespace TROUBLESHOOTING_REPAIR_SERVICE_REQUEST_SYSTEM
                       "~/Content/site.css",
                       "~/Content/App/root.css",
                       "~/Content/App/utility.css",
+                      "~/Content/App/Dashboard/Index.css",
                       "~/Content/App/component.css"));
+
         }
     }
 }

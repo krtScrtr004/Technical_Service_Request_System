@@ -16,8 +16,8 @@
 @section Styles {
     <link rel="stylesheet" href="~/Content/App/Dashboard/Index.css" type="text/css" />
 }
-   
-<section class="dashboard-page container">
+
+<section class="container-fluid">
     <section class="dashboard-header panel panel-default">
         <section class="panel-body">
             <h3 class="text-primary dashboard-title wrap-text">Welcome, @currentUser.FirstName @currentUser.LastName</h3>
@@ -25,10 +25,10 @@
                 Role: <span class="label label-info">@roleName</span>
             </p>
         </section>
-    </section> 
+    </section>
 
-    <section class="row dashboard-cards-row">
-        <div class="col-xs-12 col-sm-6 col-md-3">
+    <section class="dashboard-cards-row flex-row flex-wrap">
+        <div class="dashboard-card-col">
             <section class="panel panel-default dashboard-card">
                 <section class="panel-body">
                     <p class="dashboard-card-label">Total Requests</p>
@@ -37,7 +37,7 @@
             </section>
         </div>
 
-        <div class="col-xs-12 col-sm-6 col-md-3">
+        <div class="dashboard-card-col">
             <section class="panel panel-default dashboard-card">
                 <section class="panel-body">
                     <p class="dashboard-card-label">Active Requests</p>
@@ -46,7 +46,7 @@
             </section>
         </div>
 
-        <div class="col-xs-12 col-sm-6 col-md-3">
+        <div class="dashboard-card-col">
             <section class="panel panel-default dashboard-card">
                 <section class="panel-body">
                     <p class="dashboard-card-label">Resolved Requests</p>
@@ -55,7 +55,7 @@
             </section>
         </div>
 
-        <div class="col-xs-12 col-sm-6 col-md-3">
+        <div class="dashboard-card-col">
             <section class="panel panel-default dashboard-card">
                 <section class="panel-body">
                     <p class="dashboard-card-label">Unread Notifications</p>
@@ -65,8 +65,8 @@
         </div>
     </section>
 
-    <section class="row dashboard-cards-row">
-        <div class="col-xs-12 col-sm-6 col-md-4">
+    <section class="dashboard-cards-row flex-row flex-wrap">
+        <div class="dashboard-card-col">
             <section class="panel panel-default dashboard-card dashboard-extra-card">
                 <section class="panel-body">
                     <p id="extra_label_1" class="dashboard-card-label">-</p>
@@ -75,7 +75,7 @@
             </section>
         </div>
 
-        <div class="col-xs-12 col-sm-6 col-md-4">
+        <div class="dashboard-card-col">
             <section class="panel panel-default dashboard-card dashboard-extra-card">
                 <section class="panel-body">
                     <p id="extra_label_2" class="dashboard-card-label">-</p>
@@ -84,7 +84,7 @@
             </section>
         </div>
 
-        <div class="col-xs-12 col-sm-12 col-md-4">
+        <div class="dashboard-card-col">
             <section class="panel panel-default dashboard-card dashboard-extra-card">
                 <section class="panel-body">
                     <p id="extra_label_3" class="dashboard-card-label">-</p>

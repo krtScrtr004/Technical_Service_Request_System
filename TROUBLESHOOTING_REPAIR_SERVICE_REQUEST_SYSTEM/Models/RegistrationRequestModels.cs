@@ -46,26 +46,30 @@ namespace TROUBLESHOOTING_REPAIR_SERVICE_REQUEST_SYSTEM.Models
         [Display(Name = "First Name")]
         [MinLength(length: 1, ErrorMessage = "The minimum length is 1.")]
         [MaxLength(100, ErrorMessage = "The maximum length is 100.")]
-        [RegularExpression("^[A-Za-z\\s\\-\\.\\,]+$", ErrorMessage = "Input contains invalid character(s)")]
+        [RegularExpression(ValueConstants.VALID_NAME_REGEX,
+            ErrorMessage = ValueConstants.VALID_NAME_REGEX_MESSAGE)]
         public string FirstName { get; set; }
 
         [Display(Name = "Middle Name")]
         [MinLength(length: 1, ErrorMessage = "The minimum length is 1.")]
         [MaxLength(100, ErrorMessage = "The maximum length is 100.")]
-        [RegularExpression("^[A-Za-z\\s\\-\\.\\,]+$", ErrorMessage = "Input contains invalid character(s)")]
+        [RegularExpression(ValueConstants.VALID_NAME_REGEX,
+            ErrorMessage = ValueConstants.VALID_NAME_REGEX_MESSAGE)]
         public string MiddleName { get; set; }
 
         [Required]
         [Display(Name = "Last Name")]
         [MinLength(length: 1, ErrorMessage = "The minimum length is 1.")]
         [MaxLength(100, ErrorMessage = "The maximum length is 100.")]
-        [RegularExpression("^[A-Za-z\\s\\-\\.\\,]+$", ErrorMessage = "Input contains invalid character(s)")]
+        [RegularExpression(ValueConstants.VALID_NAME_REGEX,
+            ErrorMessage = ValueConstants.VALID_NAME_REGEX_MESSAGE)]
         public string LastName { get; set; }
 
         [Required]
         [EmailAddress]
         [DataType(DataType.EmailAddress)]
-        [RegularExpression(ValueConstants.VALID_EMAIL_REGEX, ErrorMessage = "Input contains invalid character(s)")]
+        [RegularExpression(ValueConstants.VALID_EMAIL_REGEX, 
+            ErrorMessage = ValueConstants.VALID_EMAIL_REGEX_MESSAGE)]
         [Display(Name = "Email")]
         public string Email { get; set; }
 
@@ -73,7 +77,8 @@ namespace TROUBLESHOOTING_REPAIR_SERVICE_REQUEST_SYSTEM.Models
         [Display(Name = "Contact Number")]
         [DataType(DataType.PhoneNumber)]
         [Phone(ErrorMessage = "Invalid phone number format.")]
-        [RegularExpression(ValueConstants.VALID_CONTACT_NUMBER_REGEX, ErrorMessage = "Input contains invalid character(s)")]
+        [RegularExpression(ValueConstants.VALID_CONTACT_NUMBER_REGEX,
+            ErrorMessage = ValueConstants.VALID_CONTACT_NUMBER_REGEX_MESSAGE)]
         public string ContactNumber { get; set; }
     }
 }

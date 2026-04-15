@@ -1,6 +1,5 @@
 .deactivate-page {
-    padding-top: 2rem;
-    padding-bottom: 2rem;
+    width: 60%;
 }
 
 .deactivate-panel {
@@ -59,8 +58,7 @@
 
 @media (max-width: 767px) {
     .deactivate-page {
-        padding-top: 1.5rem;
-        padding-bottom: 1.5rem;
+        width: 100%;
         padding-left: 0;
         padding-right: 0;
     }

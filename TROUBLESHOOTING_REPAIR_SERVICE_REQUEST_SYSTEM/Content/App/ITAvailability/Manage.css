@@ -1,6 +1,7 @@
 ﻿.availaibility-container {
     gap: var(--space);
     width: 100%;
+    height: 100%;
     min-width: 0;
 }
 
@@ -16,62 +17,82 @@
 
 .content-panel-body {
     width: 100%;
-    height: 40rem;
+    height: 100%;
     gap: 2rem;
     min-width: 0;
 }
 
-.content-panel-body > section:first-child {
-    flex: 1;
-    min-width: 0;
-}
+    .content-panel-body > section:first-child {
+        flex: 1;
+        min-width: 0;
+    }
 
 #datetime_picker {
     width: 100%;
+    height: 50%;
 }
 
-#datetime_picker .datepicker {
-    font-size: 14px;
-    width: 100%;
-}
-
-    #datetime_picker .datepicker-inline,
-    #datetime_picker .datepicker table {
+    #datetime_picker .datepicker {
+        font-size: 14px;
         width: 100%;
     }
+
+        #datetime_picker .datepicker-inline,
+        #datetime_picker .datepicker table {
+            width: 100%;
+            height: 400px;
+        }
+
+.rules-list {
+    margin-top: 2rem;
+    list-style-position: inside;
+    padding-left: 1rem;
+}
+
+    .rules-list,
+    .rules-list * {
+        font-size: 1.5rem;
+        line-height: 2.5rem;
+    }
+
+        .rules-list > i {
+            margin-right: 5px;
+        }
 
 .selected-date-badge-container {
     flex: 1;
     min-width: 0;
+    min-height: 20rem;
     max-height: 100%;
 }
 
     .selected-date-badge-container > div {
         width: 100%;
         height: fit-content;
-        gap: 10px;
+        gap: var(--space);
         overflow-y: auto;
         padding: 1rem;
     }
 
-    .panel-footer .buttons-container {
-        flex: 1;
-    }
+.panel-footer .buttons-container {
+    flex: 1;
+}
 
-    .panel-footer .buttons {
-        gap: 1rem;
-    }
+.panel-footer .buttons {
+    gap: 1rem;
+}
 
 .selected-date-badge {
     height: fit-content;
-    border-radius: 5px;
-    padding: 0.5rem 1.5rem;
-    background-color: #edf1f2;
+    border-radius: 2px;
+    padding: 1.5rem 2rem;
+    background-color: var(--primary);
+    color: #FFFFFF;
     box-shadow: 0 0 6px 3px rgba(0,0,0,0.1);
 }
 
     .selected-date-badge h3 {
-        font-size: 1.2rem;
+        font-size: 1.5rem;
         margin: 0;
     }
 
@@ -93,12 +114,33 @@
 .calendar-table {
     table-layout: fixed;
     border-collapse: collapse;
+    height: 400px;
 }
 
+    .calendar-table > tbody * {
+        font-size: 1.5rem;
+    }
+
+    .calendar-table > tbody td {
+        text-align: center;
+        vertical-align: middle !important;
+    }
+
     .calendar-table .blocked-date {
-        background: #979797;
+        background: var(--warning);
         color: #edf1f2;
     }
+
+@media (max-width: 1200px) {
+    .content-panel {
+        width: 100%;
+    }
+
+    .availability-history-container {
+        flex: unset;
+        width: 100%;
+    }
+}
 
 @media (max-width: 991px) {
     .availaibility-container {
@@ -149,9 +191,9 @@
             margin: 0 0 8px;
         }
 
-        .selected-date-badge-container .buttons .btn:last-child {
-            margin-bottom: 0;
-        }
+            .selected-date-badge-container .buttons .btn:last-child {
+                margin-bottom: 0;
+            }
 
     .history-selects-container {
         display: block;

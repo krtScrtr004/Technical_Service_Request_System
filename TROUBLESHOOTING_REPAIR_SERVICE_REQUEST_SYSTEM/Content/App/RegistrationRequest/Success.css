@@ -1,6 +1,4 @@
 ﻿.registration-request-success-page {
-    padding-top: 3rem;
-    padding-bottom: 3rem;
     flex: 1;
 }
 
@@ -42,7 +40,7 @@
 }
 
 .success-message {
-    max-width: 70ch;
+    max-width: 90ch;
     margin: 0 auto;
     line-height: 1.7;
     font-size: 1.55rem;

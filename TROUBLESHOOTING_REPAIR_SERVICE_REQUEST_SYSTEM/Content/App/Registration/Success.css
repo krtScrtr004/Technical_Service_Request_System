@@ -1,12 +1,5 @@
-﻿body {
-}
-
-.registration-success-page {
-    padding-top: 2rem;
-    padding-bottom: 2rem;
-}
-
-.success-panel {
+﻿.success-panel {
+    width: 70%;
     border-radius: var(--input-border-radius);
     overflow: hidden;
 }
@@ -55,6 +48,10 @@
         padding-bottom: 1.5rem;
         padding-left: 0;
         padding-right: 0;
+    }
+
+    .success-panel {
+        width: 100%;
     }
 
     .success-panel .panel-heading,
