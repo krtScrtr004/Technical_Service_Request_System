@@ -22,98 +22,61 @@
                 return "label label-default status-label";
         }
     };
+
+    var fullName = string.Join(" ", new[]
+    {
+        Model.ActionTakenByRegistration.LastName + ",",
+        Model.ActionTakenByRegistration.FirstName,
+        Model.ActionTakenByRegistration.MiddleName
+    }.Where(x => !string.IsNullOrWhiteSpace(x)));
 }
 
-
-@* Action Taken By *@
 <tr class="action-history-row">
-    <td class="text-primary light-text active">
-        TAKEN BY
-    </td>
+    <td colspan="4" class="action-history-entry-cell">
+        <div class="panel panel-default action-history-entry-panel">
+            <div class="panel-body action-history-entry-body">
+                <div class="row action-history-meta-row">
+                    <div class="col-sm-5 col-xs-12 action-history-meta-item">
+                        <p class="action-history-label light-text">TAKEN BY</p>
+                        <p class="action-history-value">@(string.IsNullOrWhiteSpace(fullName) ? "N/A" : fullName)
+                        </p>
+                    </div>
 
-    @* Last Name *@
-    <td class="text-primary bold-text">
-        @Model.ActionTakenByRegistration.LastName
-    </td>
+                    <div class="col-sm-4 col-xs-12 action-history-meta-item">
+                        <p class="action-history-label">DATE</p>
+                        <p class="action-history-value">
+                            @(Model.DateAction.HasValue
+                                ? Model.DateAction.Value.ToString("MMMM dd, yyyy hh:mm tt")
+                                : "N/A")
+                        </p>
+                    </div>
 
+                    <div class="col-sm-3 col-xs-12 action-history-meta-item">
+                        <p class="action-history-label">STATUS</p>
+                        @if (Model.TechnicalServiceRequestStatusId.HasValue && Model.TechnicalServiceRequestStatusId > 0)
+                        {
+                            <span class="@getStatusLabelClass(Model.TechnicalServiceRequestStatusId.Value)">
+                                @Model.TechnicalServiceRequestStatus.TechnicalServiceRequestStatusName
+                            </span>
+                        }
+                        else
+                        {
+                            <span class="label label-default">N/A</span>
+                        }
+                    </div>
+                </div>
 
-    @* First Name *@
-    <td class="text-primary bold-text">
-        @Model.ActionTakenByRegistration.FirstName
-    </td>
+                <div class="action-history-divider"></div>
 
-    @* Middle Name *@
-    <td class="text-primary bold-text">
-        @(Model.ActionTakenByRegistration.MiddleName ?? "N/A")
-
-    </td>
-
-    <td rowspan="3" class="generate-srf-button-container hidden-xs hidden-sm">
-        <a class="btn btn-success btn-sm" href="@Url.Action("Form", "TechnicalServiceRequests", new { id = Model.Id })">
-            <i class="glyphicon glyphicon-file"></i>
-            Generate TSRF
-        </a>
-    </td>
-</tr>
-
-<tr>
-    @* Date *@
-    <td class="text-primary light-text active">
-        DATE
-    </td>
-
-    <td class="text-primary bold-text">
-        @Model.DateAction.GetValueOrDefault().ToString("MMMM dd, yyyy hh:mm tt")
-    </td>
-
-    @* Status *@
-    <td class="text-primary light-text active">
-        STATUS
-    </td>
-
-    <td class="text-primary bold-text">
-        @if (Model.TechnicalServiceRequestStatusId.HasValue && Model.TechnicalServiceRequestStatusId > 0)
-        {
-            <span class="@getStatusLabelClass(Model.TechnicalServiceRequestStatusId.Value)">
-                @Model.TechnicalServiceRequestStatus.TechnicalServiceRequestStatusName
-            </span>
-        }
-        else
-        {
-            <span class="label label-default">
-                N/A
-            </span>
-        }
-
-    </td>
-</tr>
-
-@* Action Taken *@
-<tr>
-    <td colspan="1" class="text-primary light-text active">
-        ACTION TAKEN
-    </td>
-
-    <td colspan="3" class="text-primary">
-        <p class="action-taken-text wrap-text">
-            @(string.IsNullOrEmpty(Model.ActionTaken)
-              ? "N/A"
-              : Model.ActionTaken)
-        </p>
-    </td>
-</tr>
-
-<tr class="hidden-lg hidden-md">
-    <td class="generate-srf-button-container">
-        <a class="btn btn-success " href="@Url.Action("Form", "TechnicalServiceRequests", new { id = Model.Id })">
-            <i class="glyphicon glyphicon-file"></i>
-            Generate TSRF
-        </a>
-    </td>
-</tr>
-
-<tr>
-    <td colspan="5" class="minified-text light-text text-center">
-        -- END --
+                <div class="action-history-action-wrap">
+                    <p class="action-history-label">ACTION TAKEN</p>
+                    <p class="action-taken-text wrap-text">
+                        @(string.IsNullOrWhiteSpace(Model.ActionTaken)
+                            ? "N/A"
+                            : Model.ActionTaken)
+                    </p>
+                </div>
+            </div>
+        </div>
     </td>
 </tr>

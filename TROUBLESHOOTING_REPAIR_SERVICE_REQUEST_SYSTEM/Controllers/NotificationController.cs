@@ -1,4 +1,5 @@
 ﻿using PagedList;
+using Serilog;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -182,6 +183,7 @@ namespace TROUBLESHOOTING_REPAIR_SERVICE_REQUEST_SYSTEM.Controllers
                         NotificationHub.RefreshNotificationBadge(notification.RecipientRegistrationId.Value);
                     }
 
+                    Log.Information($"User {currentUser.Id} marked notification {notification.Id} as read.");
                     return Json(new
                     {
                         success = true,
@@ -190,11 +192,13 @@ namespace TROUBLESHOOTING_REPAIR_SERVICE_REQUEST_SYSTEM.Controllers
                 }
                 else
                 {
+                    Log.Warning($"User {currentUser.Id} attempted to mark notification {notification.Id} as read without permission.");
                     throw new Exception("You are not allowed to perform this action.");
                 }
             }
             catch (Exception ex)
             {
+                Log.Error(ex, $"Error occurred while marking notification as read for user ID {GetUserSession()?.Id.ToString() ?? "Unknown"}.");
                 return Json(new
                 {
                     success = false,

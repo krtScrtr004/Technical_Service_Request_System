@@ -25,19 +25,8 @@ namespace TROUBLESHOOTING_REPAIR_SERVICE_REQUEST_SYSTEM.Models
         [Index(IsUnique = true)]
         public string ReferenceCode { get; set; }
 
-
-        // CLIENT INFORMATION
-        public string ClientLastName { get; set; }
-        public string ClientFirstName { get; set; }
-        public string ClientMiddleName { get; set; }
-        public string ClientExtensionName { get; set; }
-
-        public string ClientOffice { get; set; }
-        public string ClientPosition { get; set; }
-        public string ClientContactNumber { get; set; }
-        [MaxLength(255)]
-        [Index]
-        public string ClientEmailAddress { get; set; }
+        public int ClientRegistrationId { get; set; }
+        public virtual Registration ClientRegistration { get; set; }
 
         // TECHNICAL SERVICE
         [Index]
@@ -86,6 +75,11 @@ namespace TROUBLESHOOTING_REPAIR_SERVICE_REQUEST_SYSTEM.Models
         public string ReferenceCode { get; set; }
 
         // CLIENT INFORMATION
+
+        [Required]
+        [HiddenInput]
+        public int ClientRegistrationId { get; set; }
+
         [Required]
         [DataType(DataType.Text)]
         [DisplayName("Last Name")]
@@ -94,6 +88,7 @@ namespace TROUBLESHOOTING_REPAIR_SERVICE_REQUEST_SYSTEM.Models
         [RegularExpression(ValueConstants.VALID_NAME_REGEX, 
             ErrorMessage = ValueConstants.VALID_NAME_REGEX_MESSAGE)]
         public string ClientLastName { get; set; }
+
         [Required]
         [DataType(DataType.Text)]
         [DisplayName("First Name")]
@@ -102,6 +97,7 @@ namespace TROUBLESHOOTING_REPAIR_SERVICE_REQUEST_SYSTEM.Models
         [RegularExpression(ValueConstants.VALID_NAME_REGEX,
             ErrorMessage = ValueConstants.VALID_NAME_REGEX_MESSAGE)]
         public string ClientFirstName { get; set; }
+
         [DataType(DataType.Text)]
         [DisplayName("Middle Name")]
         [MinLength(1, ErrorMessage = "The minimum length is 1")]
@@ -109,6 +105,7 @@ namespace TROUBLESHOOTING_REPAIR_SERVICE_REQUEST_SYSTEM.Models
         [RegularExpression(ValueConstants.VALID_NAME_REGEX,
             ErrorMessage = ValueConstants.VALID_NAME_REGEX_MESSAGE)]
         public string ClientMiddleName { get; set; }
+
         [DataType(DataType.Text)]
         [DisplayName("Extension Name")]
         [MinLength(1, ErrorMessage = "The minimum length is 1")]
@@ -125,6 +122,7 @@ namespace TROUBLESHOOTING_REPAIR_SERVICE_REQUEST_SYSTEM.Models
         [RegularExpression("^[\\w\\s-_]+$", 
             ErrorMessage = "Office field must only contain letters, numbers, spaces, hyphens ( - ), and underscores ( _ ")]
         public string ClientOffice { get; set; }
+
         [Required]
         [DataType(DataType.Text)]
         [DisplayName("Position")]
@@ -133,6 +131,7 @@ namespace TROUBLESHOOTING_REPAIR_SERVICE_REQUEST_SYSTEM.Models
         [RegularExpression("^[\\w\\s-_\\/]+$",
             ErrorMessage = "Position field must only contain letters, numbers, spaces, hyphens ( - ), and underscores ( _ ")]
         public string ClientPosition { get; set; }
+
         [Required]
         [Phone]
         [DataType(DataType.PhoneNumber)]
@@ -140,6 +139,7 @@ namespace TROUBLESHOOTING_REPAIR_SERVICE_REQUEST_SYSTEM.Models
         [RegularExpression(ValueConstants.VALID_CONTACT_NUMBER_REGEX,
             ErrorMessage = ValueConstants.VALID_CONTACT_NUMBER_REGEX_MESSAGE)]
         public string ClientContactNumber { get; set; }
+
         [Required]
         [EmailAddress]
         [DataType(DataType.EmailAddress)]
@@ -152,7 +152,11 @@ namespace TROUBLESHOOTING_REPAIR_SERVICE_REQUEST_SYSTEM.Models
         [SelectTechnicalServiceRequestType(otherPropertyName: "Others")]
         public int? TechnicalServiceTypeId { get; set; }
         [DisplayName("Type")]
-        public SelectList TechnicalServiceTypes { get; set; }
+        public IEnumerable<SelectListItem> TechnicalServiceTypes { get; set; }
+
+        public int? TechnicalServiceRequestSeverityId { get; set; }
+        [DisplayName("Severity")]
+        public IEnumerable<SelectListItem> TechnicalServiceRequestSeverities {  get; set; }
 
         [DataType(DataType.Text)]
         [DisplayName("Specify Other Request")]
@@ -186,12 +190,13 @@ namespace TROUBLESHOOTING_REPAIR_SERVICE_REQUEST_SYSTEM.Models
 
         [DataType(DataType.Time)]
         [DisplayName("End")]
+        // 5:00 PM is the latest time allowed for scheduling a service request on the same day
+        [TimeAllowed(minimumHourFromNow: 0, maximumHour: "17:00")]
         [StartEndTimeCollision(startTimePropertyName: "TechnicalServiceRequestScheduledStartTime", endTimePropertyName: "TechnicalServiceRequestScheduledEndTime")]
         public TimeSpan? TechnicalServiceRequestScheduledEndTime { get; set; }
 
         public TechnicalServiceRequestCreateViewModel()
         {
-            _db = new ApplicationDbContext();
             InitializeModel();
         }
 
@@ -206,8 +211,6 @@ namespace TROUBLESHOOTING_REPAIR_SERVICE_REQUEST_SYSTEM.Models
             string clientEmailAddress
         )
         {
-            _db = new ApplicationDbContext();
-
             ClientFirstName = clientFirstName;
             ClientLastName = clientLastName;
             ClientMiddleName = clientMiddleName;
@@ -224,10 +227,109 @@ namespace TROUBLESHOOTING_REPAIR_SERVICE_REQUEST_SYSTEM.Models
 
         private void InitializeModel()
         {
-            TechnicalServiceTypes = new SelectList(
-                _db.TechnicalServiceTypes.OrderBy(i => i.TechnicalServiceTypeName), 
-                "Id", "TechnicalServiceTypeName"
-            );
+            var assistedGroup = new SelectListGroup { Name = "Assisted" };
+            var scheduledGroup = new SelectListGroup { Name = "Scheduled Control Process" };
+            var nonAssistedGroup = new SelectListGroup { Name = "Non-Assisted" };
+
+            var serviceTypeOptions = new List<SelectListItem>
+            {
+                new SelectListItem 
+                { 
+                    Value = TechnicalServiceTypeEnum.EQUIPMENT_REPAIR_TROUBLESHOOTING.ToString(),
+                    Text = TechnicalServiceTypeEnum.DisplayName(TechnicalServiceTypeEnum.EQUIPMENT_REPAIR_TROUBLESHOOTING),
+                    Group = assistedGroup 
+                },
+                new SelectListItem 
+                { 
+                    Value = TechnicalServiceTypeEnum.INTERNET_CONNECTIVITY.ToString(),
+                    Text = TechnicalServiceTypeEnum.DisplayName(TechnicalServiceTypeEnum.INTERNET_CONNECTIVITY),
+                    Group = assistedGroup 
+                },
+
+                new SelectListItem 
+                { 
+                    Value = TechnicalServiceTypeEnum.AUDIO_VISUAL_SETUP.ToString(),
+                    Text = TechnicalServiceTypeEnum.DisplayName(TechnicalServiceTypeEnum.AUDIO_VISUAL_SETUP),
+                    Group = scheduledGroup 
+                },
+                new SelectListItem 
+                { 
+                    Value = TechnicalServiceTypeEnum.LIVESTREAM_SETUP.ToString(),
+                    Text = TechnicalServiceTypeEnum.DisplayName(TechnicalServiceTypeEnum.LIVESTREAM_SETUP),
+                    Group = scheduledGroup 
+                },
+                new SelectListItem 
+                { 
+                    Value = TechnicalServiceTypeEnum.ZOOM_WEBEX_LINK.ToString(),
+                    Text = TechnicalServiceTypeEnum.DisplayName(TechnicalServiceTypeEnum.ZOOM_WEBEX_LINK),
+                    Group = scheduledGroup 
+                },
+
+                new SelectListItem 
+                { 
+                    Value = TechnicalServiceTypeEnum.ACCOUNT_CREATION.ToString(),
+                    Text = TechnicalServiceTypeEnum.DisplayName(TechnicalServiceTypeEnum.ACCOUNT_CREATION),
+                    Group = nonAssistedGroup 
+                },
+                new SelectListItem 
+                { 
+                    Value = TechnicalServiceTypeEnum.DATA_CORRECTION.ToString(),
+                    Text = TechnicalServiceTypeEnum.DisplayName(TechnicalServiceTypeEnum.DATA_CORRECTION),
+                    Group = nonAssistedGroup 
+                },
+                new SelectListItem 
+                { 
+                    Value = TechnicalServiceTypeEnum.GOVERNMENT_EMAIL_ACCOUNT.ToString(),
+                    Text = TechnicalServiceTypeEnum.DisplayName(TechnicalServiceTypeEnum.GOVERNMENT_EMAIL_ACCOUNT),
+                    Group = nonAssistedGroup 
+                },
+                new SelectListItem 
+                { 
+                    Value = TechnicalServiceTypeEnum.PRODUCTION_MATERIAL_PRINTING.ToString(),
+                    Text = TechnicalServiceTypeEnum.DisplayName(TechnicalServiceTypeEnum.PRODUCTION_MATERIAL_PRINTING),
+                    Group = nonAssistedGroup 
+                },
+                new SelectListItem 
+                { 
+                    Value = TechnicalServiceTypeEnum.SYSTEM_SUPPORT.ToString(),
+                    Text = TechnicalServiceTypeEnum.DisplayName(TechnicalServiceTypeEnum.SYSTEM_SUPPORT),
+                    Group = nonAssistedGroup 
+                },
+                new SelectListItem 
+                { 
+                    Value = TechnicalServiceTypeEnum.TECHNICAL_GUIDANCE.ToString(),
+                    Text = TechnicalServiceTypeEnum.DisplayName(TechnicalServiceTypeEnum.TECHNICAL_GUIDANCE),
+                    Group = nonAssistedGroup 
+                },
+
+                // Keep "Others" as -1 for your existing JS logic
+                new SelectListItem { Value = "-1", Text = "Others" }
+            };
+            TechnicalServiceTypes = serviceTypeOptions;
+
+            TechnicalServiceRequestSeverities = new List<SelectListItem>
+            {
+                new SelectListItem { Value = "", Text = "Not Applicable"},
+
+                new SelectListItem {
+                    Value = TechnicalServicRequestSeverityEnum.LOW.ToString(),
+                    Text = TechnicalServicRequestSeverityEnum.DisplayName(TechnicalServicRequestSeverityEnum.LOW) 
+                },
+                new SelectListItem {
+                    Value = TechnicalServicRequestSeverityEnum.MEDIUM.ToString(),
+                    Text = TechnicalServicRequestSeverityEnum.DisplayName(TechnicalServicRequestSeverityEnum.MEDIUM) 
+                },
+                new SelectListItem 
+                { 
+                    Value = TechnicalServicRequestSeverityEnum.HIGH.ToString(),
+                    Text = TechnicalServicRequestSeverityEnum.DisplayName(TechnicalServicRequestSeverityEnum.HIGH) 
+                },
+                new SelectListItem 
+                { 
+                    Value = TechnicalServicRequestSeverityEnum.CRITICAL.ToString(),
+                    Text = TechnicalServicRequestSeverityEnum.DisplayName(TechnicalServicRequestSeverityEnum.CRITICAL) 
+                }
+            };
         }
     }
 
@@ -243,6 +345,10 @@ namespace TROUBLESHOOTING_REPAIR_SERVICE_REQUEST_SYSTEM.Models
         public string ReferenceCode { get; set; }
 
         // CLIENT INFORMATION
+
+        [HiddenInput]
+        public int ClientRegistrationId { get; set; }
+
         [DisplayName("Last Name")]
         public string ClientLastName { get; set; }
 
@@ -301,6 +407,9 @@ namespace TROUBLESHOOTING_REPAIR_SERVICE_REQUEST_SYSTEM.Models
         [DisplayName("Scheduled End Time")]
         public TimeSpan? TechnicalServiceRequestScheduledEndTime { get; set; }
 
+        // This property is used to determine if the "Generate TSRF Form" button should be enabled or disabled in the view.
+        public int? TechnicalServiceRequestFormGeneratableHistoryId { get; set; }
+
 
         // Histories
         public virtual List<TechnicalServiceRequestHistory> TechnicalServiceRequestHistories { get; set; }
@@ -341,17 +450,10 @@ namespace TROUBLESHOOTING_REPAIR_SERVICE_REQUEST_SYSTEM.Models
                 Id = technicalServiceRequest.Id,
                 ReferenceCode = technicalServiceRequest.ReferenceCode,
 
-                ClientLastName = technicalServiceRequest.ClientLastName,
-                ClientFirstName = technicalServiceRequest.ClientFirstName,
-                ClientMiddleName = technicalServiceRequest.ClientMiddleName,
-                ClientExtensionName = technicalServiceRequest.ClientExtensionName,
-
-                ClientOffice = technicalServiceRequest.ClientOffice,
-                ClientPosition = technicalServiceRequest.ClientPosition,
-                ClientContactNumber = technicalServiceRequest.ClientContactNumber,
-                ClientEmailAddress = technicalServiceRequest.ClientEmailAddress,
+                ClientRegistrationId = technicalServiceRequest.ClientRegistrationId,
 
                 TechnicalServiceTypeId = technicalServiceRequest.TechnicalServiceTypeId,
+                TechnicalServiceRequestSeverityId = technicalServiceRequest.TechnicalServiceRequestSeverityId,
                 Others = technicalServiceRequest.Others,
                 TechnicalServiceRequestDescription = technicalServiceRequest.TechnicalServiceRequestDescription,
 
@@ -370,14 +472,16 @@ namespace TROUBLESHOOTING_REPAIR_SERVICE_REQUEST_SYSTEM.Models
             {
                 Id = technicalServiceRequest.Id,
                 ReferenceCode = technicalServiceRequest.ReferenceCode,
-                ClientLastName = technicalServiceRequest.ClientLastName,
-                ClientFirstName = technicalServiceRequest.ClientFirstName,
-                ClientMiddleName = technicalServiceRequest.ClientMiddleName,
-                ClientExtensionName = technicalServiceRequest.ClientExtensionName,
-                ClientOffice = technicalServiceRequest.ClientOffice,
-                ClientPosition = technicalServiceRequest.ClientPosition,
-                ClientContactNumber = technicalServiceRequest.ClientContactNumber,
-                ClientEmailAddress = technicalServiceRequest.ClientEmailAddress,
+
+                ClientRegistrationId = technicalServiceRequest.ClientRegistrationId,
+                ClientFirstName = technicalServiceRequest.ClientRegistration.FirstName,
+                ClientMiddleName = technicalServiceRequest.ClientRegistration.MiddleName,
+                ClientLastName = technicalServiceRequest.ClientRegistration.LastName,
+                ClientExtensionName = technicalServiceRequest.ClientRegistration.ExtensionName,
+                ClientEmailAddress = technicalServiceRequest.ClientRegistration.Email,
+                ClientContactNumber = technicalServiceRequest.ClientRegistration.ContactNumber,
+                ClientOffice = technicalServiceRequest.ClientRegistration.Office,
+                ClientPosition = technicalServiceRequest.ClientRegistration.Position,
 
                 TechnicalServiceTypeId = technicalServiceRequest.TechnicalServiceTypeId.GetValueOrDefault(),
                 TechnicalServiceType = technicalServiceRequest.TechnicalServiceType,

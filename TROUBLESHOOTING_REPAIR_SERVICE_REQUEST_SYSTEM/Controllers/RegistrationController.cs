@@ -2,6 +2,7 @@
 using Microsoft.Ajax.Utilities;
 using Microsoft.AspNet.Identity;
 using Microsoft.AspNet.Identity.EntityFramework;
+using Serilog;
 using System;
 using System.Collections.Generic;
 using System.Data;
@@ -135,8 +136,11 @@ namespace TROUBLESHOOTING_REPAIR_SERVICE_REQUEST_SYSTEM.Controllers
                 FirstName = registrationCreateViewModel.FirstName,
                 MiddleName = registrationCreateViewModel.MiddleName,
                 LastName = registrationCreateViewModel.LastName,
+                ExtensionName = registrationCreateViewModel.ExtensionName,
                 Email = registrationCreateViewModel.Email,
-                ContactNumber = registrationCreateViewModel.ContactNumber
+                ContactNumber = registrationCreateViewModel.ContactNumber,
+                Office = registrationCreateViewModel.Office,
+                Position = registrationCreateViewModel.Position
             };
 
             if (id < 1)
@@ -173,6 +177,7 @@ namespace TROUBLESHOOTING_REPAIR_SERVICE_REQUEST_SYSTEM.Controllers
             if (!ModelState.IsValid)
             {
                 var errors = GetModelStateErrors();
+                Log.Warning($"Model state is invalid: {errors}");
                 return View(registrationCreateViewModel);
             }
 
@@ -199,6 +204,9 @@ namespace TROUBLESHOOTING_REPAIR_SERVICE_REQUEST_SYSTEM.Controllers
                         FirstName = registrationCreateViewModel.FirstName.Trim().ToUpper(),
                         MiddleName = registrationCreateViewModel.MiddleName?.Trim().ToUpper(),
                         LastName = registrationCreateViewModel.LastName.Trim().ToUpper(),
+                        ExtensionName = registrationCreateViewModel.ExtensionName?.Trim().ToUpper(),
+                        Office = registrationCreateViewModel.Office?.Trim().ToUpper(),
+                        Position = registrationCreateViewModel.Position?.Trim().ToUpper(),
                         RegistrationDate = DateTime.Now,
                         ExpiryDate = registrationCreateViewModel.ExpiryDate,
                         AccountType = registrationCreateViewModel.AccountType,
@@ -259,6 +267,8 @@ namespace TROUBLESHOOTING_REPAIR_SERVICE_REQUEST_SYSTEM.Controllers
                     transaction.Commit();
 
                     var enc = Custom.Controllers.EncryptionHelper.Encrypt(registration.Id.ToString());
+
+                    Log.Information($"Registration created successfully for registration ID {registration.Id} by admin ID {currentUser.Id}.");
                     return RedirectToAction(
                         "Success",
                         "Registration",
@@ -275,6 +285,7 @@ namespace TROUBLESHOOTING_REPAIR_SERVICE_REQUEST_SYSTEM.Controllers
                         Message = "An error occurred while making a request. Please try again.",
                         Status = AlertModalStatus.Error
                     };
+                    Log.Error($"An error occurred while creating registration for registration request ID {id} by admin ID {currentUser.Id}: {ex.Message}");
                     ModelState.AddModelError("", "An error occurred while making a request: " + ex.Message);
                     return View(registrationCreateViewModel);
                 }
@@ -327,34 +338,47 @@ namespace TROUBLESHOOTING_REPAIR_SERVICE_REQUEST_SYSTEM.Controllers
 
             using (var transaction = _db.Database.BeginTransaction())
             {
-                try
-                {
-                    var validPrivilegeIds = new List<int>
+                var validPrivilegeIds = new List<int>
                     {
                         AccountTypeEnum.ADMIN,
                         AccountTypeEnum.IT,
                         AccountTypeEnum.STANDARD
                     };
-                    if (!validPrivilegeIds.Contains(update_privilege))
+                if (!validPrivilegeIds.Contains(update_privilege))
+                {
+                    throw new Exception("Invalid privilege Id.");
+                }
+
+                var registration = _db.Registrations
+                    .Include(r => r.UserPrivileges)
+                    .FirstOrDefault(r => r.Id == id);
+                if (registration == null)
+                {
+                    throw new HttpException(404, "Not found");
+                }
+
+                var currentPrivileges = registration.UserPrivileges.ToArray();
+                var currentPrivilegeIds = currentPrivileges
+                    .Where(p => p.PrivilegeId.HasValue)
+                    .Select(r => r.PrivilegeId.Value)
+                    .ToArray();
+
+                try
+                {
+                    // Check for active service when user is an IT
+                    if (AccountTypeEnum.IsIT(currentPrivilegeIds) && IsTechnicianBusy(registration.Id))
                     {
-                        throw new Exception("Invalid privilege Id.");
+                        TempData["AlertModal"] = new AlertModalUtility
+                        {
+                            Title = "Error",
+                            Message = "Cannot modify user privilege with an active service.",
+                            Status = AlertModalStatus.Error
+                        };
+                        return RedirectToAction("Details", new { id = id });
                     }
 
-                    var registration = _db.Registrations
-                        .Include(r => r.UserPrivileges)
-                        .FirstOrDefault(r => r.Id == id);
-                    if (registration == null)
-                    {
-                        throw new HttpException(404, "Not found");
-                    }
-
-                    var currentPrivileges = registration.UserPrivileges.ToArray();
                     // Check if user does not have the privilege that is being updated
-                    if (!currentPrivileges
-                        .Where(p => p.PrivilegeId.HasValue)
-                        .Select(r => r.PrivilegeId.Value)
-                        .ToArray()
-                        .Contains(update_privilege))
+                    if (!currentPrivilegeIds.Contains(update_privilege))
                     {
                         foreach (var privilege in currentPrivileges)
                         {
@@ -397,11 +421,13 @@ namespace TROUBLESHOOTING_REPAIR_SERVICE_REQUEST_SYSTEM.Controllers
                             Message = "User privilege updated successfully.",
                             Status = AlertModalStatus.Success
                         };
+                        Log.Information($"User privilege updated successfully for registration ID {registration.Id} by admin ID {GetUserSession()?.Id.ToString() ?? "Unknown"}. New privilege: {privilegeName}");
                     }
                 }
                 catch (Exception ex)
                 {
                     transaction.Rollback();
+                    Log.Error(ex, $"An error occurred while updating user privilege for registration ID {registration.Id} by admin ID {GetUserSession()?.Id.ToString() ?? "Unknown"}.");
                     TempData["AlertModal"] = new AlertModalUtility
                     {
                         Title = "Error",
@@ -462,6 +488,7 @@ namespace TROUBLESHOOTING_REPAIR_SERVICE_REQUEST_SYSTEM.Controllers
                         .FirstOrDefault(i => i.Id == id);
                     if (registration == null)
                     {
+                        Log.Warning($"Attempt to deactivate non-existent registration with ID {id} by admin ID {currentUser.Id}.");
                         TempData["alertModal"] = new AlertModalUtility()
                         {
                             Title = "Error",
@@ -469,6 +496,22 @@ namespace TROUBLESHOOTING_REPAIR_SERVICE_REQUEST_SYSTEM.Controllers
                             Status = AlertModalStatus.Error
                         };
                         return View(id);
+                    }
+
+                    // Check for active service when user is an IT
+                    var registrationPrivileges = registration.UserPrivileges
+                        .Where(p => p.PrivilegeId.HasValue)
+                        .Select(p => p.PrivilegeId.Value)
+                        .ToArray();
+                    if (AccountTypeEnum.IsIT(registrationPrivileges) && IsTechnicianBusy(registration.Id))
+                    {
+                        TempData["AlertModal"] = new AlertModalUtility
+                        {
+                            Title = "Error",
+                            Message = "Cannot deactivate a user with an active service.",
+                            Status = AlertModalStatus.Error
+                        };
+                        return RedirectToAction("Details", new { id = id });
                     }
 
                     registration.IsActive = false;
@@ -486,6 +529,7 @@ namespace TROUBLESHOOTING_REPAIR_SERVICE_REQUEST_SYSTEM.Controllers
                         Message = "You have successfully deactivated this account.",
                         Status = AlertModalStatus.Success
                     };
+                    Log.Information($"Registration with ID {registration.Id} deactivated successfully by admin ID {currentUser.Id}.");
                     return RedirectToAction("Index", "Registration");
                 }
                 catch (Exception ex)
@@ -497,19 +541,11 @@ namespace TROUBLESHOOTING_REPAIR_SERVICE_REQUEST_SYSTEM.Controllers
                         Message = "An error occurred while making a request. Please try again.",
                         Status = AlertModalStatus.Error
                     };
+                    Log.Error(ex, $"An error occurred while deactivating registration with ID {id} by admin ID {GetUserSession()?.Id.ToString() ?? "Unknown"}.");
                     ModelState.AddModelError("", "An error occurred while making a request: " + ex.Message);
                     return View(id);
                 }
             }
-        }
-
-        protected override void Dispose(bool disposing)
-        {
-            if (disposing)
-            {
-                _db.Dispose();
-            }
-            base.Dispose(disposing);
         }
 
         #region API
@@ -649,6 +685,7 @@ namespace TROUBLESHOOTING_REPAIR_SERVICE_REQUEST_SYSTEM.Controllers
             }
             catch (Exception ex)
             {
+                Log.Error(ex, $"An error occurred while fetching registration data by admin ID {GetUserSession()?.Id.ToString() ?? "Unknown"}.");
                 return Json(
                     new { success = false, message = ex.Message },
                     JsonRequestBehavior.AllowGet
@@ -679,6 +716,7 @@ namespace TROUBLESHOOTING_REPAIR_SERVICE_REQUEST_SYSTEM.Controllers
                 _db.Entry(registrationRequest).State = EntityState.Modified;
                 _db.SaveChanges();
 
+                Log.Information($"Registration request with ID {id} denied successfully by admin ID {GetUserSession()?.Id.ToString() ?? "Unknown"}.");
                 return Json(new
                 {
                     success = true,
@@ -686,6 +724,7 @@ namespace TROUBLESHOOTING_REPAIR_SERVICE_REQUEST_SYSTEM.Controllers
             }
             catch (Exception ex)
             {
+                Log.Error(ex, $"An error occurred while denying registration request with ID {id} by admin ID {GetUserSession()?.Id.ToString() ?? "Unknown"}.");
                 return Json(new
                 {
                     succes = false,
@@ -774,6 +813,23 @@ namespace TROUBLESHOOTING_REPAIR_SERVICE_REQUEST_SYSTEM.Controllers
                 // Update security stamp to invalidate existing cookies (forces re-login on all devices)
                 UserManager.UpdateSecurityStamp(appUser.Id);
             }
+        }
+
+        private bool IsTechnicianBusy(int technicianId)
+        {
+            var activeStatusIds = TechnicalServiceRequestStatusEnum.GetActiveStatusIds();
+            var nonAssistedRequestIds = TechnicalServiceTypeEnum.GetNonAssistedServiceIds();
+
+            return _db.TechnicalServiceRequests.Any(r =>
+                r.TechnicalServiceRequestStatusId.HasValue &&
+                activeStatusIds.Contains(r.TechnicalServiceRequestStatusId.Value) &&
+                r.TechnicalServiceTypeId.HasValue &&
+                !nonAssistedRequestIds.Contains(r.TechnicalServiceTypeId.Value) &&
+                r.TechnicalServiceRequestHistories
+                    .OrderByDescending(h => h.UpdatedAt)
+                    .Select(h => h.ActionTakenByRegistrationId)
+                    .FirstOrDefault() == technicianId
+            );
         }
 
         #endregion

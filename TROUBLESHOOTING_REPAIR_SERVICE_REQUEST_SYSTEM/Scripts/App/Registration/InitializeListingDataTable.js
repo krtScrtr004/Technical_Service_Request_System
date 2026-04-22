@@ -40,7 +40,7 @@
                 data: null,
                 name: "LastName",
                 render: function (data, type, row) {
-                    return row.LastName + ", " + row.FirstName + " " + (row.MiddleName ? row.MiddleName : "");
+                    return row.LastName + ", " + row.FirstName + " " + (row.MiddleName ? row.MiddleName : "") + (row.ExtensionName ? row.ExtensionName : "");
                 },
             },
             {

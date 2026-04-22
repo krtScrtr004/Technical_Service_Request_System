@@ -90,7 +90,7 @@
                     @if (AccountTypeEnum.IsIT(currentUser.PrivilegeIds))
                     {
                         <li>
-                            @Html.ActionLink("Manage Availability", "Manage", "ITAvailability")
+                            @Html.ActionLink("Manage Availability", "Manage", "ITAvailability", new { id = currentUser.Id }, null)
                         </li>
                     }
 

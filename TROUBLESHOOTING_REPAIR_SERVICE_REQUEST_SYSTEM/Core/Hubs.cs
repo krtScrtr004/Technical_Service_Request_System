@@ -74,6 +74,8 @@ namespace TROUBLESHOOTING_REPAIR_SERVICE_REQUEST_SYSTEM
         {
             var context = GlobalHost.ConnectionManager.GetHubContext<RegistrationRequestHub>();
             context.Clients.Group(AdminGroupName).refreshRegistrationRequestList();
+
+            DashboardHub.RefreshDashboard();
         }
     }
 
@@ -89,6 +91,8 @@ namespace TROUBLESHOOTING_REPAIR_SERVICE_REQUEST_SYSTEM
         {
             var context = GlobalHost.ConnectionManager.GetHubContext<RegistrationHub>();
             context.Clients.Group(AdminGroupName).refreshRegistrationList();
+
+            DashboardHub.RefreshDashboard();
         }
     }
 
@@ -104,24 +108,40 @@ namespace TROUBLESHOOTING_REPAIR_SERVICE_REQUEST_SYSTEM
         {
             var context = GlobalHost.ConnectionManager.GetHubContext<TechnicalServiceRequestHub>();
             context.Clients.All.refreshTechnicalServiceRequestList();
+
+            DashboardHub.RefreshDashboard();
         }
 
         public static void RefreshTechnicalServiceRequestSeverity(string severityName)
         {
             var context = GlobalHost.ConnectionManager.GetHubContext<TechnicalServiceRequestHub>();
             context.Clients.All.refreshTechnicalServiceRequestSeverity(severityName);
+
+            DashboardHub.RefreshDashboard();
         }
 
         public static void RefreshTechnicalServiceRequestStatus(string statusName)
         {
             var context = GlobalHost.ConnectionManager.GetHubContext<TechnicalServiceRequestHub>();
             context.Clients.All.refreshTechnicalServiceRequestStatus(statusName);
+
+            DashboardHub.RefreshDashboard();
         }
 
-        public static void RefreshTechnicalServiceRequestActionHistory(int technicalServiceRequestHistoryId)
+        public static void RefreshTechnicalServiceRequestActionHistory(int technicalServiceRequestHistoryId, int technicalServiceRequestId)
         {
             var context = GlobalHost.ConnectionManager.GetHubContext<TechnicalServiceRequestHub>();
-            context.Clients.All.refreshTechnicalServiceRequestActionHistory(technicalServiceRequestHistoryId);
+            context.Clients.All.refreshTechnicalServiceRequestActionHistory(technicalServiceRequestHistoryId, technicalServiceRequestId);
+
+            DashboardHub.RefreshDashboard();
+        }
+
+        public static void RefreshTechnicalServiceRequestFormGeneration(int technicalServiceRequestId)
+        {
+            var context = GlobalHost.ConnectionManager.GetHubContext<TechnicalServiceRequestHub>();
+            context.Clients.All.refreshTechnicalServiceRequestFormGeneration(technicalServiceRequestId);
+
+            DashboardHub.RefreshDashboard();
         }
 
     }
@@ -166,12 +186,16 @@ namespace TROUBLESHOOTING_REPAIR_SERVICE_REQUEST_SYSTEM
         {
             var context = GlobalHost.ConnectionManager.GetHubContext<NotificationHub>();
             context.Clients.Group(RecipientGroupName(recipientRegistrationId)).refreshNotificationList();
+
+            DashboardHub.RefreshDashboard();
         }
 
         public static void RefreshNotificationBadge(int recipientRegistrationId)
         {
             var context = GlobalHost.ConnectionManager.GetHubContext<NotificationHub>();
             context.Clients.Group(RecipientGroupName(recipientRegistrationId)).refreshNotificationBadge();
+
+            DashboardHub.RefreshDashboard();
         }
 
         // Admin
@@ -180,12 +204,16 @@ namespace TROUBLESHOOTING_REPAIR_SERVICE_REQUEST_SYSTEM
         {
             var context = GlobalHost.ConnectionManager.GetHubContext<NotificationHub>();
             context.Clients.Group(AdminGroupName).refreshAdminNotificationList();
+
+            DashboardHub.RefreshDashboard();
         }
 
         public static void RefreshAdminNotificationBadge()
         {
             var context = GlobalHost.ConnectionManager.GetHubContext<NotificationHub>();
             context.Clients.Group(AdminGroupName).refreshAdminNotificationBadge();
+
+            DashboardHub.RefreshDashboard();
         }
 
         // IT
@@ -194,13 +222,50 @@ namespace TROUBLESHOOTING_REPAIR_SERVICE_REQUEST_SYSTEM
         {
             var context = GlobalHost.ConnectionManager.GetHubContext<NotificationHub>();
             context.Clients.Group(ITGroupName).refreshITNotificationList();
+
+            DashboardHub.RefreshDashboard();
         }
 
         public static void RefreshITNotificationBadge()
         {
             var context = GlobalHost.ConnectionManager.GetHubContext<NotificationHub>();
             context.Clients.Group(ITGroupName).refreshITNotificationBadge();
+
+            DashboardHub.RefreshDashboard();
         }
 
     }
+
+    public class ITAvailabilityHub : BaseHub
+    {
+        public override async Task OnConnected()
+        {
+            await base.OnConnected();
+        }
+
+        public static void RefreshITAvailabilityTable(int itId)
+        {
+            var context = GlobalHost.ConnectionManager.GetHubContext<ITAvailabilityHub>();
+            context.Clients.All.refreshITAvailabilityTable(itId);
+
+            DashboardHub.RefreshDashboard();
+        }
+    }
+
+    [Authorize2]
+    public class DashboardHub : BaseHub
+    {
+        public override async Task OnConnected()
+        {
+            await base.OnConnected();
+        }
+
+        public static void RefreshDashboard()
+        {
+            var context = GlobalHost.ConnectionManager.GetHubContext<DashboardHub>();
+            context.Clients.All.refreshDashboard();
+        }
+
+    }
+
 }

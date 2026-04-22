@@ -1,9 +1,9 @@
-﻿import { selectedDates, deselectedDates } from './InitializeDatetimePicker.js';
+﻿import { selectedDates, deselectedDates } from "./InitializeDatetimePicker.js";
 
-$('document').ready(function () {
-    const modifyAvailabilityButton = $('#modify_availability_button');
+$("document").ready(function () {
+    const modifyAvailabilityButton = $("#modify_availability_button");
     if (modifyAvailabilityButton.length === 0) {
-        console.warn('Modify Availability button not found');
+        console.warn("Modify Availability button not found");
         return;
     }
 
@@ -15,9 +15,9 @@ $('document').ready(function () {
         const payload = BuildPayload();
         $.ajax({
             url: submitUrl,
-            type: 'POST',
+            type: "POST",
             headers: {
-                'X-CSRF-TOKEN': token
+                "X-CSRF-TOKEN": token
             },
             data: {
                 toAdd: payload.toAdd,
@@ -27,14 +27,14 @@ $('document').ready(function () {
             success: function (response) {
                 if (response.success) {
                     Swal.fire({
-                        title: 'Success',
+                        title: "Success",
                         text: response.message,
-                        icon: 'success',
+                        icon: "success",
                     }).then(() => {
                         window.location.reload();
                     });
                 } else {
-                    Swal.fire('Error!', response.message, 'error');
+                    Swal.fire("Error!", response.message, "error");
                 }
             },
             error: function (xhr, status, error) {
@@ -42,7 +42,7 @@ $('document').ready(function () {
                     title: "Error",
                     text: "An error occured. Please try again.",
                     icon: "error",
-                    confirmButtonText: 'Understood',
+                    confirmButtonText: "Understood",
                 });
                 console.error(error)
             }

@@ -60,13 +60,13 @@
 
                     <section class="secondary-info-inputs flex-row">
                         @* Date *@
-                        <div class="form-group">
+                        <div class="form-group flex-1">
                             <label class="text-primary light-text" for="ActionDate">Date</label>
                             <input type="date" id="ActionDate" name="ActionDate" value="@DateTime.Now.ToString("yyyy-MM-dd")" class="form-control" required disabled />
                         </div>
 
                         @* Status *@
-                        <div class="form-group">
+                        <div class="form-group flex-1">
                             <label class="text-primary light-text" for="technical_service_request_status_select">Status</label>
 
                             @Html.DropDownListFor(

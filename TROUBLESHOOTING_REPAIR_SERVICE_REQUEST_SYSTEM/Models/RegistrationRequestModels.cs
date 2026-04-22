@@ -15,6 +15,7 @@ namespace TROUBLESHOOTING_REPAIR_SERVICE_REQUEST_SYSTEM.Models
         public string FirstName { get; set; }
         public string MiddleName { get; set; }
         public string LastName { get; set; }
+        public string ExtensionName { get; set; }
         [MaxLength(255)]
         [Index]
         public string Email { get; set; }
@@ -22,6 +23,8 @@ namespace TROUBLESHOOTING_REPAIR_SERVICE_REQUEST_SYSTEM.Models
         public string Code { get; set; }
         public bool UserProfilePicture { get; set; }
 
+        public string Office { get; set; }
+        public string Position { get; set; }
 
         public bool IsVerified { get; set; }
         public bool IsApproved { get; set; }
@@ -65,6 +68,13 @@ namespace TROUBLESHOOTING_REPAIR_SERVICE_REQUEST_SYSTEM.Models
             ErrorMessage = ValueConstants.VALID_NAME_REGEX_MESSAGE)]
         public string LastName { get; set; }
 
+        [Display(Name = "Extension Name")]
+        [MinLength(length: 1, ErrorMessage = "The minimum length is 1.")]
+        [MaxLength(100, ErrorMessage = "The maximum length is 100.")]
+        [RegularExpression(ValueConstants.VALID_NAME_REGEX,
+            ErrorMessage = ValueConstants.VALID_NAME_REGEX_MESSAGE)]
+        public string ExtensionName { get; set; }
+
         [Required]
         [EmailAddress]
         [DataType(DataType.EmailAddress)]
@@ -80,5 +90,19 @@ namespace TROUBLESHOOTING_REPAIR_SERVICE_REQUEST_SYSTEM.Models
         [RegularExpression(ValueConstants.VALID_CONTACT_NUMBER_REGEX,
             ErrorMessage = ValueConstants.VALID_CONTACT_NUMBER_REGEX_MESSAGE)]
         public string ContactNumber { get; set; }
+
+        [Required]
+        [Display(Name = "Office")]
+        [MinLength(length: 2, ErrorMessage = "The minimum length is 2.")]
+        [MaxLength(100, ErrorMessage = "The maximum length is 100.")]
+        [RegularExpression("^[a-zA-Z0-9\\s\\-\\.]+$", ErrorMessage = "Office field must contain only letters, numbers, spaces, hyphens, and periods.")]
+        public string Office { get; set; }
+
+        [Required]
+        [Display(Name = "Position")]
+        [MinLength(length: 2, ErrorMessage = "The minimum length is 2.")]
+        [MaxLength(100, ErrorMessage = "The maximum length is 100.")]
+        [RegularExpression("^[a-zA-Z0-9\\s\\-\\.]+$", ErrorMessage = "Position field must contain only letters, numbers, spaces, hyphens, and periods.")]
+        public string Position { get; set; }
     }
 }

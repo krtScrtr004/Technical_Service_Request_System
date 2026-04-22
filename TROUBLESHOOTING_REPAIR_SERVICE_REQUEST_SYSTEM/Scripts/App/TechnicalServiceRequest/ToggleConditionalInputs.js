@@ -10,7 +10,7 @@ $(document).ready(function () {
     select.change(function () {
         const selectedOptionValue = parseInt($(this).val(), 10);
         // If nothing is selected, enable 'others' input
-        if (isNaN(selectedOptionValue)) {
+        if (isNaN(selectedOptionValue) || selectedOptionValue < 0) {
             otherServiceInput.prop("disabled", false);
         } else {
             otherServiceInput.prop("disabled", true);
@@ -20,10 +20,10 @@ $(document).ready(function () {
 
         if (requiredScheduleTypeIds.indexOf(selectedOptionValue) !== -1) {
             scheduleInputElements.removeClass("no-display");
-            scheduleInputElements.addClass("flex-child-center-h");
+            scheduleInputElements.addClass("flex-row");
         } else {
             scheduleInputElements.addClass("no-display");
-            scheduleInputElements.removeClass("flex-child-center-h");
+            scheduleInputElements.removeClass("flex-row");
         }
     })
 

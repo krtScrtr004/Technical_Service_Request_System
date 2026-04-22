@@ -3,9 +3,15 @@
     min-width: 0;
 }
 
-#registration_table {
-    width: 100% !important;
-}
+    .registration-index-page > .panel {
+        width: 100%;
+        height: fit-content;
+        max-width: var(--max-width-wide);
+    }
+
+    #registration_table {
+        width: 100% !important;
+    }
 
 @media (min-width: 768px) {
     #registration_table {

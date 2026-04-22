@@ -1,9 +1,11 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Data.Entity;
 using System.Web;
 using System.Web.Mvc;
 using TROUBLESHOOTING_REPAIR_SERVICE_REQUEST_SYSTEM.Models;
+using TROUBLESHOOTING_REPAIR_SERVICE_REQUEST_SYSTEM.Enumerables;
 
 namespace TROUBLESHOOTING_REPAIR_SERVICE_REQUEST_SYSTEM.Services
 {
@@ -29,7 +31,9 @@ namespace TROUBLESHOOTING_REPAIR_SERVICE_REQUEST_SYSTEM.Services
         public TechnicalServiceRequest Pop()
         {
             var lastItem = _db.TechnicalServiceRequestQueues
-                .Where(q => !q.IsProcessed)
+                .Where(q => 
+                    !q.IsProcessed &&
+                    q.TechnicalServiceRequest.TechnicalServiceRequestStatusId == (int)TechnicalServiceRequestStatusEnum.PENDING)
                 .OrderBy(q => q.QueuedAt)
                 .FirstOrDefault();
 
@@ -37,6 +41,10 @@ namespace TROUBLESHOOTING_REPAIR_SERVICE_REQUEST_SYSTEM.Services
             if (lastItem != null)
             {
                 lastItem.IsProcessed = true;
+                lastItem.TechnicalServiceRequest.TechnicalServiceRequestStatusId = (int)TechnicalServiceRequestStatusEnum.ONGOING;
+
+                _db.Entry(lastItem.TechnicalServiceRequest).State = EntityState.Modified;
+                _db.Entry(lastItem).State = EntityState.Modified;
                 _db.SaveChanges();
 
                 return _db.TechnicalServiceRequests

@@ -1,6 +1,6 @@
 ﻿$(document).ready(function () {
     function buildRequestStatusLabel(status) {
-        var normalizedStatus = (status || "").toString().trim().toUpperCase();
+        var normalizedStatus = (status.replaceAll(" ", "") || "").toString().trim().toUpperCase();
         var labelClass = "label-default";
 
         switch (normalizedStatus) {
@@ -70,20 +70,23 @@
                 orderable: false,
                 className: "client-info",
                 render: function (data, type, row) {
-                    var fullName = row.ClientFirstName + ' ';
-                    if (row.ClientMiddleName) {
-                        fullName += row.ClientMiddleName.charAt(0) + '. ';
+                    var fullName = row.FirstName + ' ';
+                    if (row.MiddleName) {
+                        fullName += row.MiddleName.charAt(0) + '. ';
                     }
-                    fullName += row.ClientLastName;
+                    fullName += row.LastName;
+                    if (row.ExtensionName) {
+                        fullName += ' ' + row.ExtensionName
+                    }
 
                     return `<div class="flex-col">
                                 <section><strong>${fullName}</strong></section>
                                 <section class="client-sub-info flex-row">
-                                    <p class="contact-info single-line-ellipsis" title="${row.ClientEmailAddress}">${row.ClientEmailAddress}</p>
+                                    <p class="contact-info single-line-ellipsis" title="${row.Email}">${row.Email}</p>
                                     <span class="separator">|</span>
-                                    <p class="contact-info single-line-ellipsis" title="${row.ClientContactNumber}">${row.ClientContactNumber}</p>
+                                    <p class="contact-info single-line-ellipsis" title="${row.ContactNumber}">${row.ContactNumber}</p>
                                     <span class="separator">|</span>
-                                    <p class="single-line-ellipsis" title="${row.ClientOffice}">${row.ClientOffice}</p>
+                                    <p class="single-line-ellipsis" title="${row.Office}">${row.Office}</p>
                                 </section>
                             </div>`;
                 }
@@ -146,11 +149,11 @@
     });
 
     $("#status_filter").on("change", function () {
-        table.ajax.reload();
+        table.ajax.reload(null, false);
     });
 
     $("#date_request_filter").on("change", function () {
-        table.ajax.reload();
+        table.ajax.reload(null, false);
     });
 
     // Setup SignalR connection

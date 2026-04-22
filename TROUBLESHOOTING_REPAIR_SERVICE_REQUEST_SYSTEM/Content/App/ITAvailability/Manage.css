@@ -1,35 +1,53 @@
 ﻿.availaibility-container {
-    gap: var(--space);
+    gap: 1.25rem;
     width: 100%;
-    height: 100%;
+    max-width: var(--max-width-wide);
     min-width: 0;
+    align-items: stretch;
 }
 
 .content-panel,
 .availability-history-container {
+    height: 80vh;
     margin: 0 !important;
+    border: 0;
+    border-radius: 10px;
+    box-shadow: 0 10px 24px rgba(0, 0, 0, 0.08);
+    overflow: hidden;
 }
 
 .content-panel {
     width: 70%;
     min-width: 0;
+    display: flex;
+    flex-direction: column;
+    min-height: 720px;
 }
+
+    .content-panel .panel-heading {
+        background: #f4f7fa;
+        border-bottom: 1px solid #e5ebf1;
+        padding: 1.5rem 2rem 1rem;
+    }
 
 .content-panel-body {
     width: 100%;
-    height: 100%;
-    gap: 2rem;
+    flex: 1 1 auto;
+    min-height: 0;
     min-width: 0;
+    gap: 1.5rem;
+    align-items: stretch;
+    padding: 1.5rem 2rem;
+    overflow: hidden;
 }
 
     .content-panel-body > section:first-child {
-        flex: 1;
+        flex: 1 1 420px;
         min-width: 0;
     }
 
 #datetime_picker {
     width: 100%;
-    height: 50%;
 }
 
     #datetime_picker .datepicker {
@@ -44,15 +62,15 @@
         }
 
 .rules-list {
-    margin-top: 2rem;
+    margin-top: 1.25rem;
     list-style-position: inside;
-    padding-left: 1rem;
+    padding-left: 0.25rem;
 }
 
     .rules-list,
     .rules-list * {
-        font-size: 1.5rem;
-        line-height: 2.5rem;
+        font-size: 1.4rem;
+        line-height: 2.2rem;
     }
 
         .rules-list > i {
@@ -60,46 +78,61 @@
         }
 
 .selected-date-badge-container {
-    flex: 1;
+    flex: 1 1 360px;
     min-width: 0;
-    min-height: 20rem;
-    max-height: 100%;
+    min-height: 0;
+    height: 100%;
+    display: flex;
+    background: #f8fafc;
+    border: 1px solid #e5ebf1;
+    border-radius: 8px;
 }
 
     .selected-date-badge-container > div {
+        flex: 1 1 auto;
+        min-height: 0;
+        height: 100%;
+        max-height: 100%;
         width: 100%;
-        height: fit-content;
-        gap: var(--space);
         overflow-y: auto;
+        overflow-x: hidden;
         padding: 1rem;
+        display: grid;
+        grid-template-columns: repeat(auto-fill, minmax(165px, 1fr));
+        align-content: start;
+        gap: 0.75rem;
     }
 
-.panel-footer .buttons-container {
-    flex: 1;
-}
-
-.panel-footer .buttons {
-    gap: 1rem;
-}
-
 .selected-date-badge {
-    height: fit-content;
-    border-radius: 2px;
-    padding: 1.5rem 2rem;
-    background-color: var(--primary);
-    color: #FFFFFF;
-    box-shadow: 0 0 6px 3px rgba(0,0,0,0.1);
+    border-radius: 6px;
+    padding: 1.1rem 1.2rem;
+    background: linear-gradient(180deg, #2f4358, #26384a);
+    color: #fff;
+    box-shadow: 0 3px 10px rgba(22, 37, 54, 0.25);
 }
 
     .selected-date-badge h3 {
-        font-size: 1.5rem;
+        font-size: 1.35rem;
         margin: 0;
+        line-height: 1.35;
     }
+
+.panel-footer.buttons-container {
+    border-top: 1px solid #e5ebf1;
+    background: #f4f7fa;
+    padding: 1rem;
+}
+
+.panel-footer .buttons {
+    gap: 0.75rem;
+}
 
 .availability-history-container {
     width: 30%;
     flex: 1;
     min-width: 0;
+    padding: 1.5rem;
+    background: #fff;
 }
 
 .history-selects-container {
@@ -112,33 +145,22 @@
     }
 
 .calendar-table {
-    table-layout: fixed;
-    border-collapse: collapse;
-    height: 400px;
+    height: 500px;
 }
 
-    .calendar-table > tbody * {
-        font-size: 1.5rem;
-    }
-
-    .calendar-table > tbody td {
-        text-align: center;
-        vertical-align: middle !important;
-    }
-
-    .calendar-table .blocked-date {
-        background: var(--warning);
-        color: #edf1f2;
-    }
+.blocked-date {
+    background: var(--warning);
+    color: #ffffff;
+}
 
 @media (max-width: 1200px) {
-    .content-panel {
+    .content-panel,
+    .availability-history-container {
         width: 100%;
     }
 
     .availability-history-container {
         flex: unset;
-        width: 100%;
     }
 }
 
@@ -150,17 +172,23 @@
 
     .content-panel,
     .availability-history-container {
-        width: 100%;
+        height: unset;
+    }
+
+    .content-panel {
+        min-height: 0;
     }
 
     .content-panel-body {
-        height: auto;
-        min-height: 0;
         display: block;
+        padding: 1rem;
+        overflow: visible;
     }
 
     .selected-date-badge-container {
         margin-top: 12px;
+        min-height: 260px;
+        height: auto;
     }
 
     .availability-history-container {
@@ -177,23 +205,15 @@
     }
 
     .selected-date-badge-container > div {
+        grid-template-columns: 1fr;
         max-height: 18rem;
         padding: 0.5rem;
     }
 
-    .selected-date-badge-container .buttons {
-        display: block;
+    .panel-footer .buttons {
+        width: 100%;
+        justify-content: flex-start;
     }
-
-        .selected-date-badge-container .buttons .btn {
-            display: block;
-            width: 100%;
-            margin: 0 0 8px;
-        }
-
-            .selected-date-badge-container .buttons .btn:last-child {
-                margin-bottom: 0;
-            }
 
     .history-selects-container {
         display: block;

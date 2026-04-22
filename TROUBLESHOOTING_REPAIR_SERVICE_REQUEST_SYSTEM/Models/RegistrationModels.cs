@@ -15,6 +15,7 @@ namespace TROUBLESHOOTING_REPAIR_SERVICE_REQUEST_SYSTEM.Models
         public string FirstName { get; set; }
         public string MiddleName { get; set; }
         public string LastName { get; set; }
+        public string ExtensionName { get; set; }
 
         // Account Information
         public string UserName { get; set; }
@@ -26,6 +27,10 @@ namespace TROUBLESHOOTING_REPAIR_SERVICE_REQUEST_SYSTEM.Models
         public DateTime? ExpiryDate { get; set; }
         public string AccountType { get; set; }
         public string Code { get; set; }
+
+        public string Office { get; set; }
+        public string Position { get; set; }
+
         public int? ProjectId { get; set; }
         public virtual Project Project { get; set; }
 
@@ -77,13 +82,20 @@ namespace TROUBLESHOOTING_REPAIR_SERVICE_REQUEST_SYSTEM.Models
             ErrorMessage = ValueConstants.VALID_NAME_REGEX_MESSAGE)]
         public string LastName { get; set; }
 
+        [Display(Name = "Extension Name")]
+        [MinLength(length: 1, ErrorMessage = "The minimum length is 1.")]
+        [MaxLength(100, ErrorMessage = "The maximum length is 100.")]
+        [RegularExpression(ValueConstants.VALID_NAME_REGEX,
+            ErrorMessage = ValueConstants.VALID_NAME_REGEX_MESSAGE)]
+        public string ExtensionName { get; set; }
+
         //public string UserName { get; set; }
 
         [Required]
         [EmailAddress]
         [DataType(DataType.EmailAddress)]
         [Display(Name = "Email")]
-        [RegularExpression(ValueConstants.VALID_EMAIL_REGEX, 
+        [RegularExpression(ValueConstants.VALID_EMAIL_REGEX,
             ErrorMessage = ValueConstants.VALID_EMAIL_REGEX_MESSAGE)]
         public string Email { get; set; }
 
@@ -91,10 +103,24 @@ namespace TROUBLESHOOTING_REPAIR_SERVICE_REQUEST_SYSTEM.Models
         [Display(Name = "Contact Number")]
         [DataType(DataType.PhoneNumber)]
         [Phone(ErrorMessage = "Invalid phone number format.")]
-        [RegularExpression(ValueConstants.VALID_CONTACT_NUMBER_REGEX, 
+        [RegularExpression(ValueConstants.VALID_CONTACT_NUMBER_REGEX,
             ErrorMessage = ValueConstants.VALID_CONTACT_NUMBER_REGEX_MESSAGE)]
         public string ContactNumber { get; set; }
-        
+
+        [Required]
+        [Display(Name = "Office")]
+        [MinLength(length: 2, ErrorMessage = "The minimum length is 2.")]
+        [MaxLength(100, ErrorMessage = "The maximum length is 100.")]
+        [RegularExpression("^[a-zA-Z0-9\\s\\-\\.]+$", ErrorMessage = "Office field must contain only letters, numbers, spaces, hyphens, and periods.")]
+        public string Office { get; set; }
+
+        [Required]
+        [Display(Name = "Position")]
+        [MinLength(length: 2, ErrorMessage = "The minimum length is 2.")]
+        [MaxLength(100, ErrorMessage = "The maximum length is 100.")]
+        [RegularExpression("^[a-zA-Z0-9\\s\\-\\.]+$", ErrorMessage = "Position field must contain only letters, numbers, spaces, hyphens, and periods.")]
+        public string Position { get; set; }
+
         public string Code { get; set; }
 
         public string AccountType { get; set; }

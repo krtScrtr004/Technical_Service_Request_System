@@ -33,10 +33,12 @@ namespace TROUBLESHOOTING_REPAIR_SERVICE_REQUEST_SYSTEM.Core
                 firstName: currentUser.FirstName,
                 lastName: currentUser.LastName,
                 middleName: currentUser.MiddleName,
-                extensionName: string.Empty,
+                extensionName: currentUser.ExtensionName,
                 userName: currentUser.UserName,
                 email: currentUser.Email,
                 contactNumber: currentUser.ContactNumber,
+                office: currentUser.Office,
+                position: currentUser.Position,
                 privilegeIds: currentUser.UserPrivileges
                     .Where(p => p.PrivilegeId.HasValue)
                     .Select(p => p.PrivilegeId.Value)

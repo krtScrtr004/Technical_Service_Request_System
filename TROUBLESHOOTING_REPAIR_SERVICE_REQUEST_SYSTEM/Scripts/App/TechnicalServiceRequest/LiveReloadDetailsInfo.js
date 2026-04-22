@@ -14,7 +14,7 @@
                 break;
             case "HIGH":
             case "CRITICAL":
-                labelClass = "label-success";
+                labelClass = "label-danger";
                 break;
         }
 
@@ -39,37 +39,38 @@
                 labelClass = "label-success";
                 break;
             case "CANCELLED":
-                {
-                    labelClass = "label-danger";
-
-                    // Remove the update severity button and modal once cancelled
-                    const updateSeverityButton = $("#update_severity_button");
-                    if (updateSeverityButton.length > 0) {
-                        updateSeverityButton.remove();
-                    }
-                    const updateSeverityModal = $("#update_severity_modal");
-                    if (updateSeverityModal.length > 0) {
-                        updateSeverityModal.remove();
-                    }
-
-                    // Remove the action history button and modal once cancelled
-                    const addActionHistoryButton = $("#add_action_history_button");
-                    if (addActionHistoryButton.length > 0) {
-                        addActionHistoryButton.remove();
-                    }
-                    const addActionHistoryModal = $("#add_action_history_modal");
-                    if (addActionHistoryModal.length > 0) {
-                        addActionHistoryModal.remove();
-                    }
-
-                    break;
-                }
+                labelClass = "label-danger";
+                recalibrateUi();
+                break;
             case "CLOSED":
                 labelClass = "label-default";
+                recalibrateUi();
                 break;
         }
 
         return `<span class="label ${labelClass} status-label">${normalizedStatus || "N/A"}</span>`;
+    }
+
+    function recalibrateUi() {
+        // Remove the update severity button and modal once cancelled
+        const updateSeverityButton = $("#update_severity_button");
+        if (updateSeverityButton.length > 0) {
+            updateSeverityButton.remove();
+        }
+        const updateSeverityModal = $("#update_severity_modal");
+        if (updateSeverityModal.length > 0) {
+            updateSeverityModal.remove();
+        }
+
+        // Remove the action history button and modal once cancelled
+        const addActionHistoryButton = $("#add_action_history_button");
+        if (addActionHistoryButton.length > 0) {
+            addActionHistoryButton.remove();
+        }
+        const addActionHistoryModal = $("#add_action_history_modal");
+        if (addActionHistoryModal.length > 0) {
+            addActionHistoryModal.remove();
+        }
     }
 
     // Start the SignalR connection
@@ -99,7 +100,7 @@
             statusContainer.html(buildRequestStatusLabel(statusName));
 
             const addActionHistoryButton = $("#add_action_history_button");
-            if (statusName === "CANCELLED" && addActionHistoryButton.length > 0) {
+            if ((statusName === "CANCELLED" || statusName === "CLOSED") && addActionHistoryButton.length > 0) {
                 // Remove add action history button, if exists -> for ADMIN & IT only
                 addActionHistoryButton.remove();
             }

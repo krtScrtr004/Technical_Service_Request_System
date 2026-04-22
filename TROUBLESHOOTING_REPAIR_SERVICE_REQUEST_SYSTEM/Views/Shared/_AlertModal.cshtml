@@ -8,7 +8,7 @@
 @if (alertModal != null)
 {
     <script>
-        var alertModalData = @Html.Raw(Json.Encode(alertModal));
+        var alertModalData = @Html.Raw(Json.Encode(alertModal))
 
         Swal.fire({
             title: alertModalData.Title,

@@ -1,4 +1,5 @@
-dashboard-page {
+.dashboard-page {
+    max-width: var(--max-width-wide);
     margin-top: 20px;
     margin-bottom: 30px;
     width: 100%;

@@ -90,14 +90,7 @@ namespace TROUBLESHOOTING_REPAIR_SERVICE_REQUEST_SYSTEM.Controllers
                  */
                 var currentUser = db.Registrations
                     .Include(r => r.UserPrivileges)
-                    .Where(r =>
-                        r.Email == model.Email &&
-                        r.DeactivatedByRegistrationId == null &&
-                        (
-                            !r.ExpiryDate.HasValue ||
-                            DbFunctions.TruncateTime(DateTime.Now) < DbFunctions.TruncateTime(r.ExpiryDate.Value)
-                        )
-                    )
+                    .Where(r => r.IsActive && r.Email == model.Email)
                     .FirstOrDefault();
                 if (currentUser == null)
                 {
@@ -128,10 +121,12 @@ namespace TROUBLESHOOTING_REPAIR_SERVICE_REQUEST_SYSTEM.Controllers
                                 firstName: currentUser.FirstName,
                                 lastName: currentUser.LastName,
                                 middleName: currentUser.MiddleName,
-                                extensionName: string.Empty,
+                                extensionName: currentUser.ExtensionName,
                                 userName: currentUser.UserName,
                                 email: currentUser.Email,
                                 contactNumber: currentUser.ContactNumber,
+                                office: currentUser.Office,
+                                position: currentUser.Position,
                                 privilegeIds: currentUser.UserPrivileges
                                     .Where(p => p.PrivilegeId.HasValue)
                                     .Select(p => p.PrivilegeId.Value)

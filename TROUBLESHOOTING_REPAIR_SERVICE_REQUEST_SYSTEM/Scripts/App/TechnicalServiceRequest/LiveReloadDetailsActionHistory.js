@@ -7,10 +7,43 @@
 
     const hub = $.connection.technicalServiceRequestHub;
 
+    function refreshFormGenerationButton() {
+        const generateFormButton = $("#generate_tsrf_button");
+        if (generateFormButton.length === 0 || !formGenerationStateUrl) {
+            return;
+        }
+
+        $.ajax({
+            url: formGenerationStateUrl,
+            method: "GET",
+            data: { id: currentTechnicalServiceRequestId },
+            success: function (response) {
+                if (!response || response.success !== true) {
+                    return;
+                }
+
+                if (response.isFormGeneratable) {
+                    generateFormButton.attr("href", response.formLink || "#");
+                    generateFormButton.removeClass("no-display").addClass("block");
+                } else {
+                    generateFormButton.attr("href", "#");
+                    generateFormButton.removeClass("block").addClass("no-display");
+                }
+            },
+            error: function (xhr, status, error) {
+                console.error(error);
+            }
+        });
+    }
+
     // Update the status text when a request is cancelled
-    hub.client.refreshTechnicalServiceRequestActionHistory = function (technicalServiceRequestHistoryId) {
+    hub.client.refreshTechnicalServiceRequestActionHistory = function (technicalServiceRequestHistoryId, technicalServiceRequestId) {
         if (!technicalServiceRequestHistoryId ||
              technicalServiceRequestHistoryId < 1) {
+            return;
+        }
+
+        if (parseInt(technicalServiceRequestId, 10) !== parseInt(currentTechnicalServiceRequestId, 10)) {
             return;
         }
 
@@ -31,6 +64,14 @@
                 console.error(error);
             }
         });
+    }
+
+    hub.client.refreshTechnicalServiceRequestFormGeneration = function (technicalServiceRequestId) {
+        if (parseInt(technicalServiceRequestId, 10) !== parseInt(currentTechnicalServiceRequestId, 10)) {
+            return;
+        }
+
+        refreshFormGenerationButton();
     }
 
     // Start the SignalR connection

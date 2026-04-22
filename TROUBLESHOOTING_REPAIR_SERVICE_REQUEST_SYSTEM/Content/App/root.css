@@ -12,6 +12,8 @@
     --box-shadow: 0 25px 50px -12px rgb(0 0 0 / 0.25);
     --box-shadow-hover: 0 4px 8px rgba(0, 0, 0, 0.3);
     --transition-dur: 0.2s;
+    --max-width-std: 1280px;
+    --max-width-wide: 1440px;
 }
 
 /* For Webkit browsers (Chrome, Safari, Edge) */
@@ -45,13 +47,18 @@ body {
     width: 100%;
     min-height: 100vh;
     height: fit-content;
-} 
+}
 
 header,
 header .navbar {
     border-radius: 0;
     margin-bottom: 0;
 }
+
+    header .glyphicon {
+        height: 16px !important;
+        font-size: 16px !important;
+    }
 
     header .navbar-brand.brand-link {
         display: flex;
@@ -141,221 +148,12 @@ hr {
 
     header #logoutForm {
         float: none !important;
-    } 
+    }
 
         header #logoutForm .navbar-right {
             float: none !important;
             margin-right: 0;
         }
-}
-
-/* -- -- */
-
-.btn.flex-row,
-.btn.flex-col,
-.btn.center-child {
-    gap: 0.25rem;
-}
-
-.text-light {
-    color: #FFFFFF;
-}
-
-table.table-bordered {
-    border: 1px solid #B9C1C2 !important;
-    border-collapse: collapse !important;
-}
-
-    table.table-bordered td,
-    table.table-bordered th {
-        border: 1px solid #B9C1C2 !important;
-    }
-
-.dataTables_wrapper table.dataTable {
-    box-shadow: 0 0 5px 5px rgba(0, 0, 0, 0.1);
-}
-
-.dataTables_wrapper table.dataTable thead th {
-    background: var(--primary);
-    color: #ffffff !important;
-}
-
-.dataTables_wrapper table.dataTable thead th,
-.dataTables_wrapper table.dataTable tbody td {
-    border: unset !important;
-    padding: 12px !important;
-}
-
-    .dataTables_paginate {
-        margin-top: 12px;
-        display: flex;
-        align-items: center;
-        gap: 4px;
-    }
-
-    .dataTables_paginate .paginate_button {
-        padding: 6px 12px;
-        border-radius: 6px;
-        cursor: pointer;
-        color: #ffffff !important;
-        background: var(--success);
-        border: 1px solid var(--success);
-    }
-
-        .dataTables_paginate .paginate_button:hover {
-            background: #0f7864 !important;
-            border: 1px solid #0f7864 !important;
-        }
-
-        .dataTables_paginate .paginate_button.current {
-            background: var(--success) !important;
-            border: 1px solid var(--success) !important;
-            color: #ffffff !important;
-            font-weight: bold;
-        }
-
-        .dataTables_paginate .paginate_button.disabled {
-            opacity: 0.4;
-            cursor: not-allowed;
-        }
-
-            .dataTables_paginate .paginate_button.disabled:hover {
-                background: unset !important;
-                border: unset !important;
-                cursor: not-allowed !important;
-            }
-
-.swal2-popup {
-    font-size: 1.6rem !important;
-}
-
-.modal-header > button.close {
-    color: var(--default);
-}
-
-.panel-title > i,
-.modal-title > i {
-    margin-right: 1rem;
-}
-
-.dataTables_wrapper {
-    padding: var(--space);
-}
-
-    .dataTables_wrapper .dataTables_length {
-        float: left;
-        margin-bottom: 1rem;
-    }
-
-    .dataTables_wrapper .dataTables_filter {
-        float: right;
-        margin-bottom: 1rem;
-    }
-
-        .dataTables_wrapper .dataTables_length select,
-        .dataTables_wrapper .dataTables_filter input {
-            border: 1px solid #ddd;
-            padding: 0.5rem;
-            margin: 0 0.5rem;
-        }
-
-    .dataTables_wrapper table.dataTable {
-        width: 100% !important;
-        border-collapse: collapse !important;
-    }
-
-        .dataTables_wrapper table.dataTable thead th {
-            /* background: var(--primary); */
-            color: var(--primary);
-            font-weight: 600;
-            padding: 0.75rem;
-            border: 1px solid #ddd;
-            text-align: left;
-        }
-
-        .dataTables_wrapper table.dataTable tbody td {
-            padding: 0.75rem;
-            border: 1px solid #ddd;
-        }
-
-        .dataTables_wrapper table.dataTable tbody tr.odd {
-            background-color: #fff;
-        }
-
-        .dataTables_wrapper table.dataTable tbody tr.even {
-            background-color: #f9f9f9;
-        }
-
-    .dataTables_wrapper .dataTables_info {
-        float: left;
-        padding: 1rem 0;
-    }
-
-    .dataTables_wrapper .dataTables_paginate {
-        float: right;
-        padding: 1rem 0;
-    }
-
-        .dataTables_wrapper .dataTables_paginate .paginate_button {
-            display: inline-block;
-            padding: 0.5rem 0.75rem;
-            margin: 0 0.125rem;
-            border: 1px solid #ddd;
-            background: #fff;
-            color: #333;
-            cursor: pointer;
-            text-decoration: none;
-        }
-
-            .dataTables_wrapper .dataTables_paginate .paginate_button.current {
-                background: var(--primary);
-                border-color: var(--primary);
-                color: #fff;
-            }
-
-            .dataTables_wrapper .dataTables_paginate .paginate_button.disabled {
-                opacity: 0.5;
-                cursor: not-allowed;
-            }
-
-    .dataTables_wrapper::after {
-        content: "";
-        display: table;
-        clear: both;
-    }
-
-.panel {
-    box-shadow: var(--box-shadow);
-    margin: 0;
-}
-
-
-.datepicker .table-condensed thead th,
-.datepicker .table-condensed thead th.prev,
-.datepicker .table-condensed thead th.next,
-.datepicker .table-condensed thead th.datepicker-switch {
-    background: var(--primary) !important;
-    color: #fff !important;
-    border-radius: 0 !important;
-}
-
-    .datepicker .table-condensed thead th.prev > span,
-    .datepicker .table-condensed thead th.next > span {
-        background: transparent !important;
-        box-shadow: none !important;
-        color: #fff !important;
-    }
-
-.datepicker table tr td.active.active,
-.datepicker table tr td.active.disabled.active,
-.datepicker table tr td.active.disabled:active,
-.datepicker table tr td.active.disabled:hover.active,
-.datepicker table tr td.active.disabled:hover:active,
-.datepicker table tr td.active:active,
-.datepicker table tr td.active:hover.active,
-.datepicker table tr td.active:hover:active {
-    background: var(--primary) !important;
-    border-radius: 0;
 }
 
 @media (max-width: 767px) {

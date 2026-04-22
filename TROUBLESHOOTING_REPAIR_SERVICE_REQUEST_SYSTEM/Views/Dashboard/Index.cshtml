@@ -17,7 +17,7 @@
     <link rel="stylesheet" href="~/Content/App/Dashboard/Index.css" type="text/css" />
 }
 
-<section class="container-fluid">
+<section class="container-fluid dashboard-page">
     <section class="dashboard-header panel panel-default">
         <section class="panel-body">
             <h3 class="text-primary dashboard-title wrap-text">Welcome, @currentUser.FirstName @currentUser.LastName</h3>
@@ -185,5 +185,6 @@
         const dashboardDataUrl = '@Url.Action("GetDashboardData", "Dashboard")';
     </script>
     <script src="~/Scripts/App/Dashboard/InitializeDashboard.js" defer></script>
+    <script src="~/Scripts/App/Dashboard/LiveReloadDashboard.js" defer></script>
 }
 

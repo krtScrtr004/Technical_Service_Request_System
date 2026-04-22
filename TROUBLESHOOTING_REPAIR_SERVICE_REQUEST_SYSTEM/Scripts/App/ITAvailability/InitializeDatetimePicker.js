@@ -1,7 +1,7 @@
 ﻿export const selectedDates = new Map();
 export const deselectedDates = new Set();
 
-$(document).ready(function () {
+$(document).ready(function() {
     const datepickerElement = $("#datetime_picker");
     if (datepickerElement.length === 0) {
         console.warn("Datepicker element not found.");
@@ -28,7 +28,7 @@ $(document).ready(function () {
         container: "#datetime_picker",
         startDate: "+1d",
         yearRange: `${registrationYear}:2030`,
-        beforeShowDay: function (date) {
+        beforeShowDay: function(date) {
             const d = new Date(date);
             d.setHours(0, 0, 0, 0); // Normalize time for comparison
 
@@ -53,26 +53,26 @@ $(document).ready(function () {
     const preloadedBlockedDates = $("#preloaded_blocked_dates");
     if (preloadedBlockedDates.length > 0 && preloadedBlockedDates.val().length > 0) {
         const blockedDatesArray = preloadedBlockedDates.val().split(",").map(d => d.trim());
-        const validDates = blockedDatesArray.filter(function (stringDate) {
+        const validDates = blockedDatesArray.filter(function(stringDate) {
             const d = new Date(stringDate).setHours(0, 0, 0, 0);
             return d >= TODAY && d <= FUTURE
         });
 
         datepickerElement.datepicker("setDates", validDates);
 
-        validDates.forEach(function (date) {
+        validDates.forEach(function(date) {
             preloadedDates.set(date, null); // Do not render badge for preloaded blocked dates
             previousSelected.add(date);
         });
     }
 
-    datepickerElement.on("changeDate", function () {
+    datepickerElement.on("changeDate", function() {
         const currentSelected = new Set(
             datepickerElement.datepicker("getDates").map(formatDate)
         );
 
         // Added dates: current - previous
-        currentSelected.forEach(function (date) {
+        currentSelected.forEach(function(date) {
             if (!previousSelected.has(date)) {
                 const badgeId = preloadedDates.get(date);
                 if (!badgeId) {
@@ -86,7 +86,7 @@ $(document).ready(function () {
         });
 
         // Deselected dates: previous - current
-        previousSelected.forEach(function (date) {
+        previousSelected.forEach(function(date) {
             if (!currentSelected.has(date)) {   // Handle all deselections
                 const badgeId = selectedDates.get(date) ?? preloadedDates.get(date);
                 if (badgeId) {

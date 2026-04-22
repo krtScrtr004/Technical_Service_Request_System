@@ -1,4 +1,5 @@
-﻿using System;
+﻿using Serilog;
+using System;
 using System.Collections.Generic;
 using System.Data.Entity;
 using System.Linq;
@@ -153,6 +154,7 @@ namespace TROUBLESHOOTING_REPAIR_SERVICE_REQUEST_SYSTEM.Controllers
             }
             catch (Exception ex)
             {
+                Log.Error(ex, $"Error while fetching dashboard data for user {GetUserSession()?.Id.ToString() ?? "Unknown"}");
                 return Json(new
                 {
                     success = false,
@@ -181,7 +183,7 @@ namespace TROUBLESHOOTING_REPAIR_SERVICE_REQUEST_SYSTEM.Controllers
                 );
             }
 
-            return _db.TechnicalServiceRequests.Where(i => i.ClientEmailAddress == currentUser.Email);
+            return _db.TechnicalServiceRequests.Where(i => i.ClientRegistrationId == currentUser.Id);
         }
 
         private int GetUnreadNotificationCount(UserSession currentUser)

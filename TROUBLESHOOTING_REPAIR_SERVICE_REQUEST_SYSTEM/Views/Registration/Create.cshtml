@@ -78,6 +78,7 @@
                     <div class="row">
                         <div class="col-md-6">
 
+                            @* First Name *@
                             <div class="form-group">
                                 <label class="control-label col-sm-4">First Name</label>
                                 <div class="col-sm-8">
@@ -86,6 +87,7 @@
                                 </div>
                             </div>
 
+                            @* Middle Name *@
                             <div class="form-group">
                                 <label class="control-label col-sm-4">Middle Name</label>
                                 <div class="col-sm-8">
@@ -94,6 +96,7 @@
                                 </div>
                             </div>
 
+                            @* Last Name *@
                             <div class="form-group">
                                 <label class="control-label col-sm-4">Last Name</label>
                                 <div class="col-sm-8">
@@ -101,9 +104,19 @@
                                     @Html.ValidationMessageFor(model => model.LastName)
                                 </div>
                             </div>
+
+                            @* Extension Name *@
+                            <div class="form-group">
+                                <label class="control-label col-sm-4">Extension Name</label>
+                                <div class="col-sm-8">
+                                    @Html.TextBoxFor(model => model.ExtensionName, new { Value = Model.RegistrationRequest.ExtensionName, @class = "form-control text-uppercase" })
+                                    @Html.ValidationMessageFor(model => model.ExtensionName)
+                                </div>
+                            </div>
                         </div>
 
                         <div class="col-md-6">
+                            @* Email *@
                             <div class="form-group">
                                 <label class="control-label col-sm-4">Email Address</label>
                                 <div class="col-sm-8">
@@ -112,6 +125,7 @@
                                 </div>
                             </div>
 
+                            @* Contact Number *@
                             <div class="form-group">
                                 <label class="control-label col-sm-4">Contact Number</label>
                                 <div class="col-sm-8">
@@ -120,6 +134,25 @@
                                 </div>
                             </div>
 
+                            @* Office *@
+                            <div class="form-group">
+                                <label class="control-label col-sm-4">Office</label>
+                                <div class="col-sm-8">
+                                    @Html.TextBoxFor(model => model.Office, new { Value = Model.RegistrationRequest.Office, @class = "form-control text-uppercase" })
+                                    @Html.ValidationMessageFor(model => model.Office)
+                                </div>
+                            </div>
+
+                            @* Position *@
+                            <div class="form-group">
+                                <label class="control-label col-sm-4">Position</label>
+                                <div class="col-sm-8">
+                                    @Html.TextBoxFor(model => model.Position, new { Value = Model.RegistrationRequest.Position, @class = "form-control text-uppercase" })
+                                    @Html.ValidationMessageFor(model => model.Position)
+                                </div>
+                            </div>
+
+                            @* Expiry Date *@
                             <div class="form-group">
                                 <label class="control-label col-sm-4">Expiry Date</label>
                                 <div class="col-sm-8">
@@ -127,6 +160,7 @@
                                     @Html.ValidationMessageFor(model => model.ExpiryDate)
                                 </div>
                             </div>
+
                         </div>
                     </div>
                 </section>

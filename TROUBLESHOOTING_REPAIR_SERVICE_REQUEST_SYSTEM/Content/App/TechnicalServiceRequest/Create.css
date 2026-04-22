@@ -6,20 +6,20 @@
 
 .tsr-create-panel {
     width: 100%;
-    max-width: 100%;
+    max-width: var(--max-width-std);
     min-width: 0;
     margin-top: 20px;
 }
 
-.tsr-create-panel .panel-heading {
-    background: #f7fbff;
-    border-bottom: 1px solid #d9edf7;
-}
+    .tsr-create-panel .panel-heading {
+        background: #f7fbff;
+        border-bottom: 1px solid #d9edf7;
+    }
 
-.tsr-create-panel .panel-title {
-    font-weight: 600;
-    margin: 0;
-}
+    .tsr-create-panel .panel-title {
+        font-weight: 600;
+        margin: 0;
+    }
 
 .tsr-form-section {
     padding: 15px;
@@ -29,9 +29,9 @@
     background: #fff;
 }
 
-.tsr-form-section input:read-only {
-    cursor: not-allowed;
-}
+    .tsr-form-section input:read-only {
+        cursor: not-allowed;
+    }
 
 .tsr-section-title {
     margin-top: 0;
@@ -45,15 +45,19 @@
         margin-right: 0.5rem;
     }
 
-    .tsr-form-section .form-group {
-        margin-bottom: 12px;
-    }
+.tsr-form-section .form-group {
+    margin-bottom: 12px;
+}
 
 .tsr-form-section label {
     font-size: 12px;
     text-transform: uppercase;
     color: #555;
     margin-bottom: 4px;
+}
+
+.tsr-form-section .schedule-inputs {
+    gap: var(--space);
 }
 
 #datetime_picker {
@@ -64,15 +68,31 @@
         width: 100%;
     }
 
+.rules-list {
+    margin-top: 2rem;
+    list-style-position: inside;
+    padding-left: 1rem;
+}
+
+    .rules-list,
+    .rules-list * {
+        font-size: 1.5rem;
+        line-height: 2.5rem;
+    }
+
+        .rules-list > i {
+            margin-right: 5px;
+        }
+
 .tsr-form-actions {
     padding: 10px 0 0;
     border-top: 1px solid #eee;
     gap: 1rem;
 }
 
-.tsr-form-actions .btn + .btn {
-    margin-left: 6px;
-}
+    .tsr-form-actions .btn + .btn {
+        margin-left: 6px;
+    }
 
 @media (max-width: 991px) {
     .tsr-create-panel-container {
@@ -94,18 +114,18 @@
         margin-top: 12px;
     }
 
-    .tsr-create-panel .panel-heading,
-    .tsr-create-panel .panel-body,
-    .tsr-form-section {
-        padding-left: 10px;
-        padding-right: 10px;
-    }
+        .tsr-create-panel .panel-heading,
+        .tsr-create-panel .panel-body,
+        .tsr-form-section {
+            padding-left: 10px;
+            padding-right: 10px;
+        }
 
-    .tsr-form-section .row.flex-child-center-h {
-        display: block;
-    }
+            .tsr-form-section .row.flex-child-center-h {
+                display: block;
+            }
 
-    .schedule-inputs .col-sm-7.flex-col {
+    .schedule-inputs {
         display: block;
     }
 
@@ -120,11 +140,11 @@
             margin: 0 0 8px;
         }
 
-        .tsr-form-actions .btn + .btn {
-            margin-left: 0;
-        }
+            .tsr-form-actions .btn + .btn {
+                margin-left: 0;
+            }
 
-        .tsr-form-actions .btn:last-child {
-            margin-bottom: 0;
-        }
+            .tsr-form-actions .btn:last-child {
+                margin-bottom: 0;
+            }
 }

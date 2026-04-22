@@ -133,5 +133,9 @@ $(document).ready(function () {
         });
     }
 
+    $(document).on("dashboard:refresh", function () {
+        loadDashboard();
+    });
+
     loadDashboard();
 });

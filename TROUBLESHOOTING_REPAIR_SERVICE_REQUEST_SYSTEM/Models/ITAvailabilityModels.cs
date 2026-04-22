@@ -18,6 +18,7 @@ namespace TROUBLESHOOTING_REPAIR_SERVICE_REQUEST_SYSTEM.Models
 
     public class ITAvailabilityManageViewModel
     {
+        public int UserId { get; set; }
         public DateTime UserRegistrationDate { get; set; }
         public string SelectedStringDates { get; set; }
     }

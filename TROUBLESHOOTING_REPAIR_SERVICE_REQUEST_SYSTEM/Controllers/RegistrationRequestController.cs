@@ -1,4 +1,5 @@
-﻿using System;
+﻿using Serilog;
+using System;
 using System.Collections.Generic;
 using System.Data;
 using System.Data.Entity;
@@ -36,12 +37,6 @@ namespace TROUBLESHOOTING_REPAIR_SERVICE_REQUEST_SYSTEM.Controllers
         [AllowAnonymous]
         public ActionResult Create()
         {
-            // Redirect to Dashboard when logged in
-            if (Request.IsAuthenticated)
-            {
-                return RedirectToAction("Index", "Dashboard");
-            }
-
             return View(new RegistrationRequestCreateViewModel());
         }
 
@@ -54,6 +49,7 @@ namespace TROUBLESHOOTING_REPAIR_SERVICE_REQUEST_SYSTEM.Controllers
             if (!ModelState.IsValid)
             {
                 var errors = GetModelStateErrors();
+                Log.Warning($"Model state is invalid: {errors}");
                 return View(registrationRequestCreateViewModel);
             }
 
@@ -83,6 +79,9 @@ namespace TROUBLESHOOTING_REPAIR_SERVICE_REQUEST_SYSTEM.Controllers
                         FirstName = registrationRequestCreateViewModel.FirstName.Trim().ToUpper(),
                         LastName = registrationRequestCreateViewModel.LastName.Trim().ToUpper(),
                         MiddleName = registrationRequestCreateViewModel.MiddleName?.Trim().ToUpper(),
+                        ExtensionName = registrationRequestCreateViewModel.ExtensionName?.Trim().ToUpper(),
+                        Office = registrationRequestCreateViewModel.Office?.Trim().ToUpper(),
+                        Position = registrationRequestCreateViewModel.Position?.Trim().ToUpper(),
                         RequestDate = DateTime.Now
                     };
                     _db.RegistrationRequests.Add(registration);
@@ -95,6 +94,8 @@ namespace TROUBLESHOOTING_REPAIR_SERVICE_REQUEST_SYSTEM.Controllers
                     notificationService.NotifyAdminNewRegistrationRequest();
 
                     var encryptedId = Custom.Controllers.EncryptionHelper.Encrypt(registration.Id.ToString());
+
+                    Log.Information($"New registration request created with ID {registration.Id} and email {registration.Email}");
                     return RedirectToAction(
                         "Success",
                         "RegistrationRequest",
@@ -110,6 +111,7 @@ namespace TROUBLESHOOTING_REPAIR_SERVICE_REQUEST_SYSTEM.Controllers
                         Message = "An error occurred while making a request. Please try again.",
                         Status = AlertModalStatus.Error
                     };
+                    Log.Error(ex, $"An error occurred while creating a registration request for email {registrationRequestCreateViewModel.Email}");
                     ModelState.AddModelError("", "An error occurred while making a request: " + ex.Message);
                     return View(registrationRequestCreateViewModel);
                 }
@@ -344,6 +346,7 @@ namespace TROUBLESHOOTING_REPAIR_SERVICE_REQUEST_SYSTEM.Controllers
             }
             catch (Exception ex)
             {
+                Log.Error(ex, $"An error occurred while fetching registration requests for user ID {GetUserSession()?.Id.ToString() ?? "Unknown"}");
                 return Json(
                     new { success = false, message = ex.Message },
                     JsonRequestBehavior.AllowGet

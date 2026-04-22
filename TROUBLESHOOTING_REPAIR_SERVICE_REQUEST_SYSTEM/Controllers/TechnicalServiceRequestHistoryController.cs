@@ -1,4 +1,5 @@
-﻿using System;
+﻿using Serilog;
+using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.Data.Entity;
@@ -39,147 +40,171 @@ namespace TROUBLESHOOTING_REPAIR_SERVICE_REQUEST_SYSTEM.Controllers
                 throw new Exception("You cannot add a new action history when the status is already cancelled.");
             }
 
-            if (ModelState.IsValid)
+            var notificationService = new NotificationService();
+
+            using (var transaction = _db.Database.BeginTransaction())
             {
-                var notificationService = new NotificationService();
-
-                using (var transaction = _db.Database.BeginTransaction())
+                try
                 {
-                    try
+                    var technician = GetUserSession();
+                    if (technician == null)
                     {
-                        var technician = GetUserSession();
-                        if (technician == null)
+                        throw new Exception("An error occured.");
+                    }
+
+                    if (!ModelState.IsValid)
+                    {
+                        var errors = GetModelStateErrors();
+                        Log.Warning($"Model state is invalid: {errors}");
+                        return View(technicalServiceRequestHistory);
+                    }
+
+                    // If the new status is ongoing
+                    if (technicalServiceRequestHistory.TechnicalServiceRequestStatusId.HasValue &&
+                        technicalServiceRequestHistory.TechnicalServiceRequestStatusId.Value == (int)TechnicalServiceRequestStatusEnum.ONGOING)
+                    {
+                        var isScheduledService = technicalServiceRequest.TechnicalServiceTypeId.HasValue &&
+                            TechnicalServiceTypeEnum.IsScheduleControlProcessRequest(
+                                technicalServiceRequest.TechnicalServiceTypeId.Value
+                            );
+                        if (isScheduledService && DateTime.Now.Date != technicalServiceRequest.TechnicalServiceRequestScheduledDate.Value.Date)
                         {
-                            throw new Exception("An error occured.");
+                            TempData["alertModal"] = new AlertModalUtility
+                            {
+                                Title = "Error",
+                                Status = AlertModalStatus.Error,
+                                Message = "You cannot mark the request as ongoing on a different date than the scheduled date.",
+                            };
+                            return RedirectToAction(
+                                "Details",
+                                "TechnicalServiceRequests",
+                                new { id = technicalServiceRequestId }
+                            );
                         }
+                    }
 
-                        // Set the ActionTakenByRegistrationId to the current user's registration ID
-                        technicalServiceRequestHistory.ActionTakenByRegistrationId = technician.Id;
 
-                        technicalServiceRequestHistory.TechnicalServiceRequestId = technicalServiceRequestId;
-                        technicalServiceRequestHistory.DateAction = DateTime.Now;
-                        technicalServiceRequestHistory.UpdatedAt = DateTime.Now;
+                    // Set the ActionTakenByRegistrationId to the current user's registration ID
+                    technicalServiceRequestHistory.ActionTakenByRegistrationId = technician.Id;
 
-                        // Add the new history entry to the database
-                        technicalServiceRequest.TechnicalServiceRequestHistories.Add(technicalServiceRequestHistory);
-                        // Update the status of the request to the action history's status
-                        technicalServiceRequest.TechnicalServiceRequestStatusId = technicalServiceRequestHistory.TechnicalServiceRequestStatusId;
-                        _db.Entry(technicalServiceRequest).State = EntityState.Modified;
+                    technicalServiceRequestHistory.TechnicalServiceRequestId = technicalServiceRequestId;
+                    technicalServiceRequestHistory.DateAction = DateTime.Now;
+                    technicalServiceRequestHistory.UpdatedAt = DateTime.Now;
 
-                        var clientId = _db.Registrations
-                            .Where(i => i.Email == technicalServiceRequest.ClientEmailAddress)
-                            .Select(i => (int?)i.Id)
-                            .FirstOrDefault();
-                        if (clientId.HasValue)
+                    // Add the new history entry to the database
+                    technicalServiceRequest.TechnicalServiceRequestHistories.Add(technicalServiceRequestHistory);
+                    // Update the status of the request to the action history's status
+                    technicalServiceRequest.TechnicalServiceRequestStatusId = technicalServiceRequestHistory.TechnicalServiceRequestStatusId;
+                    _db.Entry(technicalServiceRequest).State = EntityState.Modified;
+
+                    var notificationMessage = notificationService.BuildRecipientMessageFromRequestStatus(
+                        technicalServiceRequest
+                            .TechnicalServiceRequestStatusId.Value,
+                        technicalServiceRequest.ReferenceCode,
+                        technician.FirstName
+                    );
+
+                    _db.Notifications.Add(new Notification()
+                    {
+                        RecipientRegistrationId = technicalServiceRequest.ClientRegistrationId,
+                        Title = "Technical Service Request Update",
+                        Message = notificationMessage,
+                        ForAdmin = false,
+                        ForIT = false,
+                        IsActive = true,
+                        IsRead = false,
+                        CreatedAt = DateTime.Now,
+                    });
+
+                    var completedTaskIds = TechnicalServiceRequestStatusEnum.GetCompletedStatusIds();
+                    completedTaskIds.Add(TechnicalServiceRequestStatusEnum.CANCELLED);
+                    var nonAssistedRequestIds = TechnicalServiceTypeEnum.GetNonAssistedServiceIds();
+
+                    var isCompleted = completedTaskIds.Contains(technicalServiceRequest.TechnicalServiceRequestStatusId.Value);
+                    var isNonAssisted = technicalServiceRequest.TechnicalServiceTypeId.HasValue &&
+                                        nonAssistedRequestIds.Contains(technicalServiceRequest.TechnicalServiceTypeId.Value);
+
+                    // Check if technician is available now
+                    var isAvailableNow = !_db.ITAvailabilities
+                        .Where(i => i.Id == technician.Id)
+                        .Any(i => DbFunctions.TruncateTime(i.BlockDate) ==
+                                  DbFunctions.TruncateTime(DateTime.Now));
+
+                    // When status is completed, closed, or cancelled and service type is not assisted, assign the top request from the queue to the IT
+                    if (isAvailableNow &&
+                        technicalServiceRequest
+                            .TechnicalServiceRequestStatusId
+                            .HasValue &&
+                        isCompleted &&
+                        !isNonAssisted
+                    )
+                    {
+                        var queuedRequest = AssignTechnicianToPendingRequest(technician.Id);
+                        if (queuedRequest != null)
                         {
-                            var notificationMessage = notificationService.BuildRecipientMessageFromRequestStatus(
-                                technicalServiceRequest
-                                    .TechnicalServiceRequestStatusId.Value,
-                                technicalServiceRequest.ReferenceCode,
+                            // Notify the technician about the assignment
+                            notificationService.NotifyTechnicianAssignment(technician.Id, queuedRequest.ReferenceCode);
+
+                            // Notify the client about the assignment
+                            notificationService.NotifyClientOnEnqueuedRequest(
+                                queuedRequest.ClientRegistrationId,
+                                queuedRequest.ReferenceCode,
                                 technician.FirstName
                             );
-
-                            _db.Notifications.Add(new Notification()
-                            {
-                                RecipientRegistrationId = clientId.Value,
-                                Title = "Technical Service Request Update",
-                                Message = notificationMessage,
-                                ForAdmin = false,
-                                ForIT = false,
-                                IsActive = true,
-                                IsRead = false,
-                                CreatedAt = DateTime.Now,
-                            });
+                            Log.Information($"Technician (ID: {technician.Id}) has been assigned to queued request (ID: {queuedRequest.Id}) after completing a request. Request ID: {technicalServiceRequestId}");
                         }
-
-                        var completedTaskIds = TechnicalServiceRequestStatusEnum.GetCompletedStatusIds();
-                        var nonAssistedRequestIds = TechnicalServiceTypeEnum.GetNonAssistedServiceIds();
-
-                        var isCompleted = completedTaskIds.Contains(technicalServiceRequest.TechnicalServiceRequestStatusId.Value);
-                        var isNonAssisted = technicalServiceRequest.TechnicalServiceTypeId.HasValue && 
-                                            nonAssistedRequestIds.Contains(technicalServiceRequest.TechnicalServiceTypeId.Value);
-
-                        // Check if technician is available now
-                        var isAvailableNow = !_db.ITAvailabilities
-                            .Where(i => i.Id == technician.Id)
-                            .Any(i => DbFunctions.TruncateTime(i.BlockDate) == 
-                                      DbFunctions.TruncateTime(DateTime.Now));
-
-                        // When status is completed, closed, or cancelled and service type is not assisted, assign the top request from the queue to the IT
-                        if (isAvailableNow && 
-                            technicalServiceRequest
-                                .TechnicalServiceRequestStatusId
-                                .HasValue && 
-                            isCompleted && 
-                            !isNonAssisted
-                        )
-                        {
-                            var queuedRequest = AssignTechnicianToPendingRequest(technician.Id);
-                            if (queuedRequest != null)
-                            {
-                                // Notify the technician about the assignment
-                                notificationService.NotifyTechnicianAssignment(technician.Id, queuedRequest.ReferenceCode);
-
-                                var queuedRequestClientId = _db.Registrations
-                                    .Where(i => i.Email == queuedRequest.ClientEmailAddress)
-                                    .Select(i => (int?)i.Id)
-                                    .FirstOrDefault();
-                                if (queuedRequestClientId.HasValue)
-                                {
-                                    // Notify the client about the assignment
-                                    notificationService.NotifyClientOnEnqueuedRequest(
-                                        queuedRequestClientId.Value,
-                                        queuedRequest.ReferenceCode,
-                                        technician.FirstName
-                                    );
-
-                                    TechnicalServiceRequestHub.RefreshTechnicalServiceRequestList();
-                                }
-                            }
-                        }
-
-                        _db.SaveChanges();
-                        transaction.Commit();
-
-                        TechnicalServiceRequestHub.RefreshTechnicalServiceRequestList();
-                        TechnicalServiceRequestHub.RefreshTechnicalServiceRequestStatus(
-                               TechnicalServiceRequestStatusEnum.DisplayName(
-                                   technicalServiceRequestHistory.TechnicalServiceRequestStatusId.Value
-                                )
-                        );
-                        TechnicalServiceRequestHub.RefreshTechnicalServiceRequestActionHistory(technicalServiceRequestHistory.Id);
-
-                        // If the new status is cancelled, refresh the details page
-                        if (technicalServiceRequest.TechnicalServiceRequestStatusId == (int)TechnicalServiceRequestStatusEnum.CANCELLED)
-                        {
-                            TechnicalServiceRequestHub.RefreshTechnicalServiceRequestStatus(
-                                technicalServiceRequest.TechnicalServiceRequestStatus.TechnicalServiceRequestStatusName
-                            );
-                        }
-
-                        // Notify the client
-                        notificationService.RefreshUserUi(clientId.Value);
-                        // Notify the IT
-                        notificationService.RefreshUserUi(technicalServiceRequestHistory.ActionTakenByRegistrationId.Value);
-
-                        TempData["alertModal"] = new AlertModalUtility
-                        {
-                            Title = "Success",
-                            Status = AlertModalStatus.Success,
-                            Message = "Technical Service Request history has been added successfully.",
-                        };
                     }
-                    catch (Exception ex)
+
+                    _db.SaveChanges();
+                    transaction.Commit();
+
+                    TechnicalServiceRequestHub.RefreshTechnicalServiceRequestStatus(
+                           TechnicalServiceRequestStatusEnum.DisplayName(
+                               technicalServiceRequestHistory.TechnicalServiceRequestStatusId.Value
+                           )
+                    );
+                    TechnicalServiceRequestHub.RefreshTechnicalServiceRequestActionHistory(technicalServiceRequestHistory.Id, technicalServiceRequestId);
+
+                    var completedStatusIdsForForm = TechnicalServiceRequestStatusEnum.GetCompletedStatusIds();
+                    if (completedStatusIdsForForm.Contains(technicalServiceRequestHistory.TechnicalServiceRequestStatusId.Value))
                     {
-                        transaction.Rollback();
-                        TempData["alertModal"] = new AlertModalUtility
-                        {
-                            Title = "Error",
-                            Status = AlertModalStatus.Error,
-                            Message = "An error occured. Please try again.",
-                        };
-                        ModelState.AddModelError("", "An error occurred while making a request: " + ex.Message);
+                        TechnicalServiceRequestHub.RefreshTechnicalServiceRequestFormGeneration(technicalServiceRequestId);
                     }
+
+                    // If the new status is cancelled, refresh the details page
+                    if (technicalServiceRequest.TechnicalServiceRequestStatusId == (int)TechnicalServiceRequestStatusEnum.CANCELLED)
+                    {
+                        TechnicalServiceRequestHub.RefreshTechnicalServiceRequestStatus(
+                            technicalServiceRequest.TechnicalServiceRequestStatus.TechnicalServiceRequestStatusName
+                        );
+                    }
+
+                    // Notify the client
+                    notificationService.RefreshUserUi(technicalServiceRequest.ClientRegistrationId);
+                    // Notify the IT
+                    notificationService.RefreshUserUi(technicalServiceRequestHistory.ActionTakenByRegistrationId.Value);
+
+                    TechnicalServiceRequestHub.RefreshTechnicalServiceRequestList();
+
+                    TempData["alertModal"] = new AlertModalUtility
+                    {
+                        Title = "Success",
+                        Status = AlertModalStatus.Success,
+                        Message = "Technical Service Request history has been added successfully.",
+                    };
+                    Log.Information($"Technical Service Request history added successfully. Request ID: {technicalServiceRequestId}, History ID: {technicalServiceRequestHistory.Id}");
+                }
+                catch (Exception ex)
+                {
+                    transaction.Rollback();
+                    TempData["alertModal"] = new AlertModalUtility
+                    {
+                        Title = "Error",
+                        Status = AlertModalStatus.Error,
+                        Message = "An error occured. Please try again.",
+                    };
+                    Log.Error(ex, $"An error occurred while adding Technical Service Request history. Request ID: {technicalServiceRequestId}");
+                    ModelState.AddModelError("", "An error occurred while making a request: " + ex.Message);
                 }
             }
 
@@ -209,8 +234,10 @@ namespace TROUBLESHOOTING_REPAIR_SERVICE_REQUEST_SYSTEM.Controllers
                 return null;
             }
 
-            var technicalServiceTypeId = queuedRequest.TechnicalServiceTypeId;
-            if (technicalServiceTypeId.HasValue && TechnicalServiceTypeEnum.IsRepairTroubleshootingRequest(technicalServiceTypeId.Value))
+            var isEquipmentRepairService = queuedRequest.TechnicalServiceTypeId.HasValue &&
+                TechnicalServiceTypeEnum.IsRepairTroubleshootingRequest(queuedRequest.TechnicalServiceTypeId.Value);
+            var isOthers = !String.IsNullOrEmpty(queuedRequest.Others);
+            if (isEquipmentRepairService || isOthers)
             {
                 // Assign only to a repair and troubleshooting request
                 queuedRequest.TechnicalServiceRequestHistories.Add(new TechnicalServiceRequestHistory

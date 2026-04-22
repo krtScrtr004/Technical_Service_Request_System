@@ -10,7 +10,7 @@
 
     const currentYear = new Date().getFullYear();
     const currentMonth = new Date().getMonth();
-    const yearsToShow = currentYear - (registrationYear - 1); // Show only years from registration year to current year
+    const yearsToShow = currentYear - (parseInt(registrationYear) - 1); // Show only years from registration year to current year
 
     let selectedYear = currentYear;
     let selectedMonth = currentMonth;
@@ -18,7 +18,7 @@
     // Render year select options
     function renderYearSelect() {
         yearSelect.empty();
-        for (let y = currentYear; y > currentYear - yearsToShow; y--) {
+        for (let y = currentYear - yearsToShow + 1; y <= currentYear ; y++) {
             yearSelect.append($('<option>', {
                 value: y,
                 text: y,
@@ -97,7 +97,7 @@
 
             // Check if the date is blocked and apply the appropriate class
             const isBlockedClass = blockedDates.includes(dateStr) ? "blocked-date" : "";
-            const isBlockedTitle = blockedDates.includes(dateStr) ? "You have blocked this date" : "";
+            const isBlockedTitle = blockedDates.includes(dateStr) ? "This date was marked as blocked" : "";
             html += `<td class="${isBlockedClass} text-center" title="${isBlockedTitle}">
                         ${day}
                     </td>`;
@@ -120,14 +120,12 @@
         calendarContainer.html(html);
     }
 
-    // Year select handler
-    yearSelect.on('change', function () {
-        selectedYear = parseInt($(this).val());
+    yearSelect.on("change", function() {
+        selectedYear = parseInt($(this).val(), 10);
         fetchAndRenderCalendar();
     });
 
-    // Month select handler
-    monthSelect.on('change', function () {
+    monthSelect.on("change", function() {
         selectedMonth = parseInt($(this).val(), 10);
         fetchAndRenderCalendar();
     });
@@ -138,4 +136,19 @@
         renderMonthSelect();
         fetchAndRenderCalendar();
     }
+    
+    const itAvailabilityHub = $.connection.iTAvailabilityHub;
+
+    itAvailabilityHub.client.refreshITAvailabilityTable = function(itId) {
+        if (parseInt(itId) === parseInt(selectedITId)) {
+            fetchAndRenderCalendar();
+        }
+    }
+
+    $.connection.hub.start().done(function() {
+        console.log('SignalR connected');
+    }).fail(function(error) {
+        console.error('SignalR connection failed:', error);
+    });
+
 });

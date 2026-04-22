@@ -1,10 +1,12 @@
 ﻿@model TROUBLESHOOTING_REPAIR_SERVICE_REQUEST_SYSTEM.Models.ITAvailabilityManageViewModel
 @using TROUBLESHOOTING_REPAIR_SERVICE_REQUEST_SYSTEM.Core
+@using TROUBLESHOOTING_REPAIR_SERVICE_REQUEST_SYSTEM.Enumerables
 
 @{
     ViewBag.Title = "Manage";
 
     var currentUser = ViewBag.CurrentUser as UserSession;
+    var isAdmin = AccountTypeEnum.IsAdmin(currentUser.PrivilegeIds);
 }
 
 @section Styles {
@@ -13,68 +15,74 @@
 
 <section class="container availaibility-container flex-row flex-wrap">
 
-    <section class="content-panel panel panel-default flex-col">
-        <section class="panel-heading">
-            <h4>
-                <i class="glyphicon glyphicon-calendar"></i>
-                SCHEDULE AVAILABILITY MANAGEMENT
-            </h4>
+    @* Calendar Selection *@
+    @if (!isAdmin)
+    {
+        <section class="content-panel panel panel-default flex-col">
+            <section class="panel-heading">
+                <h4>
+                    <i class="glyphicon glyphicon-calendar"></i>
+                    SCHEDULE AVAILABILITY MANAGEMENT
+                </h4>
+                <p>
+                    You can use the calendar below to select the dates you are unavailable for work.
+                </p>
 
-            <p>
-                You can use the calendar below to select the dates you are unavailable for work.
-            </p>
-        </section>
-
-        <section class="content-panel-body panel-body flex-row flex-wrap flex-1">
-            <section>
-                @Html.AntiForgeryToken()
-                @Html.HiddenFor(model => model.SelectedStringDates, new { id = "preloaded_blocked_dates" })
-
-                @* Calendar *@
-                <div class="input-group date" id="datetime_picker"></div>
-
-                <div>
-                    <ul class="rules-list text-primary">
-                        <i class="glyphicon glyphicon-info-sign"></i>Rules:
-
-                        <li>
-                            <em class="light-text">Past dates cannot be unselected.</em>
-                        </li>
-                        <li>
-                            <em class="light-text">Only upcoming dates can be selected.</em>
-                        </li>
-                        <li>
-                            <em class="light-text">You can select dates up to 30 days ahead.</em>
-                        </li>
-                    </ul>
-                </div>
             </section>
 
-            <hr class="bg-default" />
+            <section class="content-panel-body panel-body flex-row flex-wrap flex-1">
+                <section>
+                    @Html.AntiForgeryToken()
+                    @Html.HiddenFor(model => model.SelectedStringDates, new { id = "preloaded_blocked_dates" })
 
-            <section class="selected-date-badge-container flex-col">
-                <div class="flex-row flex-wrap">
-                    @* Badges Here *@
-                </div>
+                    @* Calendar *@
+                    <div class="input-group date" id="datetime_picker"></div>
+
+                    <div>
+                        <ul class="rules-list text-primary">
+                            <i class="glyphicon glyphicon-info-sign"></i>Rules:
+
+                            <li>
+                                <em class="light-text">Past dates cannot be unselected.</em>
+                            </li>
+                            <li>
+                                <em class="light-text">Only upcoming dates can be selected.</em>
+                            </li>
+                            <li>
+                                <em class="light-text">You can select dates up to 30 days ahead.</em>
+                            </li>
+                        </ul>
+                    </div>
+                </section>
+
+                <hr class="bg-default" />
+
+                <section class="selected-date-badge-container flex-col">
+                    <div class="flex-row flex-wrap">
+                        @* Badges Here *@
+                    </div>
+                </section>
+
             </section>
 
+            <section class="panel-footer buttons-container flex-col flex-child-end-v">
+                <div class="buttons flex-row-reverse flex-wrap">
+                    <button id="modify_availability_button" type="button" class="btn btn-primary ">
+                        <i class="glyphicon glyphicon glyphicon-floppy-disk"></i>
+                        Save Changes
+                    </button>
+
+                    <a href="/" class="btn btn-danger ">
+                        <i class="glyphicon glyphicon glyphicon-remove"></i>
+                        Cancel
+                    </a>
+                </div>
+            </section>
         </section>
+    }
 
-        <section class="panel-footer buttons-container flex-col flex-child-end-v">
-            <div class="buttons flex-row-reverse flex-wrap">
-                <button id="modify_availability_button" type="button" class="btn btn-primary ">
-                    <i class="glyphicon glyphicon glyphicon-floppy-disk"></i>
-                    Save Changes
-                </button>
 
-                <a href="/" class="btn btn-danger ">
-                    <i class="glyphicon glyphicon glyphicon-remove"></i>
-                    Cancel
-                </a>
-            </div>/
-        </section>
-    </section>
-
+    @* Availability History *@
     <section class="container availability-history-container bg-light panel">
         <section class="">
             <div>
@@ -83,7 +91,14 @@
                     History
                 </h4>
 
-                <p class="text-default">You may view your availability history below.</p>
+                @if (isAdmin)
+                {
+                    <p class="text-default">You may view this IT's availability history below.</p>
+                }
+                else
+                {
+                    <p class="text-default">You may view your availability history below.</p>
+                }
             </div>
 
             <div class="history-selects-container flex-row flex-wrap">
@@ -108,9 +123,10 @@
 
 @section Scripts {
     <script>
+        const selectedITId = "@Model.UserId";
         const registrationYear = "@Model.UserRegistrationDate.Year";
-        const submitUrl = "@Url.Action("Manage", "ITAvailability", new { id = currentUser.Id })";
-        const getBlockedDatesUrl = "@Url.Action("GetBlockedDates", "ITAvailability")";
+        const submitUrl = "@Url.Action("Manage", "ITAvailability", new { id = Model.UserId })";
+        const getBlockedDatesUrl = "@Url.Action("GetBlockedDates", "ITAvailability", new { id = Model.UserId })";
     </script>
 
     <script src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-datepicker/1.10.0/js/bootstrap-datepicker.min.js"></script>

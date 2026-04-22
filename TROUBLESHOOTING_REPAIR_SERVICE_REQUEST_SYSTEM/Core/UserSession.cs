@@ -18,6 +18,8 @@ namespace TROUBLESHOOTING_REPAIR_SERVICE_REQUEST_SYSTEM.Core
         private string _userName;
         private string _email;
         private string _contactNumber;
+        private string _office;
+        private string _position;
         private int[] _privilegeIds;
 
         public int Id => _id;
@@ -28,6 +30,8 @@ namespace TROUBLESHOOTING_REPAIR_SERVICE_REQUEST_SYSTEM.Core
         public string UserName => _userName;
         public string Email => _email;
         public string ContactNumber => _contactNumber;
+        public string Office => _office;
+        public string Position => _position;
         public int[] PrivilegeIds => _privilegeIds;
 
         public UserSession(
@@ -39,6 +43,8 @@ namespace TROUBLESHOOTING_REPAIR_SERVICE_REQUEST_SYSTEM.Core
             string userName,
             string email,
             string contactNumber,
+            string office,
+            string position,
             int[] privilegeIds
         )
         {
@@ -55,6 +61,8 @@ namespace TROUBLESHOOTING_REPAIR_SERVICE_REQUEST_SYSTEM.Core
             _userName = userName;
             _email = email;
             _contactNumber = contactNumber;
+            _office = office;
+            _position = position;
             _privilegeIds = privilegeIds;
 
             // Store in session for persistence across requests
@@ -66,6 +74,8 @@ namespace TROUBLESHOOTING_REPAIR_SERVICE_REQUEST_SYSTEM.Core
             HttpContext.Current.Session["userName"] = userName;
             HttpContext.Current.Session["email"] = email;
             HttpContext.Current.Session["contactNumber"] = contactNumber;
+            HttpContext.Current.Session["office"] = office;
+            HttpContext.Current.Session["position"] = position;
             HttpContext.Current.Session["privilegeIds"] = privilegeIds;
         }
 
@@ -87,9 +97,12 @@ namespace TROUBLESHOOTING_REPAIR_SERVICE_REQUEST_SYSTEM.Core
                 FirstName = this.FirstName,
                 LastName = this.LastName,
                 MiddleName = this.MiddleName,
+                ExtensionName = this.ExtensionName,
                 UserName = this.UserName,
                 Email = this.Email,
                 ContactNumber = this.ContactNumber,
+                Office = this.Office,
+                Position = this.Position,
                 UserPrivileges = privileges
             };
         }
@@ -116,6 +129,8 @@ namespace TROUBLESHOOTING_REPAIR_SERVICE_REQUEST_SYSTEM.Core
                 (string)session["userName"],
                 (string)session["email"],
                 (string)session["contactNumber"],
+                (string)session["office"],
+                (string)session["position"],
                 (int[])session["privilegeIds"]
             );
         }
@@ -156,10 +171,12 @@ namespace TROUBLESHOOTING_REPAIR_SERVICE_REQUEST_SYSTEM.Core
                 firstName: registration.FirstName,
                 lastName: registration.LastName,
                 middleName: registration.MiddleName,
-                extensionName: string.Empty,
+                extensionName: registration.ExtensionName,
                 userName: registration.UserName,
                 email: registration.Email,
                 contactNumber: registration.ContactNumber,
+                office: registration.Office,
+                position: registration.Position,
                 privilegeIds: registration.UserPrivileges
                     .Where(p => p.PrivilegeId.HasValue)
                     .Select(p => p.PrivilegeId.Value)

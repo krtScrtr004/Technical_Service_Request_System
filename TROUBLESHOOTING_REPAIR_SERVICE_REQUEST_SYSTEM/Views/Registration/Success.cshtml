@@ -35,15 +35,27 @@
                         @* Full Name *@
                         <tr>
                             <th>Full Name</th>
-                            <td colspan="3">@Model.Registration.FirstName @Model.Registration.MiddleName @Model.Registration.LastName</td>
+                            <td colspan="3">@Model.Registration.FirstName @Model.Registration.MiddleName @Model.Registration.LastName @Model.Registration.ExtensionName</td>
                         </tr>
 
-                        @* Email Address *@
                         <tr>
+                            @* Email Address *@
                             <th>Email Address</th>
                             <td>@Model.Registration.Email</td>
+
+                            @* User Type *@
                             <th>User Type</th>
                             <td>@Model.Registration.AccountType</td>
+                        </tr>
+
+                        <tr>
+                            @* Office *@
+                            <th>Office</th>
+                            <td>@Model.Registration.Office</td>
+
+                            @* Position *@
+                            <th>Position</th>
+                            <td>@Model.Registration.Position</td>
                         </tr>
 
                         <tr>
@@ -51,8 +63,8 @@
                             <th>Registration Date</th>
                             <td>
                                 @(Model.Registration.RegistrationDate.HasValue
-                                            ? Model.Registration.RegistrationDate.Value.ToString("MMMM dd, yyyy")
-                                            : "-")
+                                    ? Model.Registration.RegistrationDate.Value.ToString("MMMM dd, yyyy")
+                                    : "-")
                             </td>
 
                             @* Username *@

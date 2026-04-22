@@ -37,6 +37,7 @@
                     <div class="form-horizontal">
                         <div class="container-fluid registration-request-create-form-body">
                             <div>
+                                @* First Name *@
                                 <div class="form-group flex-row flex-wrap registration-request-create-row">
                                     @Html.LabelFor(model => model.FirstName, new { @class = "control-label col-md-4" })
                                     <div class="flex-1 registration-request-create-input-wrap">
@@ -45,14 +46,16 @@
                                     </div>
                                 </div>
 
+                                @* Middle Name *@
                                 <div class="form-group flex-row flex-wrap registration-request-create-row">
                                     @Html.LabelFor(model => model.MiddleName, new { @class = "control-label col-md-4" })
                                     <div class="flex-1 registration-request-create-input-wrap">
-                                        @Html.TextBoxFor(model => model.MiddleName, new { @class = "form-control input-sm alpha req text-uppercase registration-request-create-input" })
+                                        @Html.TextBoxFor(model => model.MiddleName, new { @class = "form-control input-sm alpha req text-uppercase registration-request-create-input", placeholder = "Optional" })
                                         @Html.ValidationMessageFor(model => model.MiddleName)
                                     </div>
                                 </div>
 
+                                @* Last Name *@
                                 <div class="form-group flex-row flex-wrap registration-request-create-row">
                                     @Html.LabelFor(model => model.LastName, new { @class = "control-label col-md-4" })
                                     <div class="flex-1 registration-request-create-input-wrap">
@@ -60,17 +63,28 @@
                                         @Html.ValidationMessageFor(model => model.LastName)
                                     </div>
                                 </div>
+
+                                @* Extension Name *@
+                                <div class="form-group flex-row flex-wrap registration-request-create-row">
+                                    @Html.LabelFor(model => model.ExtensionName, new { @class = "control-label col-md-4" })
+                                    <div class="flex-1 registration-request-create-input-wrap">
+                                        @Html.TextBoxFor(model => model.ExtensionName, new { @class = "form-control input-sm text-uppercase registration-request-create-input", placeholder = "Optional" })
+                                        @Html.ValidationMessageFor(model => model.ExtensionName)
+                                    </div>
+                                </div>
                             </div>
 
                             <div>
+                                @* Contact Number *@
                                 <div class="form-group flex-row flex-wrap registration-request-create-row">
-                                    @Html.LabelFor(model => model.ContactNumber, new { @class = "control-label col-md-4" })
+                                    @Html.LabelFor(model => model.ContactNumber, new { @class = "control-label col-md-4" }) 
                                     <div class="flex-1 registration-request-create-input-wrap">
                                         @Html.TextBoxFor(model => model.ContactNumber, new { @class = "input-sm form-control req registration-request-create-input", @required = true })
                                         @Html.ValidationMessageFor(model => model.ContactNumber)
                                     </div>
                                 </div>
 
+                                @* Email *@
                                 <div class="form-group flex-row flex-wrap registration-request-create-row">
                                     @Html.LabelFor(model => model.Email, new { @class = "control-label col-md-4" })
                                     <div class="flex-1 registration-request-create-input-wrap">
@@ -82,6 +96,27 @@
                                     </div>
                                 </div>
                             </div>
+
+                            <div>
+                                @* Office *@
+                                <div class="form-group flex-row flex-wrap registration-request-create-row">
+                                    @Html.LabelFor(model => model.Office, new { @class = "control-label col-md-4" })
+                                    <div class="flex-1 registration-request-create-input-wrap">
+                                        @Html.TextBoxFor(model => model.Office, new { @class = "input-sm form-control req registration-request-create-input", @required = true })
+                                        @Html.ValidationMessageFor(model => model.Office)
+                                    </div>
+                                </div>
+
+                                @* Position *@
+                                <div class="form-group flex-row flex-wrap registration-request-create-row">
+                                    @Html.LabelFor(model => model.Position, new { @class = "control-label col-md-4" })
+                                    <div class="flex-1 registration-request-create-input-wrap">
+                                        @Html.TextBoxFor(model => model.Position, new { @class = "input-sm form-control req registration-request-create-input", @required = true })
+                                        @Html.ValidationMessageFor(model => model.Position)
+                                    </div>
+                                </div>
+                            </div>
+
                         </div>
 
                         <div class="form-group registration-request-create-actions center-text">

@@ -8,8 +8,22 @@
 
     var currentUser = ViewBag.CurrentUser as UserSession;
     var userAccountType = currentUser.PrivilegeIds;
+
+    var isAdmin = AccountTypeEnum.IsAdmin(userAccountType);
+    var isIT = AccountTypeEnum.IsIT(userAccountType);
+
     var currentStatus = Model.TechnicalServiceRequestStatusId;
-    var isCancelled = currentStatus == (int)TechnicalServiceRequestStatusEnum.CANCELLED;
+
+    var isQueued = ViewBag.IsQueued as bool? ?? false;
+
+    var isFormGeneratable = currentStatus == (int)TechnicalServiceRequestStatusEnum.RESOLVED ||
+        currentStatus == (int)TechnicalServiceRequestStatusEnum.CLOSED;
+    var formLink = isFormGeneratable ?
+        Url.Action("Form", "TechnicalServiceRequests", new { id = Model.TechnicalServiceRequestFormGeneratableHistoryId })
+        : "#";
+
+    var isImmutable = currentStatus == (int)TechnicalServiceRequestStatusEnum.CANCELLED ||
+        currentStatus == (int)TechnicalServiceRequestStatusEnum.CLOSED;
     var isCancellable = TechnicalServiceRequestStatusEnum
         .GetCancellableStatusIds()
         .Any(s => s == currentStatus);
@@ -18,7 +32,7 @@
     var isScheduledService = scheduleRequiredTypes.Contains(Model.TechnicalServiceTypeId.GetValueOrDefault());
 
     Func<int, string> getStatusLabelClass = (status) =>
-    { 
+    {
         switch (status)
         {
             case TechnicalServiceRequestStatusEnum.PENDING:
@@ -53,6 +67,11 @@
                 return "label label-default";
         }
     };
+
+    var requestTypeName =
+        (Model.TechnicalServiceTypeId.HasValue && Model.TechnicalServiceTypeId != 0)
+            ? Model.TechnicalServiceType.TechnicalServiceTypeName
+            : Model.Others;
 }
 
 @section Styles {
@@ -62,295 +81,189 @@
 @Html.AntiForgeryToken() @* For AJAX Request *@
 
 <section class="container tsr-detail-page-container">
-    <section class="panel panel-default">
+    <section class="panel panel-default tsr-content-panel">
 
         @* Heading *@
-        <section class="panel-heading">
-            <p>
-                Reference Code: @Model.ReferenceCode
-            </p>
+        <section class="panel-heading tsr-page-header flex-row flex-child-center-h flex-space-between flex-wrap">
+            <div class="tsr-page-header-main">
+                <p class="tsr-ref-code text-primary">REFERENCE CODE: @Model.ReferenceCode</p>
+
+                <div id="status_container" class="tsr-page-status">
+                    <span class="@getStatusLabelClass(Model.TechnicalServiceRequestStatusId)">
+                        @TechnicalServiceRequestStatusEnum.DisplayName(Model.TechnicalServiceRequestStatusId)
+                    </span>
+                </div>
+            </div>
+
+            <div class="tsr-page-actions flex-row flex-wrap">
+                <a id="generate_tsrf_button" class="btn btn-success @(isFormGeneratable ? "block" : "no-display")" href="@formLink">
+                    <i class="glyphicon glyphicon-file"></i>
+                    Generate TSRF
+                </a>
+
+                @*@if (isAdmin && isQueued)
+                {
+                    <button type="button" class="btn btn-primary">
+                        <i class="glyphicon glyphicon-user"></i>
+                        Assign IT
+                    </button>
+                }*@
+            </div>
         </section>
 
         @* Body *@
-        <section class="panel-body">
+        <section class="panel-body tsr-page-body">
 
             @* Client Information *@
-            <section class="container-fluid">
-                <div>
+            <section class="tsr-detail-section">
+                <div class="tsr-detail-section-header">
                     <h4 class="section-heading-title text-primary">
                         <i class="glyphicon glyphicon-user"></i>
                         CLIENT INFORMATION
                     </h4>
                 </div>
 
-                <div class="table-responsive">
-                    <table class="detail-table stack-on-mobile table table-bordered">
-                        <tbody>
+                <div class="tsr-detail-grid tsr-detail-grid-3">
+                    <div class="tsr-detail-item">
+                        <p class="tsr-detail-label light-text">LAST NAME</p>
+                        <p class="tsr-detail-value">@Model.ClientLastName</p>
+                    </div>
 
-                            @* Personal Information *@
-                            <tr class="active">
-                                <td colspan="4" class="text-primary bold-text">
-                                    PERSONAL INFORMATION
-                                </td>
-                            </tr>
+                    <div class="tsr-detail-item">
+                        <p class="tsr-detail-label light-text">FIRST NAME</p>
+                        <p class="tsr-detail-value">@Model.ClientFirstName</p>
+                    </div>
 
-                            <tr>
-                                @* Last Name*@
-                                <td>
-                                    <p class="text-primary bold-text">
-                                        @Model.ClientLastName
-                                    </p>
+                    <div class="tsr-detail-item">
+                        <p class="tsr-detail-label light-text">MIDDLE NAME</p>
+                        <p class="tsr-detail-value">@(Model.ClientMiddleName ?? "N/A")</p>
+                    </div>
 
-                                    <p class="text-primary light-text">
-                                        LAST NAME
-                                    </p>
-                                </td>
+                    <div class="tsr-detail-item">
+                        <p class="tsr-detail-label light-text">EXT. NAME</p>
+                        <p class="tsr-detail-value">@(Model.ClientExtensionName ?? "N/A")</p>
+                    </div>
 
-                                @* First Name *@
-                                <td>
-                                    <p class="text-primary bold-text">
-                                        @Model.ClientFirstName
-                                    </p>
+                    <div class="tsr-detail-item">
+                        <p class="tsr-detail-label light-text"><i class="glyphicon glyphicon-envelope"></i> EMAIL</p>
+                        <p class="tsr-detail-value">@(string.IsNullOrWhiteSpace(Model.ClientEmailAddress) ? "N/A" : Model.ClientEmailAddress)</p>
+                    </div>
 
-                                    <p class="text-primary light-text">
-                                        FIRST NAME
-                                    </p>
-                                </td>
+                    <div class="tsr-detail-item">
+                        <p class="tsr-detail-label light-text"><i class="glyphicon glyphicon-earphone"></i> CONTACT NUMBER</p>
+                        <p class="tsr-detail-value">@(string.IsNullOrWhiteSpace(Model.ClientContactNumber) ? "N/A" : Model.ClientContactNumber)</p>
+                    </div>
 
-                                @* Middle Name *@
-                                <td>
-                                    <p class="text-primary bold-text">
-                                        @(Model.ClientMiddleName ?? "N/A")
-                                    </p>
+                    <div class="tsr-detail-item">
+                        <p class="tsr-detail-label light-text">OFFICE</p>
+                        <p class="tsr-detail-value">@(string.IsNullOrWhiteSpace(Model.ClientOffice) ? "N/A" : Model.ClientOffice)</p>
+                    </div>
 
-                                    <p class="text-primary light-text">
-                                        MIDDLE NAME
-                                    </p>
-                                </td>
-
-                                @* Extension Name *@
-                                <td>
-                                    <p class="text-primary bold-text">
-                                        @(Model.ClientExtensionName  ?? "N/A")
-                                    </p>
-
-                                    <p class="text-primary light-text">
-                                        EXT. NAME
-                                    </p>
-                                </td>
-                            </tr>
-
-                            @* Contact Information *@
-                            <tr class="active">
-                                <td colspan="4" class="text-primary bold-text">
-                                    CONTACT INFORMATION
-                                </td>
-                            </tr>
-
-                            <tr>
-
-                                @* Email *@
-                                <td class="text-primary light-text">
-                                    EMAIL
-                                </td>
-                                <td class="text-primary bold-text">
-                                    @Model.ClientEmailAddress
-                                </td>
-
-                                @* Contact Number *@
-                                <td class="text-primary light-text">
-                                    CONTACT NUMBER
-                                </td>
-                                <td class="text-primary bold-text">
-                                    @Model.ClientContactNumber
-                                </td>
-
-                            </tr>
-
-                            <tr>
-                                @* Office *@
-                                <td class="text-primary light-text">
-                                    OFFICE
-                                </td>
-                                <td class="text-primary bold-text">
-                                    @Model.ClientOffice
-                                </td>
-
-                                @* Position *@
-                                <td class="text-primary light-text">
-                                    POSITION
-                                </td>
-                                <td class="text-primary bold-text">
-                                    @Model.ClientPosition
-                                </td>
-                            </tr>
-
-                        </tbody>
-                    </table>
+                    <div class="tsr-detail-item">
+                        <p class="tsr-detail-label light-text">POSITION</p>
+                        <p class="tsr-detail-value">@(string.IsNullOrWhiteSpace(Model.ClientPosition) ? "N/A" : Model.ClientPosition)</p>
+                    </div>
                 </div>
             </section>
 
-            <section class="container-fluid">
-                @* Request Information *@
-                <div>
+            @* Request Information *@
+            <section class="tsr-detail-section">
+                <div class="tsr-detail-section-header">
                     <h4 class="section-heading-title text-primary">
                         <i class="glyphicon glyphicon-file"></i>
                         REQUEST INFORMATION
                     </h4>
                 </div>
 
-                <div class="table-responsive">
-                    <table class="request-information-table detail-table stack-on-mobile table table-bordered">
-                        <tbody>
+                <div class="tsr-detail-grid tsr-detail-grid-2">
+                    <div class="tsr-detail-item">
+                        <p class="tsr-detail-label light-text">TYPE</p>
+                        <p class="tsr-detail-value">@(string.IsNullOrWhiteSpace(requestTypeName) ? "N/A" : requestTypeName)</p>
+                    </div>
 
-                            @* Type *@
-                            <tr>
-                                <td class="text-primary light-text active">
-                                    TYPE
-                                </td>
-
-                                <td class="text-primary bold-text">
-                                    @if (Model.TechnicalServiceTypeId.HasValue && Model.TechnicalServiceTypeId != 0)
-                                    {
-                                        @Model.TechnicalServiceType.TechnicalServiceTypeName
-                                    }
-                                    else
-                                    {
-                                        @Model.Others
-                                    }
-                                </td>
-                            </tr>
-
-                            @* Severity *@
-                            <tr>
-                                <td class="text-primary light-text active">
-                                    SEVERITY
-                                </td>
-
-                                <td class="text-primary bold-text">
-                                    <div class="flex-row flex-space-between">
-                                        <p id="severity_container">
-                                            @if (Model.TechnicalServiceRequestSeverityId.HasValue && 
-                                                 Model.TechnicalServiceRequestSeverityId > 0)
-                                            {
-                                                <span class="@getSeverityLabelClass(Model.TechnicalServiceRequestSeverityId.Value)">
-                                                    @Model.TechnicalServiceRequestSeverity.SeverityName
-                                                </span>
-                                            }
-                                            else
-                                            {
-                                                <span class="label label-default">
-                                                    N/A
-                                                </span>
-                                            }
-                                        </p>
-
-                                        @if (AccountTypeEnum.IsIT(userAccountType) && !isCancelled)
-                                        {
-                                            Html.RenderPartial("~/Views/TechnicalServiceRequests/Partial/_UpdateSeverityModal.cshtml");
-                                            <button 
-                                                type="button" 
-                                                id="update_severity_button" 
-                                                class="unset-button text-info" 
-                                                data-toggle="modal" 
-                                                data-target="#update_severity_modal">Update</button>
-                                        }
-                                    </div>
-                                </td>
-                            </tr>
-
-                            @* Status *@
-                            <tr>
-                                <td class="text-primary light-text active">
-                                    STATUS
-                                </td>
-
-                                <td id="status_container" class="text-primary bold-text">
-                                    <span class="@getStatusLabelClass(Model.TechnicalServiceRequestStatusId)">
-                                        @TechnicalServiceRequestStatusEnum.DisplayName(Model.TechnicalServiceRequestStatusId)
+                    <div class="tsr-detail-item">
+                        <p class="tsr-detail-label light-text">SEVERITY</p>
+                        <div class="tsr-detail-inline-actions flex-row flex-child-center-h flex-space-between flex-wrap">
+                            <p id="severity_container" class="tsr-inline-content">
+                                @if (Model.TechnicalServiceRequestSeverityId.HasValue && Model.TechnicalServiceRequestSeverityId > 0)
+                                {
+                                    <span class="@getSeverityLabelClass(Model.TechnicalServiceRequestSeverityId.Value)">
+                                        @Model.TechnicalServiceRequestSeverity.SeverityName
                                     </span>
-                                </td>
-                            </tr>
+                                }
+                                else
+                                {
+                                    <span class="label label-default">N/A</span>
+                                }
+                            </p>
 
-
-                            @* Description *@
-                            <tr>
-                                <td class="text-primary light-text active">
-                                    DESCRIPTION
-                                </td>
-
-                                <td id="description_container" class="text-primary bold-text">
-                                    @(string.IsNullOrWhiteSpace(Model.TechnicalServiceRequestDescription) == false
-                                        ? Model.TechnicalServiceRequestDescription
-                                        : "N/A")
-                                </td>
-                            </tr>
-
-                            @* Show schedule if request is a schedule control process *@
-                            @if (Model.TechnicalServiceTypeId.HasValue &&
-                                 TechnicalServiceTypeEnum.IsScheduleControlProcessRequest(Model.TechnicalServiceTypeId.Value))
+                            @if (isIT && !isImmutable)
                             {
-                                <tr>
-                                    <td colspan="2" class="schedule-row-data">
-                                        <div class="schedule-date flex-row">
-                                            @* Date *@
-                                            <div class="flex-row">
-                                                <div class="text-primary light-text active">
-                                                    SCHEDULE
-                                                </div>
-
-                                                <div class="text-primary bold-text">
-                                                    @Model.TechnicalServiceRequestScheduledDate.Value.ToString("MMMM  dd, yyyy")
-                                                </div>
-                                            </div>
-
-                                            @* Start *@
-                                            <div class="flex-row">
-                                                <div class="text-primary light-text active">
-                                                    START
-                                                </div>
-
-                                                <div class="text-primary bold-text">
-                                                    @DateTime.Today.Date.Add(Model.TechnicalServiceRequestScheduledStartTime.Value).ToString("hh:mm tt")
-                                                </div>
-                                            </div>
-
-                                            @* End *@
-                                            <div class="flex-row">
-                                                <div class="text-primary light-text active">
-                                                    END
-                                                </div>
-
-                                                <div class="text-primary bold-text">
-                                                    @DateTime.Today.Add(Model.TechnicalServiceRequestScheduledEndTime.Value).ToString("hh:mm tt")
-                                                </div>
-                                            </div>
-                                        </div>
-                                    </td>
-                                </tr>
+                                Html.RenderPartial("~/Views/TechnicalServiceRequests/Partial/_UpdateSeverityModal.cshtml");
+                                <button type="button"
+                                        id="update_severity_button"
+                                        class="btn btn-link btn-xs"
+                                        data-toggle="modal"
+                                        data-target="#update_severity_modal">
+                                    Update
+                                </button>
                             }
+                        </div>
+                    </div>
 
-                        </tbody>
-                    </table>
+                    <div class="tsr-detail-item tsr-detail-item-full">
+                        <p class="tsr-detail-label light-text">DESCRIPTION</p>
+                        <p id="description_container" class="tsr-detail-value wrap-text">
+                            @(string.IsNullOrWhiteSpace(Model.TechnicalServiceRequestDescription)
+                                ? "N/A"
+                                : Model.TechnicalServiceRequestDescription)
+                        </p>
+                    </div>
+
+                    @if (isScheduledService &&
+                        Model.TechnicalServiceRequestScheduledDate.HasValue &&
+                        Model.TechnicalServiceRequestScheduledStartTime.HasValue &&
+                        Model.TechnicalServiceRequestScheduledEndTime.HasValue)
+                    {
+                        <div class="tsr-detail-item tsr-detail-item-full">
+                            <p class="tsr-detail-label light-text"><i class="glyphicon glyphicon-calendar"></i> SCHEDULE</p>
+
+                            <div class="row tsr-schedule-wrap">
+                                <div class="col-sm-4 col-xs-12 tsr-schedule-item">
+                                    <p class="tsr-schedule-item-label">DATE</p>
+                                    <p class="tsr-schedule-item-value">@Model.TechnicalServiceRequestScheduledDate.Value.ToString("MMMM dd, yyyy")</p>
+                                </div>
+
+                                <div class="col-sm-4 col-xs-12 tsr-schedule-item">
+                                    <p class="tsr-schedule-item-label">START</p>
+                                    <p class="tsr-schedule-item-value">@DateTime.Today.Date.Add(Model.TechnicalServiceRequestScheduledStartTime.Value).ToString("hh:mm tt")</p>
+                                </div>
+
+                                <div class="col-sm-4 col-xs-12 tsr-schedule-item">
+                                    <p class="tsr-schedule-item-label">END</p>
+                                    <p class="tsr-schedule-item-value">@DateTime.Today.Date.Add(Model.TechnicalServiceRequestScheduledEndTime.Value).ToString("hh:mm tt")</p>
+                                </div>
+                            </div>
+                        </div>
+                    }
                 </div>
             </section>
 
-            <section class="container-fluid">
+            <section class="tsr-detail-section">
                 <div class="flex-row flex-wrap flex-child-center-h flex-space-between detail-history-heading-row">
                     <h4 class="section-heading-title text-primary">
                         <i class="glyphicon glyphicon-cog"></i>
                         ACTION HISTORY
                     </h4>
 
-                    @if (AccountTypeEnum.IsIT(userAccountType) && !isCancelled)
+                    @if (isIT && !isImmutable)
                     {
                         Html.RenderPartial("~/Views/TechnicalServiceRequests/Partial/_AddActionHistoryModal.cshtml");
-                        <button 
-                            id="add_action_history_button" 
-                            class="btn " 
-                            type="button" 
-                            data-toggle="modal" 
-                            data-target="#add_action_history_modal">
+                        <button id="add_action_history_button"
+                                class="btn btn-default"
+                                type="button"
+                                data-toggle="modal"
+                                data-target="#add_action_history_modal">
                             <i class="glyphicon glyphicon-plus"></i>
                             Add
                         </button>
@@ -358,7 +271,7 @@
                 </div>
 
                 <section class="action-history-table-container table-responsive">
-                    <table id="action_history_table" class="detail-table stack-on-mobile table table-bordered">
+                    <table id="action_history_table" class="table table-bordered table-condensed action-history-table">
                         <tbody>
                             @if (Model.TechnicalServiceRequestHistories.Count() > 0)
                             {
@@ -369,26 +282,22 @@
                             }
                             else
                             {
-                                <tr>
-                                    <td class="text-primary light-text">
-                                        No Action History Available.
-                                    </td>
+                                <tr class="action-history-empty-row">
+                                    <td class="text-primary light-text text-center">No Action History Available.</td>
                                 </tr>
                             }
                         </tbody>
                     </table>
                 </section>
-
             </section>
 
             @if (isCancellable && AccountTypeEnum.IsStandard(currentUser.PrivilegeIds))
             {
                 <section class="flex-row-reverse detail-cancel-row">
-                    <button 
-                        id="cancel_request_button" 
-                        class="btn btn-danger  center-child" 
-                        type="button" 
-                        data-request-id="@Model.Id">
+                    <button id="cancel_request_button"
+                            class="btn btn-danger center-child"
+                            type="button"
+                            data-request-id="@Model.Id">
                         <i class="glyphicon glyphicon glyphicon-remove"></i>
                         Cancel
                     </button>
@@ -402,9 +311,11 @@
 
 @section Scripts {
     <script>
+        const currentTechnicalServiceRequestId = @Model.Id;
         const updateSeverityUrl = "@Url.Action("UpdateSeverity", "TechnicalServiceRequests")";
         const cancelRequestUrl = "@Url.Action("CancelRequest", "TechnicalServiceRequests")";
         const actionHistoryRowUrl = "@Url.Action("GetTechnicalServiceRequestActionHistory", "TechnicalServiceRequestHistory")";
+        const formGenerationStateUrl = "@Url.Action("GetFormGenerationState", "TechnicalServiceRequests")";
     </script>
 
     <script src="~/Scripts/App/TechnicalServiceRequest/CancelRequest.js" defer></script>

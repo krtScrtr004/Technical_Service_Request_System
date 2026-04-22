@@ -37,7 +37,9 @@
                         CLIENT INFORMATION
                     </h5>
 
-                    <div class="row flex-wrap flex-child-start-h">
+                    <div class="row flex-child-center-h flex-wrap">
+                        @Html.HiddenFor(model => model.ClientRegistrationId)
+
                         @* Last Name *@
                         <div class="col-sm-3 form-group relative">
                             @Html.LabelFor(model => model.ClientLastName)
@@ -62,28 +64,28 @@
                         @* Extension Name *@
                         <div class="col-sm-3 form-group relative">
                             @Html.LabelFor(model => model.ClientExtensionName)
-                            @Html.EditorFor(model => model.ClientExtensionName, new { htmlAttributes = new { @class = "form-control text-uppercase" } })
+                            @Html.EditorFor(model => model.ClientExtensionName, new { htmlAttributes = new { @class = "form-control text-uppercase", @readonly = "readonly" } })
                             @Html.ValidationMessageFor(model => model.ClientExtensionName, "", new { @class = "text-danger" })
                         </div>
                     </div>
 
-                    <div class="row flex-child-start-h flex-wrap">
+                    <div class="row flex-child-center-h flex-wrap">
                         @* Office *@
                         <div class="col-sm-6 form-group relative">
                             @Html.LabelFor(model => model.ClientOffice)
-                            @Html.EditorFor(model => model.ClientOffice, new { htmlAttributes = new { @class = "form-control text-uppercase" } })
+                            @Html.EditorFor(model => model.ClientOffice, new { htmlAttributes = new { @class = "form-control text-uppercase", @readonly = "readonly" } })
                             @Html.ValidationMessageFor(model => model.ClientOffice, "", new { @class = "text-danger" })
                         </div>
 
                         @* Position *@
                         <div class="col-sm-6 form-group relative">
                             @Html.LabelFor(model => model.ClientPosition)
-                            @Html.EditorFor(model => model.ClientPosition, new { htmlAttributes = new { @class = "form-control text-uppercase" } })
+                            @Html.EditorFor(model => model.ClientPosition, new { htmlAttributes = new { @class = "form-control text-uppercase", @readonly = "readonly" } })
                             @Html.ValidationMessageFor(model => model.ClientPosition, "", new { @class = "text-danger" })
                         </div>
                     </div>
 
-                    <div class="row flex-child-start-h flex-wrap">
+                    <div class="row flex-child-center-h flex-wrap">
                         @* Contact Number *@
                         <div class="col-sm-6 form-group relative">
                             @Html.LabelFor(model => model.ClientContactNumber)
@@ -106,31 +108,46 @@
                         TECHNICAL SERVICES
                     </h5>
 
-                    <div class="row flex-child-start-h flex-wrap">
+                    <div class="row flex-child-center-h flex-wrap">
                         @* Service Type *@
                         <div class="col-sm-4 form-group relative">
                             @Html.LabelFor(model => model.TechnicalServiceTypes)
                             @Html.DropDownListFor(
                                 model => model.TechnicalServiceTypeId,
                                 Model.TechnicalServiceTypes,
-                                "-- SERVICE TYPES --",
+                                "-- SELECT SERVICE TYPE --",
                                 new { id = "technical_service_type_select", @class = "form-control" }
                             )
                             @Html.ValidationMessageFor(model => model.TechnicalServiceTypeId, "", new { @class = "text-danger" })
                         </div>
 
+                        @* Severity *@
+                        <div class="col-sm-4 form-group relative">
+                            @Html.LabelFor(model => model.TechnicalServiceRequestSeverities)
+
+
+                            @Html.DropDownListFor(
+                             model => model.TechnicalServiceRequestSeverityId,
+                             Model.TechnicalServiceRequestSeverities,
+                             "-- SELECT SEVERITY --",
+                             new { id = "technical_service_request_severity_select", @class = "form-control" }
+                            )
+                            @Html.ValidationMessageFor(model => model.TechnicalServiceRequestSeverityId, "", new { @class = "text-danger" })
+                        </div>
+
                         @* Other *@
-                        <div class="col-sm-8 form-group relative">
+                        <div class="col-sm-4 form-group relative">
                             @Html.LabelFor(model => model.Others)
                             @Html.EditorFor(model => model.Others, new { htmlAttributes = new { id = "other_service_input", @class = "form-control text-uppercase" } })
                             @Html.ValidationMessageFor(model => model.Others, "", new { @class = "text-danger" })
                         </div>
                     </div>
 
-                    <div class="row flex-child-start-h flex-wrap">
+                    <div class="row flex-child-center-h flex-wrap">
                         @* Description *@
                         <div class="col-sm-12 form-group relative">
-                            @Html.LabelFor(model => model.TechnicalServiceRequestDescription)
+                            @Html.LabelFor(model => model.TechnicalServiceRequestDescription) <i class="light-text">(Optional)</i>
+
                             @Html.TextAreaFor(model => model.TechnicalServiceRequestDescription, new { @class = "form-control", rows = "8" })
                             @Html.ValidationMessageFor(model => model.TechnicalServiceRequestDescription, "", new { @class = "text-danger" })
                         </div>
@@ -139,14 +156,14 @@
                     @{
                         var scheduleRequiredTypes = TechnicalServiceTypeEnum.GetScheduledServiceIds();
                         var scheduleInputsClass = scheduleRequiredTypes.Contains(Model.TechnicalServiceTypeId.GetValueOrDefault())
-                            ? ""
+                            ? "flex-row"
                             : "no-display";
                     }
 
-                    <div class="row schedule-inputs @scheduleInputsClass flex-wrap">
+                    <div class="schedule-inputs @scheduleInputsClass flex-wrap">
 
                         @* Schedule Date *@
-                        <div class="col-sm-5 form-group relative">
+                        <div class="form-group flex-1 relative">
                             @Html.LabelFor(model => model.TechnicalServiceRequestScheduledDate)
 
                             <div class="input-group date form-group relative" id="datetime_picker"></div>
@@ -154,26 +171,31 @@
 
                             <p class="text-primary">
                                 <i class="glyphicon glyphicon-info-sign"></i>
-                                You may only schedule activities 7 days in advance.
+                                Activities must be scheduled at least 7 days ahead, but not later than 30 days.
                             </p>
 
                             @Html.ValidationMessageFor(model => model.TechnicalServiceRequestScheduledDate, "", new { @class = "text-danger" })
                         </div>
 
-                        <div class="col-sm-7 flex-col">
+                        <div class="flex-col flex-1">
                             @* Start Time *@
-                            <div class="form-group relative flex-1">
+                            <div class="form-group relative">
                                 @Html.LabelFor(model => model.TechnicalServiceRequestScheduledStartTime)
                                 @Html.EditorFor(model => model.TechnicalServiceRequestScheduledStartTime, new { htmlAttributes = new { @class = "form-control" } })
                                 @Html.ValidationMessageFor(model => model.TechnicalServiceRequestScheduledStartTime, "", new { @class = "text-danger" })
                             </div>
 
                             @* End Time *@
-                            <div class="form-group relative flex-1">
+                            <div class="form-group relative">
                                 @Html.LabelFor(model => model.TechnicalServiceRequestScheduledEndTime)
                                 @Html.EditorFor(model => model.TechnicalServiceRequestScheduledEndTime, new { htmlAttributes = new { @class = "form-control" } })
                                 @Html.ValidationMessageFor(model => model.TechnicalServiceRequestScheduledEndTime, "", new { @class = "text-danger" })
                             </div>
+
+                            <p class="text-primary">
+                                <i class="glyphicon glyphicon-info-sign"></i>
+                                Activities must be set between 8:00 AM and 5:00 PM only.
+                            </p>
                         </div>
 
                     </div>

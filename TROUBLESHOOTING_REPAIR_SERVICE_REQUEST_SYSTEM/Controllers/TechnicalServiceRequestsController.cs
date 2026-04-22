@@ -1,4 +1,5 @@
-﻿using System;
+﻿using Serilog;
+using System;
 using System.Collections.Generic;
 using System.Data;
 using System.Data.Entity;
@@ -48,7 +49,8 @@ namespace TROUBLESHOOTING_REPAIR_SERVICE_REQUEST_SYSTEM.Controllers
                 throw new HttpException(403, "Forbidden");
             }
 
-            TechnicalServiceRequest technicalServiceRequest = _db.TechnicalServiceRequests
+            var technicalServiceRequest = _db.TechnicalServiceRequests
+                .Include(t => t.ClientRegistration)
                 .Include(t => t.TechnicalServiceType)
                 .Include(t => t.TechnicalServiceRequestSeverity)
                 .Include(t => t.TechnicalServiceRequestStatus)
@@ -62,6 +64,13 @@ namespace TROUBLESHOOTING_REPAIR_SERVICE_REQUEST_SYSTEM.Controllers
                 throw new HttpException(404, "Not found");
             }
 
+            var isQueued = false;
+            if (technicalServiceRequest.TechnicalServiceRequestStatusId == (int)TechnicalServiceRequestStatusEnum.PENDING)
+            {
+                isQueued = _db.TechnicalServiceRequestQueues
+                    .Any(q => q.TechnicalServiceRequestId == id && !q.IsProcessed);
+            }
+
             if (!AccountTypeEnum.IsAdmin(currentUser.PrivilegeIds))
             {
                 var involvedTechnicianIds = technicalServiceRequest.TechnicalServiceRequestHistories
@@ -72,7 +81,7 @@ namespace TROUBLESHOOTING_REPAIR_SERVICE_REQUEST_SYSTEM.Controllers
                     !TechnicalServiceTypeEnum.IsNonAssistedRequest(technicalServiceRequest.TechnicalServiceTypeId.Value);
 
                 var isRequestClient = AccountTypeEnum.IsStandard(currentUser.PrivilegeIds) &&
-                    currentUser.Email == technicalServiceRequest.ClientEmailAddress;
+                    currentUser.Id == technicalServiceRequest.ClientRegistrationId;
 
                 // IT can view if: (non-assisted) OR (assisted AND involved)
                 var isIT = AccountTypeEnum.IsIT(currentUser.PrivilegeIds);
@@ -85,12 +94,28 @@ namespace TROUBLESHOOTING_REPAIR_SERVICE_REQUEST_SYSTEM.Controllers
                 }
             }
 
-
             // Cast technical service request to details view model 
             var casted = TechnicalServiceRequestTypeCaster
                 .ToTechnicalServiceRequestDetailsViewModel(technicalServiceRequest);
 
+            // Get the latest history with a completed status to determine if the form can be generated
+            var completedStatusIds = TechnicalServiceRequestStatusEnum.GetCompletedStatusIds();
+            if (technicalServiceRequest.TechnicalServiceRequestStatusId.HasValue &&
+                completedStatusIds.Contains(technicalServiceRequest.TechnicalServiceRequestStatusId.Value))
+            {
+                var lastFormGeneratableHistory = technicalServiceRequest.TechnicalServiceRequestHistories
+                    .LastOrDefault(h =>
+                        h.TechnicalServiceRequestStatusId.HasValue &&
+                        completedStatusIds.Contains(h.TechnicalServiceRequestStatusId.Value)
+                    );
+                if (lastFormGeneratableHistory != null)
+                {
+                    casted.TechnicalServiceRequestFormGeneratableHistoryId = lastFormGeneratableHistory.Id;
+                }
+            }
+
             ViewBag.CurrentUser = currentUser;
+            ViewBag.IsQueued = isQueued;
             return View(casted);
         }
 
@@ -110,6 +135,7 @@ namespace TROUBLESHOOTING_REPAIR_SERVICE_REQUEST_SYSTEM.Controllers
 
             var technicalServiceRequestHistory = _db.TechnicalServiceRequestHistories
                 .Include(h => h.TechnicalServiceRequest)
+                .Include(h => h.TechnicalServiceRequest.ClientRegistration)
                 .FirstOrDefault(h => h.Id == id);
             var technicalServiceRequest = technicalServiceRequestHistory?.TechnicalServiceRequest;
             if (technicalServiceRequest == null || technicalServiceRequestHistory == null)
@@ -123,7 +149,7 @@ namespace TROUBLESHOOTING_REPAIR_SERVICE_REQUEST_SYSTEM.Controllers
                   !TechnicalServiceTypeEnum.IsNonAssistedRequest(technicalServiceRequest.TechnicalServiceTypeId.Value);
 
                 var isRequestClient = AccountTypeEnum.IsStandard(currentUser.PrivilegeIds) &&
-                    currentUser.Email == technicalServiceRequest.ClientEmailAddress;
+                    currentUser.Id == technicalServiceRequest.ClientRegistrationId;
 
                 // IT can view if: (non-assisted) OR (assisted AND involved)
                 var isIT = AccountTypeEnum.IsIT(currentUser.PrivilegeIds);
@@ -157,11 +183,15 @@ namespace TROUBLESHOOTING_REPAIR_SERVICE_REQUEST_SYSTEM.Controllers
             ViewBag.CurrentUser = currentUser;
             return View(new TechnicalServiceRequestCreateViewModel()
             {
+                ClientRegistrationId = currentUser.Id,
                 ClientFirstName = currentUser.FirstName,
                 ClientLastName = currentUser.LastName,
                 ClientMiddleName = currentUser.MiddleName,
+                ClientExtensionName = currentUser.ExtensionName,
                 ClientEmailAddress = currentUser.Email,
                 ClientContactNumber = currentUser.ContactNumber,
+                ClientOffice = currentUser.Office,
+                ClientPosition = currentUser.Position
             });
         }
 
@@ -182,6 +212,7 @@ namespace TROUBLESHOOTING_REPAIR_SERVICE_REQUEST_SYSTEM.Controllers
             if (!ModelState.IsValid)
             {
                 var errors = GetModelStateErrors();
+                Log.Warning($"Model state is invalid: {errors}");
                 return View(technicalServiceRequestCreateViewModel);
             }
 
@@ -192,32 +223,28 @@ namespace TROUBLESHOOTING_REPAIR_SERVICE_REQUEST_SYSTEM.Controllers
                 {
                     var isQueued = false;
 
-                    var clientId = _db.Registrations
-                        .Where(r => r.Email == technicalServiceRequestCreateViewModel.ClientEmailAddress)
-                        .Select(r => (int?)r.Id)
+                    var clientInfo = _db.Registrations
+                        .Where(r => r.Id == technicalServiceRequestCreateViewModel.ClientRegistrationId)
                         .FirstOrDefault();
-                    if (!clientId.HasValue)
+                    if (clientInfo == null)
                     {
                         throw new Exception("Client not found.");
                     }
 
                     var technicalServiceRequest = TechnicalServiceRequestTypeCaster
                         .ToTechnicalServiceRequest(technicalServiceRequestCreateViewModel);
+                    // Invalidate severity if user selected "Not Applicable" (option value -1)
+                    if (technicalServiceRequest.TechnicalServiceRequestSeverityId < 1)
+                    {
+                        technicalServiceRequest.TechnicalServiceRequestSeverityId = null;
+                    }
                     technicalServiceRequest.ReferenceCode = GenerateReferenceCode();
                     technicalServiceRequest.DateRequest = DateTime.Now;
 
                     // Trim and uppercase information for consistency
-                    technicalServiceRequest.ClientFirstName = technicalServiceRequest.ClientFirstName?.Trim().ToUpperInvariant();
-                    technicalServiceRequest.ClientLastName = technicalServiceRequest.ClientLastName?.Trim().ToUpperInvariant();
-                    technicalServiceRequest.ClientMiddleName = technicalServiceRequest.ClientMiddleName?.Trim().ToUpperInvariant();
-                    technicalServiceRequest.ClientExtensionName = technicalServiceRequest.ClientExtensionName?.Trim().ToUpperInvariant();
-                    technicalServiceRequest.ClientOffice = technicalServiceRequest.ClientOffice?.Trim().ToUpperInvariant();
-                    technicalServiceRequest.ClientPosition = technicalServiceRequest.ClientPosition?.Trim().ToUpperInvariant();
-                    technicalServiceRequest.ClientOffice = technicalServiceRequest.ClientOffice.Trim().ToUpperInvariant();
-                    technicalServiceRequest.ClientPosition = technicalServiceRequest.ClientPosition.Trim().ToUpperInvariant();
                     technicalServiceRequest.Others = !string.IsNullOrWhiteSpace(technicalServiceRequest.Others)
-                            ? technicalServiceRequest.Others.Trim().ToUpperInvariant()
-                            : string.Empty;
+                        ? technicalServiceRequest.Others.Trim().ToUpperInvariant()
+                        : string.Empty;
 
                     var selectedTechnicalServiceType = technicalServiceRequest.TechnicalServiceTypeId;
 
@@ -322,6 +349,7 @@ namespace TROUBLESHOOTING_REPAIR_SERVICE_REQUEST_SYSTEM.Controllers
                             Message = "Your request is now being processed.",
                             Status = AlertModalStatus.Success
                         };
+                        Log.Information($"Request with reference code {technicalServiceRequest.ReferenceCode} has been created and assigned to a technician.");
                     }
                     else
                     {
@@ -335,6 +363,7 @@ namespace TROUBLESHOOTING_REPAIR_SERVICE_REQUEST_SYSTEM.Controllers
                             Message = "Your request is currently pending. All technicians are assisting other actions. You will be notified once a technician becomes available.",
                             Status = AlertModalStatus.Info
                         };
+                        Log.Information($"Request with reference code {technicalServiceRequest.ReferenceCode} has been queued.");
                     }
 
                     return RedirectToAction("Index");
@@ -348,19 +377,11 @@ namespace TROUBLESHOOTING_REPAIR_SERVICE_REQUEST_SYSTEM.Controllers
                         Message = "An error occurred while making a request. Please try again.",
                         Status = AlertModalStatus.Error
                     };
+                    Log.Error(ex, $"An error occured while user with ID {currentUser.Id} was creating a request.");
                     ModelState.AddModelError("", "An error occurred while making a request: " + ex.Message);
                 }
             }
             return View(technicalServiceRequestCreateViewModel);
-        }
-
-        protected override void Dispose(bool disposing)
-        {
-            if (disposing)
-            {
-                _db.Dispose();
-            }
-            base.Dispose(disposing);
         }
 
         #region API
@@ -407,7 +428,9 @@ namespace TROUBLESHOOTING_REPAIR_SERVICE_REQUEST_SYSTEM.Controllers
                 int recordsTotal = 0;
 
                 // Base query
-                IQueryable<TechnicalServiceRequest> query = null;
+                IQueryable<TechnicalServiceRequest> query = _db.TechnicalServiceRequests
+                    .Include(r => r.ClientRegistration)
+                    .AsQueryable();
                 if (associatedUserPrivilege == AccountTypeEnum.ADMIN)
                 {
                     // Admin can see all requests
@@ -439,7 +462,7 @@ namespace TROUBLESHOOTING_REPAIR_SERVICE_REQUEST_SYSTEM.Controllers
                     query = _db.TechnicalServiceRequests
                         .Include(t => t.TechnicalServiceType)
                         .Include(t => t.TechnicalServiceRequestStatus)
-                        .Where(t => t.ClientEmailAddress == associatedUser.Email);
+                        .Where(t => t.ClientRegistrationId == associatedUser.Id);
                 }
                 else
                 {
@@ -463,7 +486,10 @@ namespace TROUBLESHOOTING_REPAIR_SERVICE_REQUEST_SYSTEM.Controllers
                     }
                     else if (typeFilter == "assigned")
                     {
+                        var nonAssistedServices = TechnicalServiceTypeEnum.GetNonAssistedServiceIds();
                         query = query.Where(i =>
+                            i.TechnicalServiceTypeId.HasValue &&
+                            !nonAssistedServices.Contains(i.TechnicalServiceTypeId.Value) &&
                             i.TechnicalServiceRequestHistories
                             .Any(h => h.ActionTakenByRegistrationId == associatedUser.Id)
                         );
@@ -479,7 +505,11 @@ namespace TROUBLESHOOTING_REPAIR_SERVICE_REQUEST_SYSTEM.Controllers
                     else if (typeFilter == "queued")
                     {
                         var queuedRequestIds = _db.TechnicalServiceRequestQueues
-                            .Where(q => !q.IsProcessed)
+                            .Include(q => q.TechnicalServiceRequest)
+                            .Where(q =>
+                                !q.IsProcessed &&
+                                 q.TechnicalServiceRequest.TechnicalServiceRequestStatusId.HasValue &&
+                                 q.TechnicalServiceRequest.TechnicalServiceRequestStatusId.Value == (int)TechnicalServiceRequestStatusEnum.PENDING)
                             .Select(q => q.TechnicalServiceRequestId)
                             .ToList();
 
@@ -488,10 +518,10 @@ namespace TROUBLESHOOTING_REPAIR_SERVICE_REQUEST_SYSTEM.Controllers
                             .Include(t => t.TechnicalServiceType)
                             .Include(t => t.TechnicalServiceRequestStatus)
                             .Where(i =>
-                                i.TechnicalServiceTypeId.HasValue &&
-                                queuedRequestIds.Contains(i.Id
-                            )
-                        );
+                                queuedRequestIds.Contains(i.Id) &&
+                                i.TechnicalServiceRequestStatusId.HasValue &&
+                                i.TechnicalServiceRequestStatusId.Value == (int)TechnicalServiceRequestStatusEnum.PENDING
+                            );
                     }
                 }
 
@@ -553,12 +583,13 @@ namespace TROUBLESHOOTING_REPAIR_SERVICE_REQUEST_SYSTEM.Controllers
                 {
                     query = query.Where(t =>
                         t.ReferenceCode.Contains(searchValue) ||
-                        t.ClientFirstName.Contains(searchValue) ||
-                        t.ClientLastName.Contains(searchValue) ||
-                        t.ClientMiddleName.Contains(searchValue) ||
-                        t.ClientEmailAddress.Contains(searchValue) ||
-                        t.ClientContactNumber.Contains(searchValue) ||
-                        t.ClientOffice.Contains(searchValue) ||
+                        t.ClientRegistration.FirstName.Contains(searchValue) ||
+                        t.ClientRegistration.LastName.Contains(searchValue) ||
+                        t.ClientRegistration.MiddleName.Contains(searchValue) ||
+                        t.ClientRegistration.ExtensionName.Contains(searchValue) ||
+                        t.ClientRegistration.Email.Contains(searchValue) ||
+                        t.ClientRegistration.ContactNumber.Contains(searchValue) ||
+                        t.ClientRegistration.Office.Contains(searchValue) ||
                         t.TechnicalServiceType.TechnicalServiceTypeName.Contains(searchValue) ||
                         t.TechnicalServiceRequestStatus.TechnicalServiceRequestStatusName.Contains(searchValue) ||
                         t.Others.Contains(searchValue)
@@ -581,8 +612,8 @@ namespace TROUBLESHOOTING_REPAIR_SERVICE_REQUEST_SYSTEM.Controllers
                             break;
                         case 2: // Client Name
                             query = sortDirection == "asc"
-                                ? query.OrderBy(t => t.ClientFirstName)
-                                : query.OrderByDescending(t => t.ClientFirstName);
+                                ? query.OrderBy(t => t.ClientRegistration.LastName)
+                                : query.OrderByDescending(t => t.ClientRegistration.LastName);
                             break;
                         case 3: // Service Type
                             query = sortDirection == "asc"
@@ -618,12 +649,13 @@ namespace TROUBLESHOOTING_REPAIR_SERVICE_REQUEST_SYSTEM.Controllers
                     {
                         t.Id,
                         t.ReferenceCode,
-                        t.ClientFirstName,
-                        t.ClientMiddleName,
-                        t.ClientLastName,
-                        t.ClientEmailAddress,
-                        t.ClientContactNumber,
-                        t.ClientOffice,
+                        t.ClientRegistration.FirstName,
+                        t.ClientRegistration.MiddleName,
+                        t.ClientRegistration.LastName,
+                        t.ClientRegistration.ExtensionName,
+                        t.ClientRegistration.Email,
+                        t.ClientRegistration.ContactNumber,
+                        t.ClientRegistration.Office,
                         t.TechnicalServiceType?.TechnicalServiceTypeName,
                         t.Others,
                         t.TechnicalServiceRequestStatus.TechnicalServiceRequestStatusName,
@@ -644,7 +676,88 @@ namespace TROUBLESHOOTING_REPAIR_SERVICE_REQUEST_SYSTEM.Controllers
             }
             catch (Exception ex)
             {
+                Log.Error(ex, $"An error occurred while user was fetching technical service requests with ID {GetUserSession()?.Id.ToString() ?? "Unknown"}.");
                 return Json(new { error = ex.Message }, JsonRequestBehavior.AllowGet);
+            }
+        }
+
+        [Authorize2]
+        [HttpGet]
+        [AuthenticateUserPrivilege(new int[] { AccountTypeEnum.STANDARD, AccountTypeEnum.IT, AccountTypeEnum.ADMIN })]
+        public JsonResult GetFormGenerationState(int id)
+        {
+            try
+            {
+                if (id < 1)
+                {
+                    throw new HttpException(404, "Not found");
+                }
+
+                var currentUser = GetUserSession();
+                if (currentUser == null)
+                {
+                    throw new HttpException(403, "Forbidden");
+                }
+
+                var technicalServiceRequest = _db.TechnicalServiceRequests
+                    .Include(t => t.TechnicalServiceRequestHistories)
+                    .FirstOrDefault(t => t.Id == id);
+                if (technicalServiceRequest == null)
+                {
+                    throw new HttpException(404, "Not found");
+                }
+
+                if (!AccountTypeEnum.IsAdmin(currentUser.PrivilegeIds))
+                {
+                    var involvedTechnicianIds = technicalServiceRequest.TechnicalServiceRequestHistories
+                        .Where(h => h.ActionTakenByRegistrationId.HasValue)
+                        .Select(h => h.ActionTakenByRegistrationId.Value)
+                        .ToList();
+
+                    var isAssistedRequest = technicalServiceRequest.TechnicalServiceTypeId.HasValue &&
+                        !TechnicalServiceTypeEnum.IsNonAssistedRequest(technicalServiceRequest.TechnicalServiceTypeId.Value);
+
+                    var isRequestClient = AccountTypeEnum.IsStandard(currentUser.PrivilegeIds) &&
+                        currentUser.Id == technicalServiceRequest.ClientRegistrationId;
+
+                    var isIT = AccountTypeEnum.IsIT(currentUser.PrivilegeIds);
+                    var isInvolvedTechnician = isAssistedRequest && isIT && involvedTechnicianIds.Contains(currentUser.Id);
+                    var isNonAssistedAndIT = !isAssistedRequest && isIT;
+
+                    if (!isRequestClient && !isInvolvedTechnician && !isNonAssistedAndIT)
+                    {
+                        throw new HttpException(403, "Forbidden");
+                    }
+                }
+
+                var completedStatusIds = TechnicalServiceRequestStatusEnum.GetCompletedStatusIds();
+                var isFormGeneratable = technicalServiceRequest.TechnicalServiceRequestStatusId.HasValue &&
+                    completedStatusIds.Contains(technicalServiceRequest.TechnicalServiceRequestStatusId.Value);
+
+                var formGeneratableHistoryId = technicalServiceRequest.TechnicalServiceRequestHistories
+                    .Where(h => h.TechnicalServiceRequestStatusId.HasValue &&
+                        completedStatusIds.Contains(h.TechnicalServiceRequestStatusId.Value))
+                    .OrderByDescending(h => h.UpdatedAt)
+                    .Select(h => (int?)h.Id)
+                    .FirstOrDefault();
+
+                return Json(new
+                {
+                    success = true,
+                    isFormGeneratable = isFormGeneratable && formGeneratableHistoryId.HasValue,
+                    formLink = formGeneratableHistoryId.HasValue
+                        ? Url.Action("Form", "TechnicalServiceRequests", new { id = formGeneratableHistoryId.Value })
+                        : "#"
+                }, JsonRequestBehavior.AllowGet);
+            }
+            catch (Exception ex)
+            {
+                Log.Error(ex, $"An error occurred while checking form generation state for request ID {id}.");
+                return Json(new
+                {
+                    success = false,
+                    message = ex.Message
+                }, JsonRequestBehavior.AllowGet);
             }
         }
 
@@ -664,6 +777,7 @@ namespace TROUBLESHOOTING_REPAIR_SERVICE_REQUEST_SYSTEM.Controllers
                 if (!ModelState.IsValid)
                 {
                     var errors = GetModelStateErrors();
+                    Log.Warning($"Model state is invalid: {errors}");
                     throw new Exception("An error occured.");
                 }
 
@@ -674,7 +788,7 @@ namespace TROUBLESHOOTING_REPAIR_SERVICE_REQUEST_SYSTEM.Controllers
                 }
 
                 var client = _db.Registrations
-                    .Where(i => i.Email == technicalServiceRequest.ClientEmailAddress)
+                    .Where(i => i.Id == technicalServiceRequest.ClientRegistrationId)
                     .Select(i => new { i.Id, i.Email })
                     .FirstOrDefault();
                 if (client == null)
@@ -683,10 +797,10 @@ namespace TROUBLESHOOTING_REPAIR_SERVICE_REQUEST_SYSTEM.Controllers
                 }
 
                 /**
-                 * Throw an error if the email address of the logged in user does not match the email 
-                 * address associated with the request, to prevent unauthorized cancellation of requests
+                 * Throw an error if the ID of the logged in user does not match the ID 
+                 * associated with the request, to prevent unauthorized cancellation of requests
                  */
-                if (client.Email != technicalServiceRequest.ClientEmailAddress)
+                if (client.Id != technicalServiceRequest.ClientRegistrationId)
                 {
                     throw new Exception("Your are not allowed to perform this action.");
                 }
@@ -750,6 +864,7 @@ namespace TROUBLESHOOTING_REPAIR_SERVICE_REQUEST_SYSTEM.Controllers
                             .TechnicalServiceRequestSeverityId.Value
                         ) : "Unknown severity");
 
+                Log.Information($"Request with reference code {technicalServiceRequest.ReferenceCode} has been cancelled by client with email {client.Email}.");
                 return Json(new
                 {
                     success = true,
@@ -764,20 +879,16 @@ namespace TROUBLESHOOTING_REPAIR_SERVICE_REQUEST_SYSTEM.Controllers
             }
             catch (Exception ex)
             {
-                TempData["alertModal"] = new AlertModalUtility()
+                return Json(new
                 {
-                    Title = "Error",
-                    Message = "An error occurred while making a request. Please try again.",
-                    Status = AlertModalStatus.Error
-                };
+                    success = false,
+                    message = "An error occurred while making a request. Please try again.",
+                });
+                Log.Error(ex, $"An error occurred while user with ID {GetUserSession()?.Id.ToString() ?? "Unknown"} was cancelling request with ID {id}.");
                 ModelState.AddModelError("", "An error occurred while making a request: " + ex.Message);
             }
 
-            return Json(new
-            {
-                success = false,
-                message = "Your request cannot be cancelled.",
-            });
+
         }
 
         [Authorize2]
@@ -823,10 +934,12 @@ namespace TROUBLESHOOTING_REPAIR_SERVICE_REQUEST_SYSTEM.Controllers
                 var currentSeverityId = technicalServiceRequest.TechnicalServiceRequestSeverityId;
                 if (severityId != currentSeverityId)
                 {
-                    if (currentSeverityId == (int)TechnicalServiceRequestStatusEnum.CANCELLED)
+                    if (technicalServiceRequest.TechnicalServiceRequestStatusId.HasValue &&
+                        technicalServiceRequest.TechnicalServiceRequestStatusId.Value == (int)TechnicalServiceRequestStatusEnum.CANCELLED ||
+                        technicalServiceRequest.TechnicalServiceRequestStatusId.Value == (int)TechnicalServiceRequestStatusEnum.CLOSED)
                     {
-                        throw new Exception("You cannot update severity when the status is already cancelled.");
-                    } 
+                        throw new Exception("You cannot update severity when the status is already cancelled / closed.");
+                    }
 
                     technicalServiceRequest.TechnicalServiceRequestSeverityId = severityId;
                     _db.Entry(technicalServiceRequest).State = EntityState.Modified;
@@ -836,29 +949,23 @@ namespace TROUBLESHOOTING_REPAIR_SERVICE_REQUEST_SYSTEM.Controllers
                         technicalServiceRequest.TechnicalServiceRequestSeverity.SeverityName);
 
                     // Notify client about the updated severity
-                    var clientId = _db.Registrations
-                        .Where(i => i.Email == technicalServiceRequest.ClientEmailAddress)
-                        .Select(i => (int?)i.Id)
-                        .FirstOrDefault();
-                    if (clientId != null)
+                    var notificationService = new NotificationService();
+                    _db.Notifications.Add(new Notification()
                     {
-                        var notificationService = new NotificationService();
-                        _db.Notifications.Add(new Notification()
-                        {
-                            RecipientRegistrationId = clientId.Value,
-                            Title = "Severity Updated: " + technicalServiceRequest.ReferenceCode,
-                            Message = notificationService.BuildRecipientMessageFromRequestSeverity(
-                                    severityId, technicalServiceRequest.ReferenceCode, currentSeverityId
-                                ),
-                            IsRead = false,
-                            CreatedAt = DateTime.Now,
-                        });
-                        notificationService.RefreshUserUi(clientId.Value);
-                    }
+                        RecipientRegistrationId = technicalServiceRequest.ClientRegistrationId,
+                        Title = "Severity Updated: " + technicalServiceRequest.ReferenceCode,
+                        Message = notificationService.BuildRecipientMessageFromRequestSeverity(
+                                severityId, technicalServiceRequest.ReferenceCode, currentSeverityId
+                            ),
+                        IsRead = false,
+                        CreatedAt = DateTime.Now,
+                    });
+                    notificationService.RefreshUserUi(technicalServiceRequest.ClientRegistrationId);
                 }
 
                 _db.SaveChanges();
 
+                Log.Information($"Severity level of request with reference code {technicalServiceRequest.ReferenceCode} has been updated to {TechnicalServicRequestSeverityEnum.DisplayName(severityId)} by user with ID {currentUser.Id}.");
                 return Json(new
                 {
                     success = true,
@@ -872,20 +979,14 @@ namespace TROUBLESHOOTING_REPAIR_SERVICE_REQUEST_SYSTEM.Controllers
             }
             catch (Exception ex)
             {
-                TempData["alertModal"] = new AlertModalUtility()
+                return Json(new
                 {
-                    Title = "Error",
-                    Message = "An error occurred while making a request. Please try again.",
-                    Status = AlertModalStatus.Error
-                };
+                    success = false,
+                    message = "An error occurred while making a request. Please try again.",
+                });
+                Log.Error(ex, $"An error occurred while user with ID {GetUserSession()?.Id.ToString() ?? "Unknown"} was updating severity of request with ID {id}.");
                 ModelState.AddModelError("", "An error occurred while making a request: " + ex.Message);
             }
-
-            return Json(new
-            {
-                success = false,
-                message = "Your request cannot be cancelled.",
-            });
         }
 
         [Authorize2]
@@ -935,7 +1036,7 @@ namespace TROUBLESHOOTING_REPAIR_SERVICE_REQUEST_SYSTEM.Controllers
                  * service type, within the next 30 days, that have reached the per-day limit
                  */
                 var fullyBookedStringDates = _db.TechnicalServiceRequests
-                    .Where(r => 
+                    .Where(r =>
                         r.TechnicalServiceRequestStatusId != (int)TechnicalServiceRequestStatusEnum.CANCELLED &&
                         r.TechnicalServiceTypeId == selectedTypeId
                         && r.TechnicalServiceRequestScheduledDate >= startDate
@@ -956,6 +1057,7 @@ namespace TROUBLESHOOTING_REPAIR_SERVICE_REQUEST_SYSTEM.Controllers
             }
             catch (Exception ex)
             {
+                Log.Error(ex, $"An error occurred while user with ID {GetUserSession()?.Id.ToString() ?? "Unknown"} was fetching fully booked days by limit for service type ID {scheduleServiceTypeId}.");
                 return Json(new
                 {
                     success = false,
@@ -1037,6 +1139,7 @@ namespace TROUBLESHOOTING_REPAIR_SERVICE_REQUEST_SYSTEM.Controllers
             }
             catch (Exception ex)
             {
+                Log.Error(ex, $"An error occurred while user with ID {GetUserSession()?.Id.ToString() ?? "Unknown"} was fetching fully booked days by schedule.");
                 return Json(new
                 {
                     success = false,
@@ -1081,14 +1184,23 @@ namespace TROUBLESHOOTING_REPAIR_SERVICE_REQUEST_SYSTEM.Controllers
         {
             var itAccountTypeName = AccountTypeEnum.DisplayName(AccountTypeEnum.IT);
 
-            var activeStatusIds = TechnicalServiceRequestStatusEnum.GetActiveStatusIds();
+            var activeStatusIds = new List<int>()
+            {
+                (int)TechnicalServiceRequestStatusEnum.ONGOING,
+            };
             var nonAssistedRequestIds = TechnicalServiceTypeEnum.GetNonAssistedServiceIds();
+
+            var today = DateTime.Now.Date;
 
             // Build a set of technicians currently busy with active requests
             var busyTechnicianIds = _db.TechnicalServiceRequests
                 .Where(r =>
+                    r.DateRequest != null &&
+                    DbFunctions.TruncateTime(r.DateRequest) == today &&
+
                     r.TechnicalServiceRequestStatusId.HasValue &&
                     activeStatusIds.Contains(r.TechnicalServiceRequestStatusId.Value) &&
+
                     (r.TechnicalServiceTypeId.HasValue && !nonAssistedRequestIds.Contains(r.TechnicalServiceTypeId.Value))) // Exclude non-assisted requests
                 .Select(r => r.TechnicalServiceRequestHistories
                     .OrderByDescending(h => h.UpdatedAt)
@@ -1099,11 +1211,11 @@ namespace TROUBLESHOOTING_REPAIR_SERVICE_REQUEST_SYSTEM.Controllers
                 .Distinct()
                 .ToList();
 
-            var today = DateTime.Now.Date;
-
             // Pick the least recently assigned (fairness), then by Id.
             var availableTechnicianId = _db.Registrations
-                .Where(r => r.AccountType == itAccountTypeName)
+                .Where(r =>
+                    r.IsActive &&
+                    r.AccountType == itAccountTypeName)
                 .Where(r => !r.ITAvailabilities.Any(a =>
                     DbFunctions.TruncateTime(a.BlockDate) == today))
                 .Where(r => !busyTechnicianIds.Contains(r.Id))
@@ -1170,7 +1282,10 @@ namespace TROUBLESHOOTING_REPAIR_SERVICE_REQUEST_SYSTEM.Controllers
 
             // Pick the least recently assigned (fairness), then by Id.
             var availableTechnicianId = _db.Registrations
-                .Where(r => r.AccountType == itAccountTypeName)
+                .Where(r =>
+                    r.IsActive &&
+                    r.AccountType == itAccountTypeName
+                )
                 .Where(r => !r.ITAvailabilities.Any(a =>
                     DbFunctions.TruncateTime(a.BlockDate) == DbFunctions.TruncateTime(scheduleDate)))
                 .Where(r => !busyTechnicianIds.Contains(r.Id))
@@ -1242,7 +1357,7 @@ namespace TROUBLESHOOTING_REPAIR_SERVICE_REQUEST_SYSTEM.Controllers
 
             // Get all schedules on the same day
             var sameDaySchedules = _db.TechnicalServiceRequests
-                .Where(i => 
+                .Where(i =>
                     DbFunctions.TruncateTime(i.TechnicalServiceRequestScheduledDate) == DbFunctions.TruncateTime(newScheduledDate) &&
                     i.TechnicalServiceRequestStatusId != (int)TechnicalServiceRequestStatusEnum.CANCELLED
                 )

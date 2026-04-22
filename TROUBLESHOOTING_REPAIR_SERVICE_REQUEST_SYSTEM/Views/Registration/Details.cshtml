@@ -9,7 +9,31 @@
     var isCurrentUser = currentUser.Id == Model.User.Id ? true : false;
     var currentUserPrivilegeIds = currentUser.PrivilegeIds;
 
-    var fullName = Model.User.FirstName + ' ' + Model.User.MiddleName + ' ' + Model.User.LastName;
+    var isAdmin = AccountTypeEnum.IsAdmin(currentUserPrivilegeIds);
+    var isIT = AccountTypeEnum.IsIT(currentUserPrivilegeIds);
+
+    var nameParts = new[]
+    {
+        Model.User.FirstName,
+        Model.User.MiddleName,
+        Model.User.LastName,
+        Model.User.ExtensionName
+    }.Where(part => !string.IsNullOrWhiteSpace(part));
+    var fullName = string.Join(" ", nameParts).Trim();
+
+    var initials = string.Join("", new[]
+    {
+        Model.User.FirstName,
+        Model.User.LastName
+    }
+    .Where(part => !string.IsNullOrWhiteSpace(part))
+    .Select(part => part.Trim().Substring(0, 1).ToUpperInvariant()));
+
+    if (string.IsNullOrWhiteSpace(initials))
+    {
+        initials = "NA";
+    }
+
     var statusName = "N/A";
     if (Model.User.IsActive)
     {
@@ -32,144 +56,163 @@
 
 <section class="center-child registration-details-page">
     <div class="panel panel-default content-panel bg-light">
-        <section class="panel-heading profile-header flex-row flex-wrap">
-            <img src="~/Content/Images/logo.png" height="40" />
 
-            <div>
-                <h4 class="profile-name">@fullName</h4>
-                @*<hr class="text-primary"/>*@
-                <p class="registration-id light-text">Registration ID: @Model.User.Id</p>
+        @* Heading *@
+        <section class="panel-heading profile-header flex-row flex-space-between flex-child-center-h">
+            <div class="profile-main flex-row flex-child-center-h">
+                <div class="profile-avatar bold-text">@initials</div>
+
+                <div>
+                    <div class="profile-title-row flex-row flex-child-center-h flex-wrap">
+                        <h4 class="profile-name">@fullName</h4>
+                        <span class="registration-id-chip light-text">ID: @Model.User.Id</span>
+                    </div>
+
+                    <span class="status-chip @(statusName == "ACTIVE" ? "status-chip-active" : statusName == "DENIED" ? "status-chip-danger" : "status-chip-muted")">
+                        <span class="status-dot"></span>
+                        @statusName
+                    </span>
+                </div>
             </div>
         </section>
 
         <section class="panel-body">
+
+            @* General Information *@
             <section class="details-section">
                 <div class="section-header">
-                    <h4>
+                    <h4 class="text-primary">
                         <i class="glyphicon glyphicon-user"></i>
                         GENERAL INFORMATION
                     </h4>
                 </div>
 
-                <section class="section-table-container table-responsive">
-                    <table class="section-table table table-bordered">
-                        <tbody>
-                            <tr>
-                                <td class="light-text text-primary first-col active">FIRST NAME</td>
-                                <td class="text-primary bold-text">@Model.User.FirstName</td>
-                            </tr>
-                            <tr>
-                                <td class="light-text text-primary active first-col">MIDDLE NAME</td>
-                                <td class="text-primary bold-text">
-                                    @(!string.IsNullOrWhiteSpace(Model.User.MiddleName) ? Model.User.MiddleName : "N/A")
-                                </td>
-                            </tr>
-                            <tr>
-                                <td class="light-text text-primary active first-col">LAST NAME</td>
-                                <td class="text-primary bold-text">@Model.User.LastName</td>
-                            </tr>
-                            <tr>
-                                <td class="light-text text-primary active first-col">EMAIL ADDRESS</td>
-                                <td class="text-primary bold-text">@Model.User.Email</td>
-                            </tr>
-                            <tr>
-                                <td class="light-text text-primary active first-col">CONTACT NUMBER</td>
-                                <td class="text-primary bold-text">@Model.User.ContactNumber</td>
-                            </tr>
-                        </tbody>
-                    </table>
-                </section>
+                <div class="detail-grid detail-grid-3">
+                    <div class="detail-item">
+                        <p class="detail-label">FIRST NAME</p>
+                        <p class="detail-value">@Model.User.FirstName</p>
+                    </div>
+
+                    <div class="detail-item">
+                        <p class="detail-label">MIDDLE NAME</p>
+                        <p class="detail-value">@(!string.IsNullOrWhiteSpace(Model.User.MiddleName) ? Model.User.MiddleName : "N/A")</p>
+                    </div>
+
+                    <div class="detail-item">
+                        <p class="detail-label">LAST NAME</p>
+                        <p class="detail-value">@Model.User.LastName</p>
+                    </div>
+
+                    <div class="detail-item">
+                        <p class="detail-label"><i class="glyphicon glyphicon-envelope"></i> EMAIL ADDRESS</p>
+                        <p class="detail-value">@Model.User.Email</p>
+                    </div>
+
+                    <div class="detail-item">
+                        <p class="detail-label"><i class="glyphicon glyphicon-earphone"></i> CONTACT NUMBER</p>
+                        <p class="detail-value">@Model.User.ContactNumber</p>
+                    </div>
+
+                    <div class="detail-item">
+                        <p class="detail-label">EXTENSION NAME</p>
+                        <p class="detail-value">@(!string.IsNullOrWhiteSpace(Model.User.ExtensionName) ? Model.User.ExtensionName : "N/A")</p>
+                    </div>
+
+                    <div class="detail-item">
+                        <p class="detail-label">OFFICE</p>
+                        <p class="detail-value">@(!string.IsNullOrWhiteSpace(Model.User.Office) ? Model.User.Office : "N/A")</p>
+                    </div>
+
+                    <div class="detail-item">
+                        <p class="detail-label">POSITION</p>
+                        <p class="detail-value">@(!string.IsNullOrWhiteSpace(Model.User.Position) ? Model.User.Position : "N/A")</p>
+                    </div>
+                </div>
             </section>
 
+            @* Privileges *@
             <section class="details-section">
                 <div class="section-header">
-                    <h4>
+                    <h4 class="text-primary">
                         <i class="glyphicon glyphicon-lock"></i>
                         PRIVILEGES
                     </h4>
                 </div>
 
-                <section class="section-table-container table-responsive">
-                    <table class="section-table table table-bordered">
-                        <tbody>
-                            @{ var localCounter = 1; }
-                            @foreach (var privilege in Model.UserPrivileges)
-                            {
-                                <tr>
-                                    <td class="first-col active">@(localCounter++)</td>
-                                    <td class="text-primary bold-text">@privilege.Privilege.PrivilegeName</td>
-                                </tr>
-                            }
-                        </tbody>
-                    </table>
-                </section>
+                <div class="privileges-wrap flex-row flex-wrap">
+                    @if (Model.UserPrivileges != null && Model.UserPrivileges.Any())
+                    {
+                        foreach (var privilege in Model.UserPrivileges)
+                        {
+                            <span class="privilege-pill bold-text">@privilege.Privilege.PrivilegeName</span>
+                        }
+                    }
+                    else
+                    {
+                        <span class="detail-value">N/A</span>
+                    }
+                </div>
             </section>
 
+            @* Registraiton Detail *@
             <section class="details-section">
                 <div class="section-header">
-                    <h4 class="section-heading-title">
+                    <h4 class="section-heading-title text-primary">
                         <i class="glyphicon glyphicon-file"></i>
-                        REGISTRATION INFORMATION
+                        REGISTRATION DETAILS
                     </h4>
                 </div>
 
-                <section class="section-table-container table-responsive">
-                    <table class="section-table table table-bordered">
-                        <tbody>
-                            <tr>
-                                <td class="light-text text-primary active first-col">STATUS</td>
-                                <td class="text-primary bold-text">
-                                    <span class="label @(statusName == "ACTIVE" ? "label-success" : statusName == "DENIED" ? "label-danger" : "label-default")">
-                                        @statusName
-                                    </span>
-                                </td>
-                            </tr>
-                            <tr>
-                                <td class="light-text text-primary active first-col">DATE</td>
-                                <td class="text-primary bold-text">
-                                    @(Model.UserRegistrationRequest.RequestDate.HasValue
-                                                ? Model.UserRegistrationRequest.RequestDate.Value.ToString("MMMM dd, yyyy hh:mm tt")
-                                                : "N/A")
-                                </td>
-                            </tr>
-                            <tr>
-                                <td class="light-text text-primary active first-col">EXPIRY</td>
-                                <td class="text-primary bold-text">
-                                    @(Model.User.ExpiryDate.HasValue
-                                                ? Model.User.ExpiryDate.Value.ToString("MMMM dd, yyyy hh:mm tt")
-                                                : "N/A")
-                                </td>
-                            </tr>
-                        </tbody>
-                    </table>
-                </section>
+                <div class="detail-grid detail-grid-2">
+                    <div class="detail-item">
+                        <p class="detail-label"><i class="glyphicon glyphicon-calendar"></i> REGISTRATION DATE</p>
+                        <p class="detail-value">
+                            @(Model.UserRegistrationRequest.RequestDate.HasValue
+                                ? Model.UserRegistrationRequest.RequestDate.Value.ToString("MMMM dd, yyyy hh:mm tt")
+                                : "N/A")
+                        </p>
+                    </div>
+
+                    <div class="detail-item">
+                        <p class="detail-label"><i class="glyphicon glyphicon-time"></i> EXPIRY DATE</p>
+                        <p class="detail-value">
+                            @(Model.User.ExpiryDate.HasValue
+                                ? Model.User.ExpiryDate.Value.ToString("MMMM dd, yyyy hh:mm tt")
+                                : "N/A")
+                        </p>
+                    </div>
+                </div>
             </section>
         </section>
 
-        @if (AccountTypeEnum.IsAdmin(currentUserPrivilegeIds) || AccountTypeEnum.IsIT(currentUserPrivilegeIds))
+        @if (isAdmin || isIT)
         {
             <section class="panel-footer management-buttons-container">
-                <p class="text-primary options-label light-text text-right">More Options</p>
+                <p class="text-primary options-label light-text text-right bold-text">More Options</p>
 
                 <div class="buttons-container flex-row flex-child-end-v">
-                    @if (isCurrentUser && AccountTypeEnum.IsIT(currentUserPrivilegeIds))
+                    @if (AccountTypeEnum.IsIT(@Model.UserPrivileges
+                            .Where(p => p.PrivilegeId.HasValue)
+                            .Select(p => p.PrivilegeId.Value)
+                            .ToArray())
+                        )
                     {
-                        <a id="block_dates_button" href="@Url.Action("Manage", "ITAvailability")" class="btn btn-warning  center-child">
-                            <i class="glyphicon glyphicon-ban-circle"></i>
-                            MANAGE AVAILABILITY
+                        <a id="block_dates_button" href="@Url.Action("Manage", "ITAvailability", new { id = Model.User.Id })" class="btn btn-warning">
+                            <i class="glyphicon glyphicon-calendar"></i>
+                            @(isIT ? "MANAGE" : "") AVAILABILITY
                         </a>
                     }
 
-                    @if (AccountTypeEnum.IsAdmin(currentUserPrivilegeIds))
+                    @if (isAdmin)
                     {
                         Html.RenderPartial("~/Views/Registration/Partial/_ManagePrivilegeModal.cshtml", Model.User);
 
-                        <button id="manage_privilege_button" type="button" class="btn btn-default  center-child" data-toggle="modal" data-target="#manage_privilege_modal">
+                        <button id="manage_privilege_button" type="button" class="btn btn-info" data-toggle="modal" data-target="#manage_privilege_modal">
                             <i class="glyphicon glyphicon-lock"></i>
                             MANAGE PRIVILEGES
                         </button>
 
-                        <a id="deactivate_user_button" href="@Url.Action("Deactivate", "Registration", new { id = Model.User.Id })" class="btn btn-danger  center-child">
+                        <a id="deactivate_user_button" href="@Url.Action("Deactivate", "Registration", new { id = Model.User.Id })" class="btn btn-danger">
                             <i class="glyphicon glyphicon-ban-circle"></i>
                             DEACTIVATE USER
                         </a>

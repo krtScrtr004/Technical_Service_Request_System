@@ -17,7 +17,7 @@
     <ul class="nav navbar-nav navbar-right">
         <li>
             <a href="@Url.Action("Index", "Notification")" class="notification notification-badge-container text-primary">
-                <i class="glyphicon glyphicon-bell notification-icon"></i>
+                <i class="glyphicon glyphicon-bell notification-icon hidden-xs"></i>
                 <span class="visible-xs-inline notification-mobile-label">Notifications</span>
                 @Html.Action("HeaderNotificationBadge", "Notification")
             </a>
@@ -25,7 +25,7 @@
 
         <li>
             @Html.ActionLink(
-                "Hello, " + currentUser.FirstName + " " + currentUser.LastName,
+                "Hello, " + currentUser.FirstName,
                 "Details",
                 "Registration",
                 routeValues: new { id = currentUser.Id },
@@ -33,6 +33,11 @@
             )
         </li>
 
-        <li><a href="javascript:document.getElementById('logoutForm').submit()">Log off</a></li>
+        <li>
+            <a href="javascript:document.getElementById('logoutForm').submit()">
+                <i class="glyphicon glyphicon-log-out hidden-xs"></i>
+                <span class="visible-xs-inline">Log Off</span>
+            </a>
+        </li>
     </ul>
 }
