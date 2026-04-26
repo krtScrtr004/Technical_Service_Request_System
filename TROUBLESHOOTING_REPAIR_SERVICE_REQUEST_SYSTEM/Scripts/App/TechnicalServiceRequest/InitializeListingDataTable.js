@@ -1,4 +1,6 @@
 ﻿$(document).ready(function () {
+    $.fn.dataTable.ext.pager.numbers_length = 5;
+
     function buildRequestStatusLabel(status) {
         var normalizedStatus = (status.replaceAll(" ", "") || "").toString().trim().toUpperCase();
         var labelClass = "label-default";

@@ -143,6 +143,53 @@
                         </div>
                     </div>
 
+                    @{
+                        var equipmentInputsClass = Model.TechnicalServiceTypeId.GetValueOrDefault() == (int)TechnicalServiceTypeEnum.EQUIPMENT_REPAIR_TROUBLESHOOTING
+                            ? "flex-row flex-wrap"
+                            : "no-display";
+                    }
+
+                    <div class="equipment-inputs row @equipmentInputsClass">
+                        <p class="text-primary bold-text col-sm-12">Equipment Information <em class="light-text">(Optional)</em></p>
+
+                        @* Equipment Model *@
+                        <div class="col-sm-4 form-group relative">
+                            @Html.LabelFor(model => model.TechnicalServiceRequestEquipmentModel)
+                            @Html.EditorFor(model => model.TechnicalServiceRequestEquipmentModel, new { htmlAttributes = new { @class = "form-control text-uppercase" } })
+                            @Html.ValidationMessageFor(model => model.TechnicalServiceRequestEquipmentModel, "", new { @class = "text-danger" })
+                        </div> 
+
+                        @* Equipnent Asset Tag *@
+                        <div class="col-sm-4 form-group relative">
+                            @Html.LabelFor(model => model.TechnicalServiceRequestEquipmentAssetTag)
+
+                            <div class="asset-tag-wrapper">
+                                @Html.EditorFor(
+                                    model => model.TechnicalServiceRequestEquipmentAssetTag,
+                                    new { htmlAttributes = new { @class = "form-control text-uppercase", id = "asset-tag-input", autocomplete = "off" } }
+                                )
+
+                                <div id="asset-tag-suggestions" class="asset-tag-suggestions" aria-hidden="true">
+                                    <!-- Suggestion items will be injected here at runtime -->
+                                </div>
+                            </div>
+
+                            @Html.ValidationMessageFor(model => model.TechnicalServiceRequestEquipmentAssetTag, "", new { @class = "text-danger" })
+                        </div>
+
+                        @* Equipment Type *@
+                        <div class="col-sm-4 form-group relative">
+                            @Html.LabelFor(model => model.TechnicalServiceRequestEquipmentTypes)
+                            @Html.DropDownListFor(
+                                model => model.TechnicalServiceRequestEquipmentTypeId,
+                                Model.TechnicalServiceRequestEquipmentTypes,
+                                "-- SELECT EQUIPMENT TYPE --",
+                                new { id = "technical_service_request_equipment_type_select", @class = "form-control" }
+                            )
+                            @Html.ValidationMessageFor(model => model.TechnicalServiceRequestEquipmentTypeId, "", new { @class = "text-danger" })
+                        </div>
+                    </div>
+
                     <div class="row flex-child-center-h flex-wrap">
                         @* Description *@
                         <div class="col-sm-12 form-group relative">
@@ -221,20 +268,19 @@
 @section Scripts {
     @Scripts.Render("~/bundles/jqueryval");
 
-    <script>
-        // List of service type IDs that require schedule inputs
-        const requiredScheduleTypeIds = [
-            @((int)TechnicalServiceTypeEnum.AUDIO_VISUAL_SETUP),
-            @((int)TechnicalServiceTypeEnum.LIVESTREAM_SETUP),
-            @((int)TechnicalServiceTypeEnum.ZOOM_WEBEX_LINK)
-        ];
+<script>
+        const equipmentRepairTroubleshootId = "@((int)TechnicalServiceTypeEnum.EQUIPMENT_REPAIR_TROUBLESHOOTING)";
+        const requiredScheduleTypeIds = @Html.Raw(Json.Encode(TechnicalServiceTypeEnum.GetScheduledServiceIds()));
 
         const fullyBookedDayByLimitUrl = "@Url.Action("GetFullyBookedDayByLimit", "TechnicalServiceRequests")";
         const fullyBookedDayByScheduleUrl = "@Url.Action("GetFullyBookedDayBySchedule", "TechnicalServiceRequests")";
-    </script>
+
+        const equipmentSuggestionUrl = "@Url.Action("GetEquipmentDetailByAssetTag", "TechnicalServiceRequests")";
+</script>
 
     <script src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-datepicker/1.10.0/js/bootstrap-datepicker.min.js"></script>
     <script src="~/Scripts/App/TechnicalServiceRequest/ToggleConditionalInputs.js" defer></script>
     <script src="~/Scripts/App/TechnicalServiceRequest/InitializeDateTimePicker.js" defer></script>
+    <script src="~/Scripts/App/TechnicalServiceRequest/ShowEquipmentSuggestions.js" defer></script>
 }
 

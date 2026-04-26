@@ -124,14 +124,14 @@ namespace TROUBLESHOOTING_REPAIR_SERVICE_REQUEST_SYSTEM.Job
                                 // Check if the request status is pending
                                 r.TechnicalServiceRequestStatusId == (int)TechnicalServiceRequestStatusEnum.PENDING &&
                                 // Check if the request has a scheduled date and it is today
-                                r.TechnicalServiceRequestScheduledDate.HasValue &&
-                                DbFunctions.TruncateTime(now) == DbFunctions.TruncateTime(r.TechnicalServiceRequestScheduledDate.Value) &&
+                                r.ScheduledControlProcessDetail.TechnicalServiceRequestScheduledDate.HasValue &&
+                                DbFunctions.TruncateTime(now) == DbFunctions.TruncateTime(r.ScheduledControlProcessDetail.TechnicalServiceRequestScheduledDate.Value) &&
                                 // Check if the request has a scheduled start time and it has passed
-                                r.TechnicalServiceRequestScheduledStartTime.HasValue &&
-                                nowTime >= r.TechnicalServiceRequestScheduledStartTime.Value &&
+                                r.ScheduledControlProcessDetail.TechnicalServiceRequestScheduledStartTime.HasValue &&
+                                nowTime >= r.ScheduledControlProcessDetail.TechnicalServiceRequestScheduledStartTime.Value &&
                                 // Check if the request has a scheduled end time and it has not passed
-                                r.TechnicalServiceRequestScheduledEndTime.HasValue &&
-                                nowTime <= r.TechnicalServiceRequestScheduledEndTime.Value
+                                r.ScheduledControlProcessDetail.TechnicalServiceRequestScheduledEndTime.HasValue &&
+                                nowTime <= r.ScheduledControlProcessDetail.TechnicalServiceRequestScheduledEndTime.Value
                             )
                             .ToList();
 

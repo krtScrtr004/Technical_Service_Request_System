@@ -85,7 +85,11 @@
     if (severityContainer.length === 0) {
         console.warn('Severity container not found');
     } else {
-        hub.client.refreshTechnicalServiceRequestSeverity = function (severityName) {
+        hub.client.refreshTechnicalServiceRequestSeverity = function (technicalServiceRequestId, severityName) {
+            if (parseInt(technicalServiceRequestId, 10) !== parseInt(currentTechnicalServiceRequestId, 10)) {
+                return;
+            }
+
             severityContainer.html(buildRequestSeverityLabel(severityName));
         };
     }
@@ -96,7 +100,11 @@
         console.warn('Status container not found');
     } else {
         // Update the status text when a request is cancelled
-        hub.client.refreshTechnicalServiceRequestStatus = function (statusName) {
+        hub.client.refreshTechnicalServiceRequestStatus = function (technicalServiceRequestId, statusName) {
+            if (parseInt(technicalServiceRequestId, 10) !== parseInt(currentTechnicalServiceRequestId, 10)) {
+                return;
+            }
+
             statusContainer.html(buildRequestStatusLabel(statusName));
 
             const addActionHistoryButton = $("#add_action_history_button");
@@ -104,6 +112,21 @@
                 // Remove add action history button, if exists -> for ADMIN & IT only
                 addActionHistoryButton.remove();
             }
+        };
+    }
+
+    // Listen for changes in request's description
+    const descriptionContainer = $("#technical_service_request_description_container");
+    if (descriptionContainer.length === 0) {
+        console.warn('Description container not found');
+    } else {
+        hub.client.refreshTechnicalServiceRequestDescription = function (technicalServiceRequestId, description) {
+            if (parseInt(technicalServiceRequestId, 10) !== parseInt(currentTechnicalServiceRequestId, 10)) {
+                return;
+            }
+
+            const normalizedDescription = (description || "").toString().trim();
+            descriptionContainer.text(normalizedDescription || "N/A");
         };
     }
 

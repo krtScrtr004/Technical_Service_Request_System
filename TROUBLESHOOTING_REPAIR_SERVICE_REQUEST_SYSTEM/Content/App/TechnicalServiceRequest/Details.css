@@ -65,7 +65,7 @@
 
 .tsr-detail-grid {
     display: grid;
-    gap: 1rem 1.5rem;
+    gap: 2rem;
 }
 
 .tsr-detail-grid-3 {
@@ -109,6 +109,15 @@
 
 .tsr-inline-content {
     margin: 0;
+}
+
+.edit-description-button {
+    cursor: pointer;
+    margin-left: 10px;
+}
+
+#technical_service_request_description_container {
+    font-weight: 500;
 }
 
 #update_severity_button {

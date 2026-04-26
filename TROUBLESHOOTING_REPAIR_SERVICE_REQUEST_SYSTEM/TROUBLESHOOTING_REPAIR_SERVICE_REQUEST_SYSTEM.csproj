@@ -220,11 +220,13 @@
     <Compile Include="App_Start\RouteConfig.cs" />
     <Compile Include="App_Start\Startup.Auth.cs" />
     <Compile Include="Attributes\DateAttribute.cs" />
+    <Compile Include="Attributes\EquipmentAttribute.cs" />
     <Compile Include="Attributes\TechnicalServiceTypeAttribute.cs" />
     <Compile Include="Attributes\TimeAttribute.cs" />
     <Compile Include="Controllers\AccountController.cs" />
     <Compile Include="Attributes\AuthorizedUserAttribute.cs" />
     <Compile Include="Controllers\DashboardController.cs" />
+    <Compile Include="Controllers\EquipmentController.cs" />
     <Compile Include="Controllers\ErrorController.cs" />
     <Compile Include="Controllers\ITAvailabilityController.cs" />
     <Compile Include="Controllers\LayoutController.cs" />
@@ -274,8 +276,81 @@
     <Compile Include="Migrations\202603040036246_addStartEndScheduleTimeOnTSR.Designer.cs">
       <DependentUpon>202603040036246_addStartEndScheduleTimeOnTSR.cs</DependentUpon>
     </Compile>
+    <Compile Include="Migrations\202603061353247_removeSystemSupportTable.cs" />
+    <Compile Include="Migrations\202603061353247_removeSystemSupportTable.Designer.cs">
+      <DependentUpon>202603061353247_removeSystemSupportTable.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Migrations\202603061549175_addDescriptionToTSR.cs" />
+    <Compile Include="Migrations\202603061549175_addDescriptionToTSR.Designer.cs">
+      <DependentUpon>202603061549175_addDescriptionToTSR.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Migrations\202603100556239_addITBlockDatesTable.cs" />
+    <Compile Include="Migrations\202603100556239_addITBlockDatesTable.Designer.cs">
+      <DependentUpon>202603100556239_addITBlockDatesTable.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Migrations\202603110016342_renameITBlockDatesTable.cs" />
+    <Compile Include="Migrations\202603110016342_renameITBlockDatesTable.Designer.cs">
+      <DependentUpon>202603110016342_renameITBlockDatesTable.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Migrations\202603120057310_addNotification.cs" />
+    <Compile Include="Migrations\202603120057310_addNotification.Designer.cs">
+      <DependentUpon>202603120057310_addNotification.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Migrations\202603120132540_addIsReadOnNotification.cs" />
+    <Compile Include="Migrations\202603120132540_addIsReadOnNotification.Designer.cs">
+      <DependentUpon>202603120132540_addIsReadOnNotification.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Migrations\202603120137320_addCreatedAtOnNotification.cs" />
+    <Compile Include="Migrations\202603120137320_addCreatedAtOnNotification.Designer.cs">
+      <DependentUpon>202603120137320_addCreatedAtOnNotification.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Migrations\202603170626155_addGroupSpecificNotificationProperties.cs" />
+    <Compile Include="Migrations\202603170626155_addGroupSpecificNotificationProperties.Designer.cs">
+      <DependentUpon>202603170626155_addGroupSpecificNotificationProperties.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Migrations\202603310522292_addIndexesToTables.cs" />
+    <Compile Include="Migrations\202603310522292_addIndexesToTables.Designer.cs">
+      <DependentUpon>202603310522292_addIndexesToTables.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Migrations\202604171548293_addMorePropertiesOnRegistration.cs" />
+    <Compile Include="Migrations\202604171548293_addMorePropertiesOnRegistration.Designer.cs">
+      <DependentUpon>202604171548293_addMorePropertiesOnRegistration.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Migrations\202604180039061_referenceClientInfoFromRegistration.cs" />
+    <Compile Include="Migrations\202604180039061_referenceClientInfoFromRegistration.Designer.cs">
+      <DependentUpon>202604180039061_referenceClientInfoFromRegistration.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Migrations\202604230332385_separteScheduledControllProcessDetails.cs" />
+    <Compile Include="Migrations\202604230332385_separteScheduledControllProcessDetails.Designer.cs">
+      <DependentUpon>202604230332385_separteScheduledControllProcessDetails.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Migrations\202604231439179_addEquipmentModels.cs" />
+    <Compile Include="Migrations\202604231439179_addEquipmentModels.Designer.cs">
+      <DependentUpon>202604231439179_addEquipmentModels.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Migrations\202604231604106_addEquipmentIdToTSRModel.cs" />
+    <Compile Include="Migrations\202604231604106_addEquipmentIdToTSRModel.Designer.cs">
+      <DependentUpon>202604231604106_addEquipmentIdToTSRModel.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Migrations\202604240212055_addAuditProperTiesOnEquipmentModel.cs" />
+    <Compile Include="Migrations\202604240212055_addAuditProperTiesOnEquipmentModel.Designer.cs">
+      <DependentUpon>202604240212055_addAuditProperTiesOnEquipmentModel.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Migrations\202604241556463_addEquipmentLocationAndStatus.cs" />
+    <Compile Include="Migrations\202604241556463_addEquipmentLocationAndStatus.Designer.cs">
+      <DependentUpon>202604241556463_addEquipmentLocationAndStatus.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Migrations\202604250530564_addCreatedByInEquipmentModel.cs" />
+    <Compile Include="Migrations\202604250530564_addCreatedByInEquipmentModel.Designer.cs">
+      <DependentUpon>202604250530564_addCreatedByInEquipmentModel.cs</DependentUpon>
+    </Compile>
     <Compile Include="Migrations\Configuration.cs" />
     <Compile Include="Models\AccountViewModels.cs" />
+    <Compile Include="Models\EquipmentCategoryModels.cs" />
+    <Compile Include="Models\EquipmentLocationModels.cs" />
+    <Compile Include="Models\EquipmentModels.cs" />
+    <Compile Include="Models\EquipmentStatusModels.cs" />
+    <Compile Include="Models\EquipmentTypeModels.cs" />
     <Compile Include="Models\IdentityModels.cs" />
     <Compile Include="Models\ITAvailabilityModels.cs" />
     <Compile Include="Models\ManageViewModels.cs" />
@@ -284,6 +359,7 @@
     <Compile Include="Models\ProjectModels.cs" />
     <Compile Include="Models\RegistrationModels.cs" />
     <Compile Include="Models\RegistrationRequestModels.cs" />
+    <Compile Include="Models\ScheduledControlProcessDetailModels.cs" />
     <Compile Include="Models\TechnicalServiceRequestHistoryModels.cs" />
     <Compile Include="Models\TechnicalServiceRequestModels.cs" />
     <Compile Include="Models\TechnicalServiceRequestQueueModels.cs" />
@@ -292,6 +368,7 @@
     <Compile Include="Models\TechnicalServiceTypeModels.cs" />
     <Compile Include="Models\UserPrivilegeModels.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="Services\EquipmentService.cs" />
     <Compile Include="Services\NotificationService.cs" />
     <Compile Include="Services\TechnicalServiceRequestQueueService.cs" />
     <Compile Include="Utilities\AlertUtilities.cs" />
@@ -304,6 +381,10 @@
     <Content Include="Content\App\Account\Login.css" />
     <Content Include="Content\App\component.css" />
     <Content Include="Content\App\Dashboard\Index.css" />
+    <Content Include="Content\App\Equipment\CreateEditForm.css" />
+    <Content Include="Content\App\Equipment\Details.css" />
+    <Content Include="Content\App\Equipment\Index.css" />
+    <Content Include="Scripts\App\Equipment\InitializeListingDataTable.js" />
     <Content Include="Content\App\ITAvailability\Manage.css" />
     <Content Include="Content\App\Notification\Index.css" />
     <Content Include="Content\App\RegistrationRequest\Create.css" />
@@ -2933,6 +3014,7 @@
     <Content Include="Scripts\App\Account\LoadParticleJs.js" />
     <Content Include="Scripts\App\Dashboard\InitializeDashboard.js" />
     <Content Include="Scripts\App\Dashboard\LiveReloadDashboard.js" />
+    <Content Include="Scripts\App\Equipment\LiveReloadDetailsInfo.js" />
     <Content Include="Scripts\App\ITAvailability\InitializeDatetimePicker.js" />
     <Content Include="Scripts\App\ITAvailability\InitializeHistory.js" />
     <Content Include="Scripts\App\ITAvailability\SaveChanges.js" />
@@ -2940,7 +3022,7 @@
     <Content Include="Scripts\App\Notification\LiveReloadNotificationBadge.js" />
     <Content Include="Scripts\App\Notification\ViewNotificationDetailModal.js" />
     <Content Include="Scripts\App\RegistrationRequest\DenyNonLetterKey.js" />
-    <Content Include="Scripts\App\RegistrationRequest\KeyForceUpper.js" />
+    <Content Include="Scripts\App\RegistrationRequest\InitializeListingDataTable.js" />
     <Content Include="Scripts\App\RegistrationRequest\Psgc.js" />
     <Content Include="Scripts\App\Registration\DenyRegistration.js" />
     <Content Include="Scripts\App\Registration\InitializeListingDataTable.js" />
@@ -2949,6 +3031,7 @@
     <Content Include="Scripts\App\TechnicalServiceRequest\InitializeListingDataTable.js" />
     <Content Include="Scripts\App\TechnicalServiceRequest\LiveReloadDetailsActionHistory.js" />
     <Content Include="Scripts\App\TechnicalServiceRequest\LiveReloadDetailsInfo.js" />
+    <Content Include="Scripts\App\TechnicalServiceRequest\ShowEquipmentSuggestions.js" />
     <Content Include="Scripts\App\TechnicalServiceRequest\ToggleConditionalInputs.js" />
     <Content Include="Scripts\App\TechnicalServiceRequest\UpdateSeverity.js" />
     <Content Include="Scripts\bootstrap.js" />
@@ -3347,7 +3430,6 @@
     <Content Include="Views\TechnicalServiceRequests\Create.cshtml" />
     <Content Include="Views\TechnicalServiceRequests\Details.cshtml" />
     <Content Include="Views\TechnicalServiceRequests\Index.cshtml" />
-    <Content Include="Views\TechnicalServiceRequests\Partial\_CreateEditForm.cshtml" />
     <Content Include="Views\TechnicalServiceRequests\Edit.cshtml" />
     <Content Include="Views\Notification\Index.cshtml" />
     <Content Include="Views\Notification\Partial\_HeaderNotificationBadge.cshtml" />
@@ -3364,6 +3446,12 @@
     <Content Include="Views\TechnicalServiceRequests\Partial\_AddActionHistoryModal.cshtml" />
     <Content Include="Views\TechnicalServiceRequests\Partial\_UpdateSeverityModal.cshtml" />
     <Content Include="Views\Registration\Partial\_ManagePrivilegeModal.cshtml" />
+    <Content Include="Views\TechnicalServiceRequests\Partial\_EditDescriptionModal.cshtml" />
+    <Content Include="Views\Equipment\Index.cshtml" />
+    <Content Include="Views\Equipment\Create.cshtml" />
+    <Content Include="Views\Equipment\Partial\_CreateEditForm.cshtml" />
+    <Content Include="Views\Equipment\Edit.cshtml" />
+    <Content Include="Views\Equipment\Details.cshtml" />
   </ItemGroup>
   <ItemGroup>
     <Folder Include="App_Data\" />
@@ -3401,6 +3489,57 @@
     </EmbeddedResource>
     <EmbeddedResource Include="Migrations\202603040036246_addStartEndScheduleTimeOnTSR.resx">
       <DependentUpon>202603040036246_addStartEndScheduleTimeOnTSR.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Migrations\202603061353247_removeSystemSupportTable.resx">
+      <DependentUpon>202603061353247_removeSystemSupportTable.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Migrations\202603061549175_addDescriptionToTSR.resx">
+      <DependentUpon>202603061549175_addDescriptionToTSR.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Migrations\202603100556239_addITBlockDatesTable.resx">
+      <DependentUpon>202603100556239_addITBlockDatesTable.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Migrations\202603110016342_renameITBlockDatesTable.resx">
+      <DependentUpon>202603110016342_renameITBlockDatesTable.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Migrations\202603120057310_addNotification.resx">
+      <DependentUpon>202603120057310_addNotification.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Migrations\202603120132540_addIsReadOnNotification.resx">
+      <DependentUpon>202603120132540_addIsReadOnNotification.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Migrations\202603120137320_addCreatedAtOnNotification.resx">
+      <DependentUpon>202603120137320_addCreatedAtOnNotification.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Migrations\202603170626155_addGroupSpecificNotificationProperties.resx">
+      <DependentUpon>202603170626155_addGroupSpecificNotificationProperties.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Migrations\202603310522292_addIndexesToTables.resx">
+      <DependentUpon>202603310522292_addIndexesToTables.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Migrations\202604171548293_addMorePropertiesOnRegistration.resx">
+      <DependentUpon>202604171548293_addMorePropertiesOnRegistration.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Migrations\202604180039061_referenceClientInfoFromRegistration.resx">
+      <DependentUpon>202604180039061_referenceClientInfoFromRegistration.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Migrations\202604230332385_separteScheduledControllProcessDetails.resx">
+      <DependentUpon>202604230332385_separteScheduledControllProcessDetails.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Migrations\202604231439179_addEquipmentModels.resx">
+      <DependentUpon>202604231439179_addEquipmentModels.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Migrations\202604231604106_addEquipmentIdToTSRModel.resx">
+      <DependentUpon>202604231604106_addEquipmentIdToTSRModel.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Migrations\202604240212055_addAuditProperTiesOnEquipmentModel.resx">
+      <DependentUpon>202604240212055_addAuditProperTiesOnEquipmentModel.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Migrations\202604241556463_addEquipmentLocationAndStatus.resx">
+      <DependentUpon>202604241556463_addEquipmentLocationAndStatus.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Migrations\202604250530564_addCreatedByInEquipmentModel.resx">
+      <DependentUpon>202604250530564_addCreatedByInEquipmentModel.cs</DependentUpon>
     </EmbeddedResource>
   </ItemGroup>
   <PropertyGroup>

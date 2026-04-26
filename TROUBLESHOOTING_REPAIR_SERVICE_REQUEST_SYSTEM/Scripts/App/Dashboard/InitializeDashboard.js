@@ -18,6 +18,31 @@ $(document).ready(function () {
         $("#extra_value_" + index).text(value != null ? value : 0);
     }
 
+    function buildTopRepairedEquipmentsTable(data) {
+        var $tbody = $("#top_repaired_equipments_table_body");
+        if ($tbody.length === 0) {
+            return;
+        }
+
+        var rows = (data || []).map(function (item) {
+            return [
+                "<tr>",
+                "<td>", item.AssetTag || "N/A", "</td>",
+                "<td>", item.EquipmentModel || "N/A", "</td>",
+                "<td>", item.EquipmentType || "N/A", "</td>",
+                "<td>", item.EquipmentStatus || "N/A", "</td>",
+                "<td class='text-right'>", item.RepairCount != null ? item.RepairCount : 0, "</td>",
+                "</tr>"
+            ].join("");
+        }).join("");
+
+        if (!rows) {
+            rows = "<tr><td colspan='6' class='text-center text-muted'>No equipments found.</td></tr>";
+        }
+
+        $tbody.html(rows);
+    }
+
     function buildStatusChart(data) {
         Highcharts.chart("request_status_chart", {
             chart: { type: "pie" },
@@ -124,10 +149,12 @@ $(document).ready(function () {
             buildStatusChart(response.charts.requestByStatus);
             buildServiceTypeChart(response.charts.requestByType);
             buildTrendChart(response.charts.monthlySubmitted, response.charts.monthlyResolved);
+            buildTopRepairedEquipmentsTable(response.tables && response.tables.topRepairedEquipments);
         }).fail(function () {
             $("#request_status_chart").html("<p class='text-danger'>Unable to load dashboard data.</p>");
             $("#request_type_chart").html("<p class='text-danger'>Unable to load dashboard data.</p>");
             $("#request_trend_chart").html("<p class='text-danger'>Unable to load dashboard data.</p>");
+            $("#top_repaired_equipments_table_body").html("<tr><td colspan='6' class='text-center text-danger'>Unable to load dashboard data.</td></tr>");
         }).always(function () {
             $dashboardPage.removeClass("dashboard-loading");
         });

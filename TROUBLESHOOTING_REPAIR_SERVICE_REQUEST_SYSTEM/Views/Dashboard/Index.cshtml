@@ -18,16 +18,23 @@
 }
 
 <section class="container-fluid dashboard-page">
+
+    @* Header *@
     <section class="dashboard-header panel panel-default">
         <section class="panel-body">
+            @* Name *@
             <h3 class="text-primary dashboard-title wrap-text">Welcome, @currentUser.FirstName @currentUser.LastName</h3>
+
+            @* Role *@
             <p class="dashboard-subtitle wrap-text">
                 Role: <span class="label label-info">@roleName</span>
             </p>
         </section>
     </section>
 
+    @* ards *@
     <section class="dashboard-cards-row flex-row flex-wrap">
+        @* Total Requests *@
         <div class="dashboard-card-col">
             <section class="panel panel-default dashboard-card">
                 <section class="panel-body">
@@ -37,6 +44,7 @@
             </section>
         </div>
 
+        @* Active Requests *@
         <div class="dashboard-card-col">
             <section class="panel panel-default dashboard-card">
                 <section class="panel-body">
@@ -46,6 +54,7 @@
             </section>
         </div>
 
+        @* Resolved Requests *@
         <div class="dashboard-card-col">
             <section class="panel panel-default dashboard-card">
                 <section class="panel-body">
@@ -55,6 +64,7 @@
             </section>
         </div>
 
+        @* Unread Notifications *@
         <div class="dashboard-card-col">
             <section class="panel panel-default dashboard-card">
                 <section class="panel-body">
@@ -65,6 +75,7 @@
         </div>
     </section>
 
+    @* Extra Values *@
     <section class="dashboard-cards-row flex-row flex-wrap">
         <div class="dashboard-card-col">
             <section class="panel panel-default dashboard-card dashboard-extra-card">
@@ -95,6 +106,7 @@
     </section>
 
     <section class="row dashboard-chart-row">
+        @* Request Status Chart *@
         <div class="col-xs-12 col-sm-12 col-md-6">
             <section class="panel panel-default dashboard-chart-panel">
                 <section class="panel-heading">
@@ -106,6 +118,7 @@
             </section>
         </div>
 
+        @* Top Service Chart *@
         <div class="col-xs-12 col-sm-12 col-md-6">
             <section class="panel panel-default dashboard-chart-panel">
                 <section class="panel-heading">
@@ -118,6 +131,7 @@
         </div>
     </section>
 
+    @* Request Trend Chart *@
     <section class="row dashboard-chart-row">
         <div class="col-xs-12 col-md-12">
             <section class="panel panel-default dashboard-chart-panel">
@@ -131,10 +145,39 @@
         </div>
     </section>
 
+    <section class="panel panel-default dashboard-equipment-panel">
+        <section class="panel-heading">
+            <b>Top 10 Most Repaired Equipments</b>
+        </section>
+
+        <section class="panel-body">
+            <div class="table-responsive">
+                <table class="table table-striped dashboard-equipment-table">
+                    <thead>
+                        <tr>
+                            <th>Asset Tag</th>
+                            <th>Model</th>
+                            <th>Type</th>
+                            <th>Status</th>
+                            <th class="repair-count text-right">Repair Count</th>
+                        </tr>
+                    </thead>
+                    <tbody id="top_repaired_equipments_table_body">
+                        <tr>
+                            <td colspan="6" class="text-center text-muted">Loading...</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </section>
+    </section>
+
+    @* Quick Actions *@
     <section class="dashboard-quick-actions panel panel-default">
         <section class="panel-heading">
             <b>Quick Actions</b>
         </section>
+
         <section class="panel-body">
             <div class="dashboard-action-buttons flex-row flex-wrap">
                 @if (AccountTypeEnum.IsStandard(currentUser.PrivilegeIds))
@@ -154,7 +197,7 @@
                         <i class="glyphicon glyphicon-briefcase"></i>
                         View Work Queue
                     </a>
-                    <a href="@Url.Action("Manage", "ITAvailability")" class="btn btn-warning dashboard-action-btn">
+                    <a href="@Url.Action("Manage", "ITAvailability", new { id = currentUser.Id })" class="btn btn-warning dashboard-action-btn">
                         <i class="glyphicon glyphicon-calendar"></i>
                         Manage Availability
                     </a>

@@ -67,41 +67,31 @@ namespace TROUBLESHOOTING_REPAIR_SERVICE_REQUEST_SYSTEM
             IScheduler scheduler = StdSchedulerFactory.GetDefaultScheduler().Result;
             scheduler.Start();
 
-            // Schedule the job to update scheduled control process status every hour from 8:00 AM to 4:00 PM
+            // Every hour from 8:00 AM to 4:00 PM
             var updateScheduledControlProcessStatusJob = JobBuilder.Create<UpdateScheduledControlProcessStatusJob>().Build();
             var updateScheduledControlProcessStatusJobTrigger = TriggerBuilder.Create()
-                .WithDailyTimeIntervalSchedule(s =>
-                    s.OnEveryDay()
-                    .StartingDailyAt(TimeOfDay.HourAndMinuteOfDay(8, 0)) // Start at 8:00 AM
-                    .EndingDailyAt(TimeOfDay.HourAndMinuteOfDay(16, 0)) // End at 4:00 PM
-                    .WithIntervalInHours(1)) // Run every hour
+                .WithCronSchedule("0 0 8-16 * * ?")
                 .Build();
             scheduler.ScheduleJob(updateScheduledControlProcessStatusJob, updateScheduledControlProcessStatusJobTrigger);
 
-            // Schedule the job to assign queued requests daily at 1:00 AM
+            // Once daily at 1:00 AM
             var assignQueuedRequestJob = JobBuilder.Create<AssignQueuedRequestJob>().Build();
             var assignQueuedRequestTrigger = TriggerBuilder.Create()
-                .WithDailyTimeIntervalSchedule(s =>
-                    s.OnEveryDay()
-                    .StartingDailyAt(TimeOfDay.HourAndMinuteOfDay(1, 0)))
+                .WithCronSchedule("0 0 1 * * ?")
                 .Build();
             scheduler.ScheduleJob(assignQueuedRequestJob, assignQueuedRequestTrigger);
 
-            // Schedule the job to delete old notifications daily at 2:30 AM
+            // Once daily at 2:30 AM
             var deleteOldNotificationJob = JobBuilder.Create<DeleteOldNotificationsJob>().Build();
             var deleteOldNotificationTrigger = TriggerBuilder.Create()
-                .WithDailyTimeIntervalSchedule(s =>
-                    s.OnEveryDay()
-                    .StartingDailyAt(TimeOfDay.HourAndMinuteOfDay(2, 30)))
+                .WithCronSchedule("0 30 2 * * ?")
                 .Build();
             scheduler.ScheduleJob(deleteOldNotificationJob, deleteOldNotificationTrigger);
 
-            // Schedule the job to deactivate expired registrations daily at 3:30 AM
+            // Once daily at 3:30 AM
             var deactivateExpiredRegistrationsJob = JobBuilder.Create<DeactivateExpiredRegistrationsJob>().Build();
             var deactivateExpiredRegistrationsTrigger = TriggerBuilder.Create()
-                .WithDailyTimeIntervalSchedule(s =>
-                    s.OnEveryDay()
-                    .StartingDailyAt(TimeOfDay.HourAndMinuteOfDay(3, 30)))
+                .WithCronSchedule("0 30 3 * * ?")
                 .Build();
             scheduler.ScheduleJob(deactivateExpiredRegistrationsJob, deactivateExpiredRegistrationsTrigger);
 

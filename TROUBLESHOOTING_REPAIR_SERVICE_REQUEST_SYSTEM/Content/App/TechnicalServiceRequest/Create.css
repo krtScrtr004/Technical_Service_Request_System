@@ -125,6 +125,10 @@
                 display: block;
             }
 
+    .equipment-inputs {
+        flex-direction: column;
+    }
+
     .schedule-inputs {
         display: block;
     }

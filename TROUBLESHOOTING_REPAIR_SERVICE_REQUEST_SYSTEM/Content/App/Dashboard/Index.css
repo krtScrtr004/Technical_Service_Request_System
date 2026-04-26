@@ -72,6 +72,10 @@
     min-height: 360px;
 }
 
+.dashboard-equipment-panel {
+    margin-bottom: 10px;
+}
+
 .dashboard-chart-container {
     width: 100%;
     height: 280px;
@@ -80,6 +84,29 @@
 .dashboard-chart-container-lg {
     height: 320px;
 }
+
+.dashboard-equipment-table {
+    margin-bottom: 0;
+}
+
+    .dashboard-equipment-table .status,
+    .dashboard-equipment-table .repair-count {
+        width: 15ch;
+    }
+
+    .dashboard-equipment-table thead th {
+        background: var(--primary);
+        color: #ffffff;
+        vertical-align: middle;
+    }
+
+    .dashboard-equipment-table tbody td {
+        vertical-align: middle !important;
+    }
+
+    .dashboard-equipment-table .btn {
+        min-width: 34px;
+    }
 
 .dashboard-quick-actions {
     margin-top: 10px;
@@ -154,6 +181,10 @@
     .dashboard-chart-container,
     .dashboard-chart-container-lg {
         height: 250px;
+    }
+
+    .dashboard-equipment-table {
+        font-size: 12px;
     }
 
     .dashboard-quick-actions {

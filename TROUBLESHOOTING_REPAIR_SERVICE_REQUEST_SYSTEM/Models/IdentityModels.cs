@@ -33,14 +33,24 @@ namespace TROUBLESHOOTING_REPAIR_SERVICE_REQUEST_SYSTEM.Models
         public DbSet<Project> Projects { get; set; }
         public DbSet<Privilege> Privileges { get; set; }
         public DbSet<UserPrivilege> UserPrivileges { get; set; }
+
         public DbSet<Registration> Registrations { get; set; }
         public DbSet<RegistrationRequest> RegistrationRequests { get; set; }
+
+        public DbSet<Equipment> Equipments { get; set; }
+        public DbSet<EquipmentType> EquipmentTypes { get; set; }
+        public DbSet<EquipmentCategory> EquipmentCategories { get; set; }
+        public DbSet<EquipmentLocation> EquipmentLocations { get; set; }
+        public DbSet<EquipmentStatus> EquipmentStatuses { get; set; }
+
         public DbSet<TechnicalServiceRequest> TechnicalServiceRequests { get; set; }
         public DbSet<TechnicalServiceRequestHistory> TechnicalServiceRequestHistories { get; set; }
         public DbSet<TechnicalServiceRequestSeverity> TechnicalServiceRequestSeverities { get; set; }
         public DbSet<TechnicalServiceRequestStatus> TechnicalServiceRequestStatus { get; set; }
         public DbSet<TechnicalServiceType> TechnicalServiceTypes { get; set; }
+        public DbSet<ScheduledControlProcessDetail> ScheduledControlProcessDetails { get; set; }
         public DbSet<TechnicalServiceRequestQueue> TechnicalServiceRequestQueues { get; set; }
+
         public DbSet<ITAvailability> ITAvailabilities { get; set; }
         public DbSet<Notification> Notifications { get; set; }
     }

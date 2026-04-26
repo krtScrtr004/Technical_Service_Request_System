@@ -44,11 +44,13 @@ namespace TROUBLESHOOTING_REPAIR_SERVICE_REQUEST_SYSTEM.Models
         public string Others { get; set; } = string.Empty;
         public string TechnicalServiceRequestDescription { get; set; }
 
+        // CONDITIONAL PROP: If the service requested is either Equipment Repair/Troubleshooting
+        public int? TechnicalServiceRequestEquipmentId { get; set; }
+        public virtual Equipment TechnicalServiceRequestEquipment { get; set; }
+
         // CONDITIONAL PROP: If the service requested is either Zoom/Webex Link, Livestream Setup, or Audio/Visual Setup
-        [Index]
-        public DateTime? TechnicalServiceRequestScheduledDate { get; set; }
-        public TimeSpan? TechnicalServiceRequestScheduledStartTime { get; set; }
-        public TimeSpan? TechnicalServiceRequestScheduledEndTime { get; set; }
+        public int? ScheduledControlProcessDetailId { get; set; }
+        public virtual ScheduledControlProcessDetail ScheduledControlProcessDetail { get; set; }
 
         // Histories
         public virtual List<TechnicalServiceRequestHistory> TechnicalServiceRequestHistories { get; set; }
@@ -129,7 +131,7 @@ namespace TROUBLESHOOTING_REPAIR_SERVICE_REQUEST_SYSTEM.Models
         [MinLength(1, ErrorMessage = "The minimum length is 1")]
         [MaxLength(50, ErrorMessage = "The maximum length is 50")]
         [RegularExpression("^[\\w\\s-_\\/]+$",
-            ErrorMessage = "Position field must only contain letters, numbers, spaces, hyphens ( - ), and underscores ( _ ")]
+            ErrorMessage = "Position field must only contain letters, numbers, spaces, hyphens ( - ), and underscores ( _ )")]
         public string ClientPosition { get; set; }
 
         [Required]
@@ -165,6 +167,7 @@ namespace TROUBLESHOOTING_REPAIR_SERVICE_REQUEST_SYSTEM.Models
         [RegularExpression("^[\\w\\s-_\\/]+$", 
             ErrorMessage = "Others field must only contain letters, numbers, spaces, hyphens ( - ), underscores ( _ ), and slashes ( / )")]
         public string Others { get; set; } = null;
+
         [DataType(DataType.Text)]
         [DisplayName("Description")]
         [MinLength(1, ErrorMessage = "The minimum length is 1")]
@@ -172,6 +175,47 @@ namespace TROUBLESHOOTING_REPAIR_SERVICE_REQUEST_SYSTEM.Models
         [RegularExpression("^[\\w\\s-_\\/.,\\!\\?\\&\\(\\)\\\\{\\}\\[\\]]+$", 
             ErrorMessage = "Description field must only contain letters, numbers, spaces, hyphens ( - ), underscores ( _ ), slashes ( / ), dots ( . ), commas ( , ), exclamation marks ( ! ), question marks ( ? ), ampersands ( & ), parentheses ( ( ) ), curly braces ( {{ }} ), and square brackets ( [ ] )")]
         public string TechnicalServiceRequestDescription { get; set; } = null;
+
+
+        // CONDITIONAL PROP: If the service requested is either Equipment Repair/Troubleshooting
+        [HiddenInput]
+        public int? TechnicalServiceRequestEquipmentId { get; set; }
+
+        [DisplayName("Model")]
+        [DataType(DataType.Text)]
+        [MinLength(1, ErrorMessage = "The minimum length is 1")]
+        [MaxLength(100, ErrorMessage = "The maximum length is 100")]
+        [CompleteEquipmentField(
+            propertyDisplayName: "Model",
+            relatedProperties: new[] { "TechnicalServiceRequestEquipmentAssetTag", "TechnicalServiceRequestEquipmentTypeId" },
+            serviceTypePropertyName: "TechnicalServiceTypeId"
+        )]
+        [RegularExpression("^[\\w\\s-_\\/]+$",
+            ErrorMessage = "Position field must only contain letters, numbers, spaces, hyphens ( - ), and underscores ( _ )")]
+        public string TechnicalServiceRequestEquipmentModel { get; set; }
+
+        [DisplayName("Asset Tag")]
+        [DataType(DataType.Text)]
+        [MinLength(1, ErrorMessage = "The minimum length is 1")]
+        [MaxLength(100, ErrorMessage = "The maximum length is 100")]
+        [CompleteEquipmentField(
+            propertyDisplayName: "Asset Tag",
+            relatedProperties: new[] { "TechnicalServiceRequestEquipmentTypeId", "TechnicalServiceRequestEquipmentModel" },
+            serviceTypePropertyName: "TechnicalServiceTypeId"
+        )]
+        [RegularExpression("^[\\w\\s-_\\/]+$",
+            ErrorMessage = "Position field must only contain letters, numbers, spaces, hyphens ( - ), and underscores ( _ )")]
+        public string TechnicalServiceRequestEquipmentAssetTag{ get; set; }
+
+        [CompleteEquipmentField(
+            propertyDisplayName: "Type",
+            relatedProperties: new[] { "TechnicalServiceRequestEquipmentAssetTag", "TechnicalServiceRequestEquipmentModel" },
+            serviceTypePropertyName: "TechnicalServiceTypeId"
+        )]
+        public int? TechnicalServiceRequestEquipmentTypeId { get; set; }
+        [DisplayName("Type")]
+        public IEnumerable<SelectListItem> TechnicalServiceRequestEquipmentTypes { get; set; }
+
 
         // CONDITIONAL PROP: If the service requested is either Zoom/Webex Link, Livestream Setup, or Audio/Visual Setup
         [DataType(DataType.Date)]
@@ -227,109 +271,9 @@ namespace TROUBLESHOOTING_REPAIR_SERVICE_REQUEST_SYSTEM.Models
 
         private void InitializeModel()
         {
-            var assistedGroup = new SelectListGroup { Name = "Assisted" };
-            var scheduledGroup = new SelectListGroup { Name = "Scheduled Control Process" };
-            var nonAssistedGroup = new SelectListGroup { Name = "Non-Assisted" };
-
-            var serviceTypeOptions = new List<SelectListItem>
-            {
-                new SelectListItem 
-                { 
-                    Value = TechnicalServiceTypeEnum.EQUIPMENT_REPAIR_TROUBLESHOOTING.ToString(),
-                    Text = TechnicalServiceTypeEnum.DisplayName(TechnicalServiceTypeEnum.EQUIPMENT_REPAIR_TROUBLESHOOTING),
-                    Group = assistedGroup 
-                },
-                new SelectListItem 
-                { 
-                    Value = TechnicalServiceTypeEnum.INTERNET_CONNECTIVITY.ToString(),
-                    Text = TechnicalServiceTypeEnum.DisplayName(TechnicalServiceTypeEnum.INTERNET_CONNECTIVITY),
-                    Group = assistedGroup 
-                },
-
-                new SelectListItem 
-                { 
-                    Value = TechnicalServiceTypeEnum.AUDIO_VISUAL_SETUP.ToString(),
-                    Text = TechnicalServiceTypeEnum.DisplayName(TechnicalServiceTypeEnum.AUDIO_VISUAL_SETUP),
-                    Group = scheduledGroup 
-                },
-                new SelectListItem 
-                { 
-                    Value = TechnicalServiceTypeEnum.LIVESTREAM_SETUP.ToString(),
-                    Text = TechnicalServiceTypeEnum.DisplayName(TechnicalServiceTypeEnum.LIVESTREAM_SETUP),
-                    Group = scheduledGroup 
-                },
-                new SelectListItem 
-                { 
-                    Value = TechnicalServiceTypeEnum.ZOOM_WEBEX_LINK.ToString(),
-                    Text = TechnicalServiceTypeEnum.DisplayName(TechnicalServiceTypeEnum.ZOOM_WEBEX_LINK),
-                    Group = scheduledGroup 
-                },
-
-                new SelectListItem 
-                { 
-                    Value = TechnicalServiceTypeEnum.ACCOUNT_CREATION.ToString(),
-                    Text = TechnicalServiceTypeEnum.DisplayName(TechnicalServiceTypeEnum.ACCOUNT_CREATION),
-                    Group = nonAssistedGroup 
-                },
-                new SelectListItem 
-                { 
-                    Value = TechnicalServiceTypeEnum.DATA_CORRECTION.ToString(),
-                    Text = TechnicalServiceTypeEnum.DisplayName(TechnicalServiceTypeEnum.DATA_CORRECTION),
-                    Group = nonAssistedGroup 
-                },
-                new SelectListItem 
-                { 
-                    Value = TechnicalServiceTypeEnum.GOVERNMENT_EMAIL_ACCOUNT.ToString(),
-                    Text = TechnicalServiceTypeEnum.DisplayName(TechnicalServiceTypeEnum.GOVERNMENT_EMAIL_ACCOUNT),
-                    Group = nonAssistedGroup 
-                },
-                new SelectListItem 
-                { 
-                    Value = TechnicalServiceTypeEnum.PRODUCTION_MATERIAL_PRINTING.ToString(),
-                    Text = TechnicalServiceTypeEnum.DisplayName(TechnicalServiceTypeEnum.PRODUCTION_MATERIAL_PRINTING),
-                    Group = nonAssistedGroup 
-                },
-                new SelectListItem 
-                { 
-                    Value = TechnicalServiceTypeEnum.SYSTEM_SUPPORT.ToString(),
-                    Text = TechnicalServiceTypeEnum.DisplayName(TechnicalServiceTypeEnum.SYSTEM_SUPPORT),
-                    Group = nonAssistedGroup 
-                },
-                new SelectListItem 
-                { 
-                    Value = TechnicalServiceTypeEnum.TECHNICAL_GUIDANCE.ToString(),
-                    Text = TechnicalServiceTypeEnum.DisplayName(TechnicalServiceTypeEnum.TECHNICAL_GUIDANCE),
-                    Group = nonAssistedGroup 
-                },
-
-                // Keep "Others" as -1 for your existing JS logic
-                new SelectListItem { Value = "-1", Text = "Others" }
-            };
-            TechnicalServiceTypes = serviceTypeOptions;
-
-            TechnicalServiceRequestSeverities = new List<SelectListItem>
-            {
-                new SelectListItem { Value = "", Text = "Not Applicable"},
-
-                new SelectListItem {
-                    Value = TechnicalServicRequestSeverityEnum.LOW.ToString(),
-                    Text = TechnicalServicRequestSeverityEnum.DisplayName(TechnicalServicRequestSeverityEnum.LOW) 
-                },
-                new SelectListItem {
-                    Value = TechnicalServicRequestSeverityEnum.MEDIUM.ToString(),
-                    Text = TechnicalServicRequestSeverityEnum.DisplayName(TechnicalServicRequestSeverityEnum.MEDIUM) 
-                },
-                new SelectListItem 
-                { 
-                    Value = TechnicalServicRequestSeverityEnum.HIGH.ToString(),
-                    Text = TechnicalServicRequestSeverityEnum.DisplayName(TechnicalServicRequestSeverityEnum.HIGH) 
-                },
-                new SelectListItem 
-                { 
-                    Value = TechnicalServicRequestSeverityEnum.CRITICAL.ToString(),
-                    Text = TechnicalServicRequestSeverityEnum.DisplayName(TechnicalServicRequestSeverityEnum.CRITICAL) 
-                }
-            };
+            TechnicalServiceTypes = TechnicalServiceTypeEnum.GetSelectListItems();
+            TechnicalServiceRequestSeverities = TechnicalServicRequestSeverityEnum.GetSelectListItems();
+            TechnicalServiceRequestEquipmentTypes = EquipmentTypeEnum.GetSelectListItems();
         }
     }
 
@@ -397,6 +341,17 @@ namespace TROUBLESHOOTING_REPAIR_SERVICE_REQUEST_SYSTEM.Models
         [DisplayName("Description")]
         public string TechnicalServiceRequestDescription { get; set; } = string.Empty;
 
+        [DisplayName("Date Requested")]
+        public DateTime? DateRequest { get; set; }
+
+        [DisplayName("Date Recieved")]
+        public DateTime? DateRecieved { get; set; }
+
+        // CONDITIONAL PROP: If the service requested is either Equipment Repair/Troubleshooting
+        public string TechnicalServiceRequestEquipmentModel { get; set; }
+        public string TechnicalServiceRequestEquipmentAssetTag { get; set; }
+        public string TechnicalServiceRequestEquipmentTypeName { get; set; }
+
         // CONDITIONAL PROP: If the service requested is either Zoom/Webex Link, Livestream Setup, or Audio/Visual Setup
         [DisplayName("Scheduled Date")]
         public DateTime? TechnicalServiceRequestScheduledDate { get; set; }
@@ -414,18 +369,17 @@ namespace TROUBLESHOOTING_REPAIR_SERVICE_REQUEST_SYSTEM.Models
         // Histories
         public virtual List<TechnicalServiceRequestHistory> TechnicalServiceRequestHistories { get; set; }
 
+
         public TechnicalServiceRequestDetailsViewModel()
         {
-            _db = new ApplicationDbContext();
-
             TechnicalServiceRequestSeverities = new SelectList(
-                _db.TechnicalServiceRequestSeverities,
-                "Id", "SeverityName"
+                TechnicalServicRequestSeverityEnum.GetSelectListItems(),
+                "Value", "Text"
             );
 
             TechnicalServiceRequestStatuses = new SelectList(
-                _db.TechnicalServiceRequestStatus,
-                "Id", "TechnicalServiceRequestStatusName"
+                TechnicalServiceRequestStatusEnum.GetSelectListItems(),
+                "Value", "Text"
             );
         }
 
@@ -445,6 +399,27 @@ namespace TROUBLESHOOTING_REPAIR_SERVICE_REQUEST_SYSTEM.Models
     {
         public static TechnicalServiceRequest ToTechnicalServiceRequest(TechnicalServiceRequestCreateViewModel technicalServiceRequest)
         {
+            var equipment = new Equipment
+            {
+                EquipmentModel = technicalServiceRequest.TechnicalServiceRequestEquipmentModel,
+                AssetTag = technicalServiceRequest.TechnicalServiceRequestEquipmentAssetTag,
+                EquipmentTypeId = technicalServiceRequest.TechnicalServiceRequestEquipmentTypeId
+            };
+
+            var scheduledControlProcessDetail = new ScheduledControlProcessDetail
+            {
+                // For the scheduled date, combine the date and time properties from the view model into a single DateTime property in the model
+                TechnicalServiceRequestScheduledDate = technicalServiceRequest.TechnicalServiceRequestScheduledDate.HasValue && technicalServiceRequest.TechnicalServiceRequestScheduledStartTime.HasValue
+                    ? (DateTime?)technicalServiceRequest.TechnicalServiceRequestScheduledDate.Value.Date + technicalServiceRequest.TechnicalServiceRequestScheduledStartTime.Value
+                    : null,
+                TechnicalServiceRequestScheduledStartTime = technicalServiceRequest.TechnicalServiceRequestScheduledStartTime.HasValue
+                    ? technicalServiceRequest.TechnicalServiceRequestScheduledStartTime.Value
+                    : (TimeSpan?)null,
+                TechnicalServiceRequestScheduledEndTime = technicalServiceRequest.TechnicalServiceRequestScheduledEndTime.HasValue
+                    ? technicalServiceRequest.TechnicalServiceRequestScheduledEndTime.Value
+                    : (TimeSpan?)null,
+            };
+
             return new TechnicalServiceRequest
             {
                 Id = technicalServiceRequest.Id,
@@ -457,10 +432,11 @@ namespace TROUBLESHOOTING_REPAIR_SERVICE_REQUEST_SYSTEM.Models
                 Others = technicalServiceRequest.Others,
                 TechnicalServiceRequestDescription = technicalServiceRequest.TechnicalServiceRequestDescription,
 
-                // For the scheduled date, combine the date and time properties from the view model into a single DateTime property in the model
-                TechnicalServiceRequestScheduledDate = technicalServiceRequest.TechnicalServiceRequestScheduledDate,
-                TechnicalServiceRequestScheduledStartTime = technicalServiceRequest.TechnicalServiceRequestScheduledStartTime,
-                TechnicalServiceRequestScheduledEndTime = technicalServiceRequest.TechnicalServiceRequestScheduledEndTime,
+                TechnicalServiceRequestEquipmentId = equipment != null ? equipment.Id : (int?)null,
+                TechnicalServiceRequestEquipment = equipment ?? null,
+
+                ScheduledControlProcessDetailId = scheduledControlProcessDetail != null ? scheduledControlProcessDetail.Id : (int?)null,
+                ScheduledControlProcessDetail = scheduledControlProcessDetail ?? null
             };
         }
 
@@ -488,22 +464,28 @@ namespace TROUBLESHOOTING_REPAIR_SERVICE_REQUEST_SYSTEM.Models
                 TechnicalServiceRequestSeverityId = technicalServiceRequest.TechnicalServiceRequestSeverityId.GetValueOrDefault(),
                 TechnicalServiceRequestSeverity = technicalServiceRequest.TechnicalServiceRequestSeverity,
                 TechnicalServiceRequestSeverities = new SelectList(
-                    _db.TechnicalServiceRequestSeverities,
-                    "Id", "SeverityName"
+                    TechnicalServicRequestSeverityEnum.GetSelectListItems(),
+                    "Value", "Text"
                 ),
                 TechnicalServiceRequestStatusId = technicalServiceRequest.TechnicalServiceRequestStatusId.GetValueOrDefault(),
                 TechnicalServiceRequestStatus = technicalServiceRequest.TechnicalServiceRequestStatus,
                 TechnicalServiceRequestStatuses = new SelectList(
-                    _db.TechnicalServiceRequestStatus,
-                    "Id", "TechnicalServiceRequestStatusName"
+                    TechnicalServiceRequestStatusEnum.GetSelectListItems(),
+                    "Value", "Text"
                 ),
                 Others = technicalServiceRequest.Others,
                 TechnicalServiceRequestDescription = technicalServiceRequest.TechnicalServiceRequestDescription,
 
-                // For the scheduled date, combine the date and time properties from the view model into a single DateTime property in the model
-                TechnicalServiceRequestScheduledDate = technicalServiceRequest.TechnicalServiceRequestScheduledDate,
-                TechnicalServiceRequestScheduledStartTime = technicalServiceRequest.TechnicalServiceRequestScheduledStartTime,
-                TechnicalServiceRequestScheduledEndTime = technicalServiceRequest.TechnicalServiceRequestScheduledEndTime,
+                DateRequest = technicalServiceRequest.DateRequest,
+                DateRecieved = technicalServiceRequest.DateReceived,
+
+                TechnicalServiceRequestEquipmentModel = technicalServiceRequest.TechnicalServiceRequestEquipment?.EquipmentModel,
+                TechnicalServiceRequestEquipmentAssetTag = technicalServiceRequest.TechnicalServiceRequestEquipment?.AssetTag,
+                TechnicalServiceRequestEquipmentTypeName = technicalServiceRequest.TechnicalServiceRequestEquipment?.EquipmentType.EquipmentTypeName,
+
+                TechnicalServiceRequestScheduledDate = technicalServiceRequest.ScheduledControlProcessDetail?.TechnicalServiceRequestScheduledDate,
+                TechnicalServiceRequestScheduledStartTime = technicalServiceRequest.ScheduledControlProcessDetail?.TechnicalServiceRequestScheduledStartTime,
+                TechnicalServiceRequestScheduledEndTime = technicalServiceRequest.ScheduledControlProcessDetail?.TechnicalServiceRequestScheduledEndTime,
 
                 TechnicalServiceRequestHistories = technicalServiceRequest.TechnicalServiceRequestHistories,
             };

@@ -22,6 +22,58 @@
         font-weight: 800;
     }
 
+/* Asset tag suggestion UI */
+.asset-tag-wrapper {
+    position: relative;
+    display: block;
+}
+
+/* suggestion list container (hidden by default) */
+.asset-tag-suggestions {
+    position: absolute;
+    top: calc(100% + 4px);
+    left: 0;
+    right: 0;
+    z-index: 1050;
+    background: #ffffff;
+    border: 1px solid #dcdcdc;
+    border-radius: 3px;
+    box-shadow: 0 2px 6px rgba(0,0,0,0.08);
+    max-height: 200px;
+    overflow-y: auto;
+    display: none;
+    padding: 4px 0;
+    -webkit-overflow-scrolling: touch;
+}
+
+    /* visible state (JS toggles this) */
+    .asset-tag-suggestions.open {
+        display: block;
+    }
+
+    /* individual suggestion item */
+    .asset-tag-suggestions .suggestion-item {
+        padding: 8px 12px;
+        font-size: 13px;
+        color: #333;
+        cursor: pointer;
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+    }
+
+        .asset-tag-suggestions .suggestion-item:hover,
+        .asset-tag-suggestions .suggestion-item.active {
+            background-color: #f5f5f5;
+        }
+
+/* small-screen adjustments */
+@media (max-width: 767px) {
+    .asset-tag-suggestions {
+        max-height: 180px;
+    }
+}
+
 .btn.flex-row,
 .btn.flex-col,
 .btn.center-child {

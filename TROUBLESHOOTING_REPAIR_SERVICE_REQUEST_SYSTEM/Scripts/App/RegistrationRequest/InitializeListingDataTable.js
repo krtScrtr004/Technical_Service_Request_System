@@ -1,4 +1,6 @@
 ﻿$(document).ready(function () {
+    $.fn.dataTable.ext.pager.numbers_length = 5;
+
     var table = $("#registration_request_table").DataTable({
         processing: true,
         serverSide: true,

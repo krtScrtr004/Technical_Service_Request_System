@@ -125,6 +125,10 @@ namespace TROUBLESHOOTING_REPAIR_SERVICE_REQUEST_SYSTEM.Controllers
                     })
                     .ToList();
 
+                var topRepairedEquipments = BuildTopRepairedEquipment(currentUser)
+                    .Take(10)
+                    .ToList();
+
                 var extraCards = BuildExtraCards(currentUser, visibleRequests);
 
                 return Json(new
@@ -149,6 +153,10 @@ namespace TROUBLESHOOTING_REPAIR_SERVICE_REQUEST_SYSTEM.Controllers
                         requestByType = serviceTypeData,
                         monthlySubmitted,
                         monthlyResolved
+                    },
+                    tables = new
+                    {
+                        topRepairedEquipments
                     }
                 }, JsonRequestBehavior.AllowGet);
             }
@@ -287,6 +295,50 @@ namespace TROUBLESHOOTING_REPAIR_SERVICE_REQUEST_SYSTEM.Controllers
                 thirdLabel = "Submitted This Month",
                 thirdValue = submittedThisMonth
             };
+        }
+
+        private IEnumerable<object> BuildTopRepairedEquipment(UserSession currentUser)
+        {
+            IQueryable<Models.Equipment> query;
+
+            if (AccountTypeEnum.IsAdmin(currentUser.PrivilegeIds) || AccountTypeEnum.IsIT(currentUser.PrivilegeIds))
+            {
+                query = _db.Equipments.AsNoTracking();
+            }
+            else
+            {
+                query = _db.TechnicalServiceRequests
+                    .AsNoTracking()
+                    .Where(r => r.ClientRegistrationId == currentUser.Id && r.TechnicalServiceRequestEquipmentId.HasValue)
+                    .Select(r => r.TechnicalServiceRequestEquipment)
+                    .Where(e => e != null);
+            }
+
+            var allowedStatuses = new[]
+            {
+                EquipmentStatusEnum.OPERATIONAL,
+                EquipmentStatusEnum.UNDER_REPAIR
+            };
+
+            return query
+                .Where(e => e.EquipmentStatusId.HasValue && allowedStatuses.Contains(e.EquipmentStatusId.Value))
+                .GroupBy(e => e.Id)
+                .Select(g => g.FirstOrDefault())
+                .OrderByDescending(e => e.RepairCount)
+                .AsEnumerable()
+                .Select(e => new
+                {
+                    e.Id,
+                    e.AssetTag,
+                    e.EquipmentModel,
+                    EquipmentType = e.EquipmentTypeId.HasValue
+                        ? EquipmentTypeEnum.DisplayName(e.EquipmentTypeId.Value)
+                        : "N/A",
+                    EquipmentStatus = e.EquipmentStatusId.HasValue
+                        ? EquipmentStatusEnum.DisplayName(e.EquipmentStatusId.Value)
+                        : "N/A",
+                    e.RepairCount
+                });
         }
     }
 

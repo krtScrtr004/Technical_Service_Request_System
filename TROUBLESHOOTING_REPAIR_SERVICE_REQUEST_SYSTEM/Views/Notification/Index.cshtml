@@ -38,8 +38,15 @@
                     UlElementClasses = new[] { "pagination" },
                     LinkToPreviousPageFormat = "Previous",
                     LinkToNextPageFormat = "Next",
-                    DisplayLinkToFirstPage = PagedListDisplayMode.Never,
-                    DisplayLinkToLastPage = PagedListDisplayMode.Never,
+                    LinkToFirstPageFormat = "First",
+                    LinkToLastPageFormat = "Last",
+                    MaximumPageNumbersToDisplay = 5,
+                    DisplayEllipsesWhenNotShowingAllPageNumbers = true,
+                    DisplayLinkToPreviousPage = PagedListDisplayMode.IfNeeded,
+                    DisplayLinkToNextPage = PagedListDisplayMode.IfNeeded,
+                    DisplayLinkToFirstPage = PagedListDisplayMode.IfNeeded,
+                    DisplayLinkToLastPage = PagedListDisplayMode.IfNeeded,
+                    EllipsesFormat = "..."
                 })
         </section>
     </div>

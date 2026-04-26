@@ -11,10 +11,22 @@ namespace TROUBLESHOOTING_REPAIR_SERVICE_REQUEST_SYSTEM.Services
 {
     public class NotificationService
     {
+        #region Specific Notification Methods
+
         public void RefreshUserUi(int userId)
         {
             NotificationHub.RefreshNotificationList(userId);
             NotificationHub.RefreshNotificationBadge(userId);
+        }
+
+        #endregion
+
+        #region Technician Notification Methods
+
+        public void RefreshAllTechniciansUi()
+        {
+            NotificationHub.RefreshITNotificationList();
+            NotificationHub.RefreshITNotificationBadge();
         }
 
         public void NotifyTechnicianAssignment(int technicianId, string referenceCode)
@@ -56,9 +68,48 @@ namespace TROUBLESHOOTING_REPAIR_SERVICE_REQUEST_SYSTEM.Services
                 });
                 _db.SaveChanges();
 
-                NotificationHub.RefreshITNotificationList();
-                NotificationHub.RefreshITNotificationBadge();
+                RefreshAllTechniciansUi();
             }
+        }
+
+        public void NotifyTechnicianDescriptionUpdate(int? technicianId, string referenceCode)
+        {
+            using (var _db = new ApplicationDbContext())
+            {
+                var forAll = technicianId == null ? true : false;
+
+                _db.Notifications.Add(new Notification()
+                {
+                    RecipientRegistrationId = technicianId,
+                    Title = "Request Description Update",
+                    Message = "The description for request (" + referenceCode + ") has been updated. Please check requests list for details.",
+                    ForAdmin = false,
+                    ForIT = forAll,
+                    IsActive = true,
+                    IsRead = false,
+                    CreatedAt = DateTime.Now,
+                });
+                _db.SaveChanges();
+
+                if (forAll)
+                {
+                    RefreshAllTechniciansUi();
+                }
+                else
+                {
+                    RefreshUserUi(technicianId.Value);
+                }
+            }
+        }
+
+        #endregion
+
+        #region Admin Notification Methods
+
+        public void RefreshAllAdminsUi()
+        {
+            NotificationHub.RefreshAdminNotificationList();
+            NotificationHub.RefreshAdminNotificationBadge();
         }
 
         public void NotifyAdminNewRegistrationRequest()
@@ -67,7 +118,7 @@ namespace TROUBLESHOOTING_REPAIR_SERVICE_REQUEST_SYSTEM.Services
             {
                 _db.Notifications.Add(new Notification()
                 {
-                    RecipientRegistrationId = null, 
+                    RecipientRegistrationId = null,
                     Title = "New Registration Request",
                     Message = "A new registration request has been submitted. Please review and approve or reject the request.",
                     ForAdmin = true,
@@ -78,11 +129,14 @@ namespace TROUBLESHOOTING_REPAIR_SERVICE_REQUEST_SYSTEM.Services
                 });
                 _db.SaveChanges();
 
-                NotificationHub.RefreshAdminNotificationList();
-                NotificationHub.RefreshAdminNotificationBadge();
+                RefreshAllAdminsUi();
                 RegistrationRequestHub.RefreshRegistrationRequestList();
             }
         }
+
+        #endregion
+
+        #region Client Notification Methods
 
         public void NotifyClientOnEnqueuedRequest(int clientId, string refenceCode, string technicianFirstName)
         {
@@ -104,6 +158,36 @@ namespace TROUBLESHOOTING_REPAIR_SERVICE_REQUEST_SYSTEM.Services
                 RefreshUserUi(clientId);
             }
         }
+
+        #endregion
+
+        #region General Notification Methods
+
+        public void NotifyNewEquipmentEntry(string equipmentAssetTag, string creatorFirstName)
+        {
+            using (var _db = new ApplicationDbContext())
+            {
+                _db.Notifications.Add(new Notification()
+                {
+                    RecipientRegistrationId = null,
+                    Title = "New Equipment Entry",
+                    Message = "A new equipment entry has been added by " + creatorFirstName + ". Equipment Asset Tag: " + equipmentAssetTag + ".",
+                    ForAdmin = true,
+                    ForIT = true,
+                    IsActive = true,
+                    IsRead = false,
+                    CreatedAt = DateTime.Now,
+                });
+                _db.SaveChanges();
+
+                RefreshAllAdminsUi();
+                RefreshAllTechniciansUi();
+            }
+        }
+
+        #endregion
+
+        #region Utilities
 
         public string BuildRecipientMessageFromRequestStatus(int statusId, string referenceCode, string technicianFirstName)
         {
@@ -144,7 +228,8 @@ namespace TROUBLESHOOTING_REPAIR_SERVICE_REQUEST_SYSTEM.Services
             return "The severity of your request was changed to " + severityName + ". Reference: " + referenceCode + ".";
         }
 
+        #endregion
+
     }
-    
 
 }

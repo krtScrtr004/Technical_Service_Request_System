@@ -9,6 +9,7 @@
     var currentUser = ViewBag.CurrentUser as UserSession;
     var userAccountType = currentUser.PrivilegeIds;
 
+    var isStandard = AccountTypeEnum.IsStandard(userAccountType);
     var isAdmin = AccountTypeEnum.IsAdmin(userAccountType);
     var isIT = AccountTypeEnum.IsIT(userAccountType);
 
@@ -22,14 +23,19 @@
         Url.Action("Form", "TechnicalServiceRequests", new { id = Model.TechnicalServiceRequestFormGeneratableHistoryId })
         : "#";
 
+    var isOwnRequest = Model.ClientRegistrationId == currentUser.Id;
+    var isEditable = isStandard && isOwnRequest &&
+        (currentStatus == (int)TechnicalServiceRequestStatusEnum.PENDING ||
+        currentStatus == (int)TechnicalServiceRequestStatusEnum.OPEN);
+
     var isImmutable = currentStatus == (int)TechnicalServiceRequestStatusEnum.CANCELLED ||
         currentStatus == (int)TechnicalServiceRequestStatusEnum.CLOSED;
     var isCancellable = TechnicalServiceRequestStatusEnum
         .GetCancellableStatusIds()
         .Any(s => s == currentStatus);
 
-    var scheduleRequiredTypes = TechnicalServiceTypeEnum.GetScheduledServiceIds();
-    var isScheduledService = scheduleRequiredTypes.Contains(Model.TechnicalServiceTypeId.GetValueOrDefault());
+    var isEquipmentRepairTroubleshootingService = Model.TechnicalServiceTypeId.GetValueOrDefault() == (int)TechnicalServiceTypeEnum.EQUIPMENT_REPAIR_TROUBLESHOOTING;
+    var isScheduledService = TechnicalServiceTypeEnum.IsScheduleControlProcessRequest(Model.TechnicalServiceTypeId.GetValueOrDefault());
 
     Func<int, string> getStatusLabelClass = (status) =>
     {
@@ -78,7 +84,7 @@
     <link rel="stylesheet" href="~/Content/App/TechnicalServiceRequest/Details.css" />
 }
 
-@Html.AntiForgeryToken() @* For AJAX Request *@
+@Html.AntiForgeryToken()
 
 <section class="container tsr-detail-page-container">
     <section class="panel panel-default tsr-content-panel">
@@ -102,12 +108,12 @@
                 </a>
 
                 @*@if (isAdmin && isQueued)
-                {
-                    <button type="button" class="btn btn-primary">
-                        <i class="glyphicon glyphicon-user"></i>
-                        Assign IT
-                    </button>
-                }*@
+                    {
+                        <button type="button" class="btn btn-primary">
+                            <i class="glyphicon glyphicon-user"></i>
+                            Assign IT
+                        </button>
+                    }*@
             </div>
         </section>
 
@@ -176,11 +182,13 @@
                 </div>
 
                 <div class="tsr-detail-grid tsr-detail-grid-2">
+                    @* Request Type *@
                     <div class="tsr-detail-item">
                         <p class="tsr-detail-label light-text">TYPE</p>
                         <p class="tsr-detail-value">@(string.IsNullOrWhiteSpace(requestTypeName) ? "N/A" : requestTypeName)</p>
                     </div>
 
+                    @* Severity *@
                     <div class="tsr-detail-item">
                         <p class="tsr-detail-label light-text">SEVERITY</p>
                         <div class="tsr-detail-inline-actions flex-row flex-child-center-h flex-space-between flex-wrap">
@@ -202,7 +210,7 @@
                                 Html.RenderPartial("~/Views/TechnicalServiceRequests/Partial/_UpdateSeverityModal.cshtml");
                                 <button type="button"
                                         id="update_severity_button"
-                                        class="btn btn-link btn-xs"
+                                        class="btn btn-link btn-xs" `
                                         data-toggle="modal"
                                         data-target="#update_severity_modal">
                                     Update
@@ -211,15 +219,81 @@
                         </div>
                     </div>
 
-                    <div class="tsr-detail-item tsr-detail-item-full">
-                        <p class="tsr-detail-label light-text">DESCRIPTION</p>
-                        <p id="description_container" class="tsr-detail-value wrap-text">
-                            @(string.IsNullOrWhiteSpace(Model.TechnicalServiceRequestDescription)
-                                ? "N/A"
-                                : Model.TechnicalServiceRequestDescription)
+                    @* Date Request *@
+                    <div class="detail-item">
+                        <p class="tsr-detail-label light-text">DATE REQUESTED</p>
+                        <p class="tsr-detail-value wrap-text">
+                            @(Model.DateRequest.HasValue
+                                 ? Model.DateRequest.Value.ToString("MMMM dd, yyyy hh:mm tt")
+                                 : "N/A")
                         </p>
                     </div>
 
+                    @* Date Received *@
+                    <div class="detail-item">
+                        <p class="tsr-detail-label light-text">DATE RECEIVED</p>
+                        <p class="tsr-detail-value wrap-text">
+                            @(Model.DateRecieved.HasValue
+                                  ? Model.DateRecieved.Value.ToString("MMMM dd, yyyy hh:mm tt")
+                                  : "N/A")
+                        </p>
+                    </div>
+
+                    @* Description *@
+                    <div class="tsr-detail-item tsr-detail-item-full">
+                        <div class="flex-row">
+                            <p class="tsr-detail-label light-text">DESCRIPTION</p>
+
+                            @if (isEditable)
+                            {
+                                <button type="button" class="edit-description-button btn-link unset-button" data-toggle="modal" data-target="#edit_description_modal">
+                                    (<p class="text-success inline bold-text">
+                                        Update
+                                    </p>)
+                                </button>
+
+                                @Html.Partial("~/Views/TechnicalServiceRequests/Partial/_EditDescriptionModal.cshtml", Model);
+                            }
+
+                        </div>
+
+                        <p id="technical_service_request_description_container" class="tsr-detail-value wrap-text light-text">
+                            @(string.IsNullOrWhiteSpace(Model.TechnicalServiceRequestDescription)
+                                 ? "N/A"
+                                 : Model.TechnicalServiceRequestDescription)
+                        </p>
+                    </div>
+
+                    @* Equipment Detail *@
+                    @if (isEquipmentRepairTroubleshootingService &&
+                        (!string.IsNullOrEmpty(Model.TechnicalServiceRequestEquipmentModel) ||
+                        !string.IsNullOrEmpty(Model.TechnicalServiceRequestEquipmentAssetTag) ||
+                        !string.IsNullOrEmpty(Model.TechnicalServiceRequestEquipmentTypeName)))
+                    {
+                        <div class="tsr-detail-item tsr-detail-item-full">
+                            <p class="tsr-detail-label light-text"><i class="glyphicon glyphicon-cog"></i> EQUIPMENT</p>
+
+                            <div class="row tsr-schedule-wrap">
+                                <div class="col-sm-4 col-xs-12 tsr-schedule-item">
+                                    <p class="tsr-schedule-item-label">ASSET TAG</p>
+                                    <p class="tsr-schedule-item-value">@(Model.TechnicalServiceRequestEquipmentAssetTag ?? "N/A")</p>
+                                </div>
+
+                                <div class="col-sm-4 col-xs-12 tsr-schedule-item">
+                                    <p class="tsr-schedule-item-label">MODEL</p>
+                                    <p class="tsr-schedule-item-value">@(Model.TechnicalServiceRequestEquipmentModel ?? "N/A")</p>
+                                </div>
+
+                                <div class="col-sm-4 col-xs-12 tsr-schedule-item">
+                                    <p class="tsr-schedule-item-label">TYPE</p>
+                                    <p class="tsr-schedule-item-value">@(Model.TechnicalServiceRequestEquipmentTypeName ?? "N/A")</p>
+                                </div>
+                            </div>
+                        </div>
+                    }
+
+
+                    @* Schedule *@
                     @if (isScheduledService &&
                         Model.TechnicalServiceRequestScheduledDate.HasValue &&
                         Model.TechnicalServiceRequestScheduledStartTime.HasValue &&
@@ -246,9 +320,12 @@
                             </div>
                         </div>
                     }
+
                 </div>
+
             </section>
 
+            @* Action History *@
             <section class="tsr-detail-section">
                 <div class="flex-row flex-wrap flex-child-center-h flex-space-between detail-history-heading-row">
                     <h4 class="section-heading-title text-primary">

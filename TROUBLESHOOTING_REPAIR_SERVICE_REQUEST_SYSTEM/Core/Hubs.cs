@@ -2,6 +2,7 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Net.NetworkInformation;
 using System.Text.RegularExpressions;
 using System.Threading.Tasks;
 using System.Web;
@@ -97,6 +98,71 @@ namespace TROUBLESHOOTING_REPAIR_SERVICE_REQUEST_SYSTEM
     }
 
     [Authorize2]
+    public class EquipmentHub : BaseHub
+    {
+        public override async Task OnConnected()
+        {
+            await base.OnConnected();
+        }
+
+        public static void RefreshEquipmentList()
+        {
+            var context = GlobalHost.ConnectionManager.GetHubContext<EquipmentHub>();
+            context.Clients.All.refreshEquipmentList();
+
+            DashboardHub.RefreshDashboard();
+        }
+
+        public static void RefreshEquipmentAssetTag(int equipmentId, string assetTag)
+        {
+            var context = GlobalHost.ConnectionManager.GetHubContext<EquipmentHub>();
+            context.Clients.All.refreshEquipmentAssetTag(equipmentId, assetTag);
+        }
+
+        public static void RefreshEquipmentModel(int equipmentId, string equipmentModel)
+        {
+            var context = GlobalHost.ConnectionManager.GetHubContext<EquipmentHub>();
+            context.Clients.All.refreshEquipmentModel(equipmentId, equipmentModel);
+        }
+
+        public static void RefreshEquipmentType(int equipmentId, string type)
+        {
+            var context = GlobalHost.ConnectionManager.GetHubContext<EquipmentHub>();
+            context.Clients.All.refreshEquipmentType(equipmentId, type);
+        }
+
+        public static void RefreshEquipmentStatus(int equipmentId, string status)
+        {
+            var context = GlobalHost.ConnectionManager.GetHubContext<EquipmentHub>();
+            context.Clients.All.refreshEquipmentStatus(equipmentId, status);
+        }
+
+        public static void RefreshEquipmentBuildingNumber(int equipmentId, int buildingNumber)
+        {
+            var context = GlobalHost.ConnectionManager.GetHubContext<EquipmentHub>();
+            context.Clients.All.refreshEquipmentBuildingNumber(equipmentId, buildingNumber);
+        }
+
+        public static void RefreshEquipmentFloorNumber(int equipmentId, int floorNumber)
+        {
+            var context = GlobalHost.ConnectionManager.GetHubContext<EquipmentHub>();
+            context.Clients.All.refreshEquipmentFloorNumber(equipmentId, floorNumber);
+        }
+
+        public static void RefreshEquipmentOffice(int equipmentId, string office)
+        {
+            var context = GlobalHost.ConnectionManager.GetHubContext<EquipmentHub>();
+            context.Clients.All.refreshEquipmentOffice(equipmentId, office);
+        }
+
+        public static void RefreshEquipmentRepairCount(int equipmentId, int repairCount)
+        {
+            var context = GlobalHost.ConnectionManager.GetHubContext<EquipmentHub>();
+            context.Clients.All.refreshEquipmentRepairCount(equipmentId, repairCount);
+        }
+    }
+
+    [Authorize2]
     public class TechnicalServiceRequestHub : BaseHub
     {
         public override async Task OnConnected()
@@ -112,18 +178,26 @@ namespace TROUBLESHOOTING_REPAIR_SERVICE_REQUEST_SYSTEM
             DashboardHub.RefreshDashboard();
         }
 
-        public static void RefreshTechnicalServiceRequestSeverity(string severityName)
+        public static void RefreshTechnicalServiceRequestSeverity(int technicalServiceRequestId, string severityName)
         {
             var context = GlobalHost.ConnectionManager.GetHubContext<TechnicalServiceRequestHub>();
-            context.Clients.All.refreshTechnicalServiceRequestSeverity(severityName);
+            context.Clients.All.refreshTechnicalServiceRequestSeverity(technicalServiceRequestId, severityName);
 
             DashboardHub.RefreshDashboard();
         }
 
-        public static void RefreshTechnicalServiceRequestStatus(string statusName)
+        public static void RefreshTechnicalServiceRequestStatus(int technicalServiceRequestId, string statusName)
         {
             var context = GlobalHost.ConnectionManager.GetHubContext<TechnicalServiceRequestHub>();
-            context.Clients.All.refreshTechnicalServiceRequestStatus(statusName);
+            context.Clients.All.refreshTechnicalServiceRequestStatus(technicalServiceRequestId, statusName);
+
+            DashboardHub.RefreshDashboard();
+        }
+
+        public static void RefreshTechnicalServiceRequestDescription(int technicalServiceRequestId, string description)
+        {
+            var context = GlobalHost.ConnectionManager.GetHubContext<TechnicalServiceRequestHub>();
+            context.Clients.All.refreshTechnicalServiceRequestDescription(technicalServiceRequestId, description);
 
             DashboardHub.RefreshDashboard();
         }

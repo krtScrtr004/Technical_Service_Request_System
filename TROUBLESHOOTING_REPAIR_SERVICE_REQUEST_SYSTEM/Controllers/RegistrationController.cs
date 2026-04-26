@@ -285,8 +285,10 @@ namespace TROUBLESHOOTING_REPAIR_SERVICE_REQUEST_SYSTEM.Controllers
                         Message = "An error occurred while making a request. Please try again.",
                         Status = AlertModalStatus.Error
                     };
+
                     Log.Error($"An error occurred while creating registration for registration request ID {id} by admin ID {currentUser.Id}: {ex.Message}");
                     ModelState.AddModelError("", "An error occurred while making a request: " + ex.Message);
+
                     return View(registrationCreateViewModel);
                 }
             }

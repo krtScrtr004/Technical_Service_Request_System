@@ -27,6 +27,13 @@ namespace TROUBLESHOOTING_REPAIR_SERVICE_REQUEST_SYSTEM.Controllers
             TechnicalServiceRequestHistory technicalServiceRequestHistory
         )
         {
+            if (!ModelState.IsValid)
+            {
+                var errors = GetModelStateErrors();
+                Log.Warning($"Model state is invalid: {errors}");
+                return View(technicalServiceRequestHistory);
+            }
+
             // Set the ActionTakenByRegistrationId to the current user's registration ID
             var technicalServiceRequest = _db.TechnicalServiceRequests.Find(technicalServiceRequestId);
             if (technicalServiceRequest == null)
@@ -52,38 +59,29 @@ namespace TROUBLESHOOTING_REPAIR_SERVICE_REQUEST_SYSTEM.Controllers
                         throw new Exception("An error occured.");
                     }
 
-                    if (!ModelState.IsValid)
+                    var hasEquipmentStatusModified = false;
+
+                    var isEquipmentRepairTroubleshooting = technicalServiceRequest.TechnicalServiceTypeId == (int)TechnicalServiceTypeEnum.EQUIPMENT_REPAIR_TROUBLESHOOTING;
+                    var equipment = technicalServiceRequest.TechnicalServiceRequestEquipment;
+                    if (isEquipmentRepairTroubleshooting && equipment != null)
                     {
-                        var errors = GetModelStateErrors();
-                        Log.Warning($"Model state is invalid: {errors}");
-                        return View(technicalServiceRequestHistory);
+                        UpdateEquipmentStatusId(ref equipment, technicalServiceRequestId);
+                        hasEquipmentStatusModified = true;
                     }
 
-                    // If the new status is ongoing
-                    if (technicalServiceRequestHistory.TechnicalServiceRequestStatusId.HasValue &&
-                        technicalServiceRequestHistory.TechnicalServiceRequestStatusId.Value == (int)TechnicalServiceRequestStatusEnum.ONGOING)
+                    // Prevent adding new action history on different date thatn schedule
+                    if (!PreventActionHistoryOnDifferentSchedule(
+                            ref technicalServiceRequest,
+                            ref technicalServiceRequestHistory
+                        ))
                     {
-                        var isScheduledService = technicalServiceRequest.TechnicalServiceTypeId.HasValue &&
-                            TechnicalServiceTypeEnum.IsScheduleControlProcessRequest(
-                                technicalServiceRequest.TechnicalServiceTypeId.Value
-                            );
-                        if (isScheduledService && DateTime.Now.Date != technicalServiceRequest.TechnicalServiceRequestScheduledDate.Value.Date)
-                        {
-                            TempData["alertModal"] = new AlertModalUtility
-                            {
-                                Title = "Error",
-                                Status = AlertModalStatus.Error,
-                                Message = "You cannot mark the request as ongoing on a different date than the scheduled date.",
-                            };
-                            return RedirectToAction(
-                                "Details",
-                                "TechnicalServiceRequests",
-                                new { id = technicalServiceRequestId }
-                            );
-                        }
+                        return RedirectToAction(
+                            "Details",
+                            "TechnicalServiceRequests",
+                            new { id = technicalServiceRequest.Id }
+                        );
                     }
-
-
+                    
                     // Set the ActionTakenByRegistrationId to the current user's registration ID
                     technicalServiceRequestHistory.ActionTakenByRegistrationId = technician.Id;
 
@@ -159,9 +157,10 @@ namespace TROUBLESHOOTING_REPAIR_SERVICE_REQUEST_SYSTEM.Controllers
                     transaction.Commit();
 
                     TechnicalServiceRequestHub.RefreshTechnicalServiceRequestStatus(
-                           TechnicalServiceRequestStatusEnum.DisplayName(
-                               technicalServiceRequestHistory.TechnicalServiceRequestStatusId.Value
-                           )
+                        technicalServiceRequestId,
+                        TechnicalServiceRequestStatusEnum.DisplayName(
+                            technicalServiceRequestHistory.TechnicalServiceRequestStatusId.Value
+                        )
                     );
                     TechnicalServiceRequestHub.RefreshTechnicalServiceRequestActionHistory(technicalServiceRequestHistory.Id, technicalServiceRequestId);
 
@@ -175,8 +174,16 @@ namespace TROUBLESHOOTING_REPAIR_SERVICE_REQUEST_SYSTEM.Controllers
                     if (technicalServiceRequest.TechnicalServiceRequestStatusId == (int)TechnicalServiceRequestStatusEnum.CANCELLED)
                     {
                         TechnicalServiceRequestHub.RefreshTechnicalServiceRequestStatus(
+                            technicalServiceRequestId,
                             technicalServiceRequest.TechnicalServiceRequestStatus.TechnicalServiceRequestStatusName
                         );
+                    }
+
+                    // If the request is associated with an equipment and has been resolved, closed, or cancelled; refresh the details
+                    if (hasEquipmentStatusModified)
+                    {
+                        EquipmentHub.RefreshEquipmentStatus(equipment.Id, EquipmentStatusEnum.DisplayName((int)equipment.EquipmentStatusId.Value));
+                        EquipmentHub.RefreshEquipmentList();
                     }
 
                     // Notify the client
@@ -214,6 +221,59 @@ namespace TROUBLESHOOTING_REPAIR_SERVICE_REQUEST_SYSTEM.Controllers
                 new { id = technicalServiceRequestId }
             );
         }
+
+        private void UpdateEquipmentStatusId(ref Equipment equipment, int actionHistoryStatusId)
+        {
+            var completedStatusIds = TechnicalServiceRequestStatusEnum.GetCompletedStatusIds();
+            completedStatusIds.Add((int)TechnicalServiceRequestStatusEnum.CANCELLED);
+
+            // If resolved, closed, or cancelled, set the equipment status to operational again
+            var isResolved = completedStatusIds.Contains(actionHistoryStatusId);
+            if (isResolved)
+            {
+                equipment.EquipmentStatusId = (int)EquipmentStatusEnum.OPERATIONAL;
+                _db.Entry(equipment).State = EntityState.Modified;
+            }
+        }
+
+        private bool PreventActionHistoryOnDifferentSchedule(ref TechnicalServiceRequest technicalServiceRequest, ref TechnicalServiceRequestHistory technicalServiceRequestHistory)
+        {
+            // Prevent adding new action history if the request is scheduled for a specific date
+            // and the current date is different from the scheduled date
+            var modifieableStatusIds = new int[]
+            {
+                        (int)TechnicalServiceRequestStatusEnum.CANCELLED,
+                        (int)TechnicalServiceRequestStatusEnum.CLOSED
+            };
+
+            var isPending = technicalServiceRequest.TechnicalServiceRequestStatusId.HasValue &&
+                technicalServiceRequest.TechnicalServiceRequestStatusId.Value == (int)TechnicalServiceRequestStatusEnum.PENDING;
+            var isModifiable = technicalServiceRequestHistory.TechnicalServiceRequestStatusId.HasValue &&
+                modifieableStatusIds.Contains(technicalServiceRequestHistory.TechnicalServiceRequestStatusId.Value);
+            if (isPending && !isModifiable)
+            {
+                var isScheduledService = technicalServiceRequest.TechnicalServiceTypeId.HasValue &&
+                    TechnicalServiceTypeEnum.IsScheduleControlProcessRequest(
+                        technicalServiceRequest.TechnicalServiceTypeId.Value
+                    );
+
+                var scheduledControlProcessDetail = technicalServiceRequest.ScheduledControlProcessDetail;
+                var isToday = scheduledControlProcessDetail.TechnicalServiceRequestScheduledDate.HasValue &&
+                    DateTime.Today == scheduledControlProcessDetail.TechnicalServiceRequestScheduledDate.Value.Date;
+                if (isScheduledService && !isToday)
+                {
+                    TempData["alertModal"] = new AlertModalUtility
+                    {
+                        Title = "Error",
+                        Status = AlertModalStatus.Error,
+                        Message = "You cannot add a new action history on a different date than the scheduled date.",
+                    };
+                    return false;
+                }
+            }
+            return true;
+        }
+
 
         [AuthenticateUserPrivilege(new int[] { AccountTypeEnum.IT })]
         private TechnicalServiceRequest AssignTechnicianToPendingRequest(int technicianId)

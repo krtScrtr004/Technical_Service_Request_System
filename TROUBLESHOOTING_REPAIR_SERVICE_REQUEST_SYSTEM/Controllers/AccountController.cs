@@ -15,10 +15,11 @@ using TROUBLESHOOTING_REPAIR_SERVICE_REQUEST_SYSTEM.Models;
 using TROUBLESHOOTING_REPAIR_SERVICE_REQUEST_SYSTEM.Source;
 using TROUBLESHOOTING_REPAIR_SERVICE_REQUEST_SYSTEM.Utilities;
 using TROUBLESHOOTING_REPAIR_SERVICE_REQUEST_SYSTEM.Core;
+using Serilog;
 
 namespace TROUBLESHOOTING_REPAIR_SERVICE_REQUEST_SYSTEM.Controllers
 {
-    public class AccountController : Controller
+    public class AccountController : BaseController
     {
         private ApplicationSignInManager _signInManager;
         private ApplicationUserManager _userManager;
@@ -77,72 +78,28 @@ namespace TROUBLESHOOTING_REPAIR_SERVICE_REQUEST_SYSTEM.Controllers
         {
             if (!ModelState.IsValid)
             {
+                var errors = GetModelStateErrors();
+                Log.Warning($"Model state is invalid: {errors}");
                 return View(model);
             }
 
-            using (var db = new ApplicationDbContext())
+            try
             {
-                /**
-                 * Check if the user:
-                 *  - exists
-                 *  - active 
-                 *  - not expired
-                 */
-                var currentUser = db.Registrations
-                    .Include(r => r.UserPrivileges)
-                    .Where(r => r.IsActive && r.Email == model.Email)
-                    .FirstOrDefault();
-                if (currentUser == null)
+                using (var db = new ApplicationDbContext())
                 {
-                    model.Alert = new Dictionary<string, AlertBaseUtility>()
+                    /**
+                     * Check if the user:
+                     *  - exists
+                     *  - active 
+                     *  - not expired
+                     */
+                    var currentUser = db.Registrations
+                        .Include(r => r.UserPrivileges)
+                        .Where(r => r.IsActive && r.Email == model.Email)
+                        .FirstOrDefault();
+                    if (currentUser == null)
                     {
-                        { "invalidLogin", new AlertBoxUtility()
-                            {
-                                Status = "danger",
-                                Message = "Invalid login attempt.",
-                                Dismissible = true
-                            }
-                        }
-                    };
-                    ModelState.AddModelError("", "Invalid login attempt.");
-
-                    return View(model);
-                }
-
-                // This doesn't count login failures towards account lockout
-                // To enable password failures to trigger account lockout, change to shouldLockout: true
-                var result = await SignInManager.PasswordSignInAsync(model.Email, model.Password, model.RememberMe, shouldLockout: false);
-                switch (result)
-                {
-                    case SignInStatus.Success:
-                        {
-                            new UserSession(
-                                id: currentUser.Id,
-                                firstName: currentUser.FirstName,
-                                lastName: currentUser.LastName,
-                                middleName: currentUser.MiddleName,
-                                extensionName: currentUser.ExtensionName,
-                                userName: currentUser.UserName,
-                                email: currentUser.Email,
-                                contactNumber: currentUser.ContactNumber,
-                                office: currentUser.Office,
-                                position: currentUser.Position,
-                                privilegeIds: currentUser.UserPrivileges
-                                    .Where(p => p.PrivilegeId.HasValue)
-                                    .Select(p => p.PrivilegeId.Value)
-                                    .ToArray()
-                            );
-
-                            return RedirectToLocal(returnUrl);
-                        }
-                    case SignInStatus.LockedOut:
-                        return View("Lockout");
-                    case SignInStatus.RequiresVerification:
-                        return RedirectToAction("SendCode", new { ReturnUrl = returnUrl, RememberMe = model.RememberMe });
-                    case SignInStatus.Failure:
-                    default:
-                        {
-                            model.Alert = new Dictionary<string, AlertBaseUtility>()
+                        model.Alert = new Dictionary<string, AlertBaseUtility>()
                         {
                             { "invalidLogin", new AlertBoxUtility()
                                 {
@@ -152,11 +109,75 @@ namespace TROUBLESHOOTING_REPAIR_SERVICE_REQUEST_SYSTEM.Controllers
                                 }
                             }
                         };
-                            ModelState.AddModelError("", "Invalid login attempt.");
+                        ModelState.AddModelError("", "Invalid login attempt.");
 
-                            return View(model);
-                        }
+                        return View(model);
+                    }
+
+                    // This doesn't count login failures towards account lockout
+                    // To enable password failures to trigger account lockout, change to shouldLockout: true
+                    var result = await SignInManager.PasswordSignInAsync(model.Email, model.Password, model.RememberMe, shouldLockout: false);
+                    switch (result)
+                    {
+                        case SignInStatus.Success:
+                            {
+                                new UserSession(
+                                    id: currentUser.Id,
+                                    firstName: currentUser.FirstName,
+                                    lastName: currentUser.LastName,
+                                    middleName: currentUser.MiddleName,
+                                    extensionName: currentUser.ExtensionName,
+                                    userName: currentUser.UserName,
+                                    email: currentUser.Email,
+                                    contactNumber: currentUser.ContactNumber,
+                                    office: currentUser.Office,
+                                    position: currentUser.Position,
+                                    privilegeIds: currentUser.UserPrivileges
+                                        .Where(p => p.PrivilegeId.HasValue)
+                                        .Select(p => p.PrivilegeId.Value)
+                                        .ToArray()
+                                );
+
+                                return RedirectToLocal(returnUrl);
+                            }
+                        case SignInStatus.LockedOut:
+                            return View("Lockout");
+                        case SignInStatus.RequiresVerification:
+                            return RedirectToAction("SendCode", new { ReturnUrl = returnUrl, RememberMe = model.RememberMe });
+                        case SignInStatus.Failure:
+                        default:
+                            {
+                                model.Alert = new Dictionary<string, AlertBaseUtility>()
+                        {
+                            { "invalidLogin", new AlertBoxUtility()
+                                {
+                                    Status = "danger",
+                                    Message = "Invalid login attempt.",
+                                    Dismissible = true
+                                }
+                            }
+                        };
+                                ModelState.AddModelError("", "Invalid login attempt.");
+
+                                return View(model);
+                            }
+                    }
                 }
+
+            }
+            catch (Exception ex)
+            {
+                TempData["alertModal"] = new AlertModalUtility()
+                {
+                    Title = "Error",
+                    Message = "An error occurred while making a request. Please try again.",
+                    Status = AlertModalStatus.Error
+                };
+
+                Log.Error(ex, "An error occurred during login.");
+                ModelState.AddModelError("", "An error occurred while making a request: " + ex.Message);
+
+                return View(model);
             }
         }
 

@@ -3,8 +3,10 @@ using System;
 using System.Collections.Generic;
 using System.Data;
 using System.Data.Entity;
+using System.IO;
 using System.Linq;
 using System.Net;
+using System.Text.RegularExpressions;
 using System.Web;
 using System.Web.Mvc;
 using TROUBLESHOOTING_REPAIR_SERVICE_REQUEST_SYSTEM.Attributes;
@@ -54,6 +56,8 @@ namespace TROUBLESHOOTING_REPAIR_SERVICE_REQUEST_SYSTEM.Controllers
                 .Include(t => t.TechnicalServiceType)
                 .Include(t => t.TechnicalServiceRequestSeverity)
                 .Include(t => t.TechnicalServiceRequestStatus)
+                .Include(t => t.TechnicalServiceRequestEquipment)
+                .Include(t => t.ScheduledControlProcessDetail)
                 .Include(t => t.TechnicalServiceRequestHistories
                     .Select(h => h.ActionTakenByRegistration))
                 .Include(t => t.TechnicalServiceRequestHistories
@@ -135,6 +139,7 @@ namespace TROUBLESHOOTING_REPAIR_SERVICE_REQUEST_SYSTEM.Controllers
 
             var technicalServiceRequestHistory = _db.TechnicalServiceRequestHistories
                 .Include(h => h.TechnicalServiceRequest)
+                .Include(h => h.TechnicalServiceRequest.ScheduledControlProcessDetail)
                 .Include(h => h.TechnicalServiceRequest.ClientRegistration)
                 .FirstOrDefault(h => h.Id == id);
             var technicalServiceRequest = technicalServiceRequestHistory?.TechnicalServiceRequest;
@@ -222,6 +227,7 @@ namespace TROUBLESHOOTING_REPAIR_SERVICE_REQUEST_SYSTEM.Controllers
                 try
                 {
                     var isQueued = false;
+                    Equipment updatedEquipment = null;
 
                     var clientInfo = _db.Registrations
                         .Where(r => r.Id == technicalServiceRequestCreateViewModel.ClientRegistrationId)
@@ -256,7 +262,19 @@ namespace TROUBLESHOOTING_REPAIR_SERVICE_REQUEST_SYSTEM.Controllers
                         // Implement different logic based on the selected technical service type
                         if (TechnicalServiceTypeEnum.IsRepairTroubleshootingRequest(selectedTechnicalServiceType.Value))
                         {
-                            CreateEquipmentRepairTroubleshootingRequest(ref technicalServiceRequest, ref isQueued);
+                            try { CreateEquipmentRepairTroubleshootingRequest(ref technicalServiceRequest, ref isQueued, out updatedEquipment); }
+                            catch (Exception ex)
+                            {
+                                TempData["alertModal"] = new AlertModalUtility()
+                                {
+                                    Title = "Error",
+                                    Message = ex.Message,
+                                    Status = AlertModalStatus.Error
+                                };
+                                ModelState.AddModelError("", "An error occurred while making a request: " + ex.Message);
+                                return View(technicalServiceRequestCreateViewModel);
+                            }
+                            
                         }
                         else if (TechnicalServiceTypeEnum.IsScheduleControlProcessRequest(selectedTechnicalServiceType.Value))
                         {
@@ -285,7 +303,7 @@ namespace TROUBLESHOOTING_REPAIR_SERVICE_REQUEST_SYSTEM.Controllers
                         technicalServiceRequest.TechnicalServiceType = null;
 
                         // Default to Equipment Repair Troubleshooting logic
-                        CreateEquipmentRepairTroubleshootingRequest(ref technicalServiceRequest, ref isQueued);
+                        CreateEquipmentRepairTroubleshootingRequest(ref technicalServiceRequest, ref isQueued, out updatedEquipment);
                     }
                     else
                     {
@@ -311,6 +329,19 @@ namespace TROUBLESHOOTING_REPAIR_SERVICE_REQUEST_SYSTEM.Controllers
 
                     // Notify all connected clients about the new request
                     TechnicalServiceRequestHub.RefreshTechnicalServiceRequestList();
+
+                    // Refresh the equipment hub when the repair request changes an equipment's status/count
+                    if (updatedEquipment != null)
+                    {
+                        EquipmentHub.RefreshEquipmentStatus(
+                            updatedEquipment.Id,
+                            EquipmentStatusEnum.DisplayName(updatedEquipment.EquipmentStatusId ?? 0)
+                        );
+                        EquipmentHub.RefreshEquipmentRepairCount(updatedEquipment.Id, updatedEquipment.RepairCount);
+                    }
+
+                    // Refresh the equipment list so any new/updated equipment is reflected immediately
+                    EquipmentHub.RefreshEquipmentList();
 
                     if (!isQueued)
                     {
@@ -365,6 +396,8 @@ namespace TROUBLESHOOTING_REPAIR_SERVICE_REQUEST_SYSTEM.Controllers
                         };
                         Log.Information($"Request with reference code {technicalServiceRequest.ReferenceCode} has been queued.");
                     }
+
+                    
 
                     return RedirectToAction("Index");
                 }
@@ -762,6 +795,150 @@ namespace TROUBLESHOOTING_REPAIR_SERVICE_REQUEST_SYSTEM.Controllers
         }
 
         [Authorize2]
+        [HttpGet]
+        [AuthenticateUserPrivilege(new int[] { AccountTypeEnum.STANDARD, AccountTypeEnum.IT, AccountTypeEnum.ADMIN })]
+        public JsonResult GetEquipmentDetailByAssetTag(string assetTag)
+        {
+            try
+            {
+                var equipmentService = new EquipmentService();
+
+                var normalizedAssetTag = equipmentService.NormalizeAssetTag(assetTag);
+                if (string.IsNullOrEmpty(normalizedAssetTag))
+                {
+                    throw new Exception("Invalid equipment asset tag.");
+                }
+
+                var activeStatusIds = EquipmentStatusEnum.GetActiveIds();
+
+                var equipments = equipmentService
+                    .GetListEquipmentByAssetTag(normalizedAssetTag, exactMatch: false)
+                    .Where(e =>
+                        e.IsActive &&
+                        e.EquipmentStatusId.HasValue &&
+                        activeStatusIds.Contains(e.EquipmentStatusId.Value)
+                    )
+                    .Select(e => new
+                    {
+                        e.Id,
+                        e.EquipmentModel,
+                        e.AssetTag,
+                        e.EquipmentTypeId
+                    })
+                    .ToList();
+
+                Log.Information($"Successfully retrieved equipment details for asset tag {normalizedAssetTag}. Retrieved {equipments.Count} equipment(s).");
+                return Json(new
+                {
+                    success = true,
+                    data = equipments
+                }, JsonRequestBehavior.AllowGet);
+            }
+            catch (Exception ex)
+            {
+                Log.Error(ex, $"An error occurred while retrieving equipment details for asset tag {assetTag}.");
+                return Json(new
+                {
+                    success = false,
+                    message = ex.Message
+                }, JsonRequestBehavior.AllowGet);
+            }
+        }
+
+        [Authorize2]
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        [AuthenticateUserPrivilege(new int[] { AccountTypeEnum.STANDARD })]
+        public ActionResult EditDescription(TechnicalServiceRequest technicalServiceRequestParam, int id)
+        {
+            try
+            {
+                if (id < 1)
+                {
+                    throw new Exception("Invalid request ID.");
+                }
+
+                if (!ModelState.IsValid)
+                {
+                    var errors = GetModelStateErrors();
+                    Log.Warning($"Model state is invalid: {errors}");
+                    throw new Exception("An error occured.");
+                }
+
+                var currentUser = GetUserSession();
+                if (currentUser == null)
+                {
+                    throw new Exception("User not found.");
+                }
+
+                var technicalServiceRequest = _db.TechnicalServiceRequests
+                    .Include(r => r.ClientRegistration)
+                    .Include(r => r.TechnicalServiceRequestHistories)
+                    .FirstOrDefault(r => r.Id == id);
+                if (technicalServiceRequest == null)
+                {
+                    throw new Exception("Technical service request not found.");
+                }
+
+                if (currentUser.Id != technicalServiceRequest.ClientRegistrationId)
+                {
+                    throw new Exception("You are not allowed to perform this action.");
+                }
+
+                technicalServiceRequest.TechnicalServiceRequestDescription = technicalServiceRequestParam.TechnicalServiceRequestDescription?.Trim();
+                _db.Entry(technicalServiceRequest).State = EntityState.Modified;
+                _db.SaveChanges();
+
+                TechnicalServiceRequestHub.RefreshTechnicalServiceRequestDescription(
+                    technicalServiceRequest.Id,
+                    technicalServiceRequest.TechnicalServiceRequestDescription
+                );
+
+                var latestTechnicianId = technicalServiceRequest.TechnicalServiceRequestHistories
+                    .OrderByDescending(h => h.UpdatedAt)
+                    .Select(h => h.ActionTakenByRegistrationId)
+                    .FirstOrDefault();
+                var serviceType = technicalServiceRequest.TechnicalServiceTypeId.HasValue
+                    ? technicalServiceRequest.TechnicalServiceTypeId.Value
+                    : 0;
+                if (latestTechnicianId.HasValue && serviceType > 0)
+                {
+                    /**
+                     * Notify the assigned technician about the updated description if the request is an assisted service, otherwise,
+                     * notify all technicians about the updated description for non-assisted service
+                     */
+                    var isNonAssisted = TechnicalServiceTypeEnum.IsNonAssistedRequest(serviceType);
+                    var firstParam = !isNonAssisted
+                        ? latestTechnicianId
+                        : null;
+
+                    var notificationService = new NotificationService();
+                    notificationService.NotifyTechnicianDescriptionUpdate(firstParam, technicalServiceRequest.ReferenceCode);
+                }
+
+                TempData["alertModal"] = new AlertModalUtility()
+                {
+                    Title = "Success",
+                    Message = "Description updated successfully.",
+                    Status = AlertModalStatus.Success
+                };
+            }
+            catch (Exception ex)
+            {
+                Log.Error(ex, $"An error occurred while user with ID {GetUserSession()?.Id.ToString() ?? "Unknown"} was editing description of request with ID {id}.");
+                ModelState.AddModelError("", "An error occurred while making a request: " + ex.Message);
+                TempData["alertModal"] = new AlertModalUtility()
+                {
+                    Title = "Error",
+                    Message = "An error occurred while updating description. Please try again.",
+                    Status = AlertModalStatus.Error
+                };
+            }
+
+            return RedirectToAction("Details", new { id = id });
+        }
+
+        [Authorize2]
         [HttpPost]
         [ValidateAntiForgeryToken]
         [AuthenticateUserPrivilege(new int[] { AccountTypeEnum.STANDARD })]
@@ -851,6 +1028,7 @@ namespace TROUBLESHOOTING_REPAIR_SERVICE_REQUEST_SYSTEM.Controllers
                 // Notify all connected clients about the cancelled request
                 TechnicalServiceRequestHub.RefreshTechnicalServiceRequestList();
                 TechnicalServiceRequestHub.RefreshTechnicalServiceRequestStatus(
+                    technicalServiceRequest.Id,
                     TechnicalServiceRequestStatusEnum.DisplayName(newStatus)
                 );
 
@@ -879,16 +1057,14 @@ namespace TROUBLESHOOTING_REPAIR_SERVICE_REQUEST_SYSTEM.Controllers
             }
             catch (Exception ex)
             {
+                Log.Error(ex, $"An error occurred while user with ID {GetUserSession()?.Id.ToString() ?? "Unknown"} was cancelling request with ID {id}.");
+                ModelState.AddModelError("", "An error occurred while making a request: " + ex.Message);
                 return Json(new
                 {
                     success = false,
                     message = "An error occurred while making a request. Please try again.",
                 });
-                Log.Error(ex, $"An error occurred while user with ID {GetUserSession()?.Id.ToString() ?? "Unknown"} was cancelling request with ID {id}.");
-                ModelState.AddModelError("", "An error occurred while making a request: " + ex.Message);
             }
-
-
         }
 
         [Authorize2]
@@ -946,7 +1122,9 @@ namespace TROUBLESHOOTING_REPAIR_SERVICE_REQUEST_SYSTEM.Controllers
 
                     // Notify all connected clients about the updated severity
                     TechnicalServiceRequestHub.RefreshTechnicalServiceRequestSeverity(
-                        technicalServiceRequest.TechnicalServiceRequestSeverity.SeverityName);
+                        technicalServiceRequest.Id,
+                        technicalServiceRequest.TechnicalServiceRequestSeverity.SeverityName
+                    );
 
                     // Notify client about the updated severity
                     var notificationService = new NotificationService();
@@ -979,13 +1157,14 @@ namespace TROUBLESHOOTING_REPAIR_SERVICE_REQUEST_SYSTEM.Controllers
             }
             catch (Exception ex)
             {
+                Log.Error(ex, $"An error occurred while user with ID {GetUserSession()?.Id.ToString() ?? "Unknown"} was updating severity of request with ID {id}.");
+                ModelState.AddModelError("", "An error occurred while making a request: " + ex.Message);
+
                 return Json(new
                 {
                     success = false,
                     message = "An error occurred while making a request. Please try again.",
                 });
-                Log.Error(ex, $"An error occurred while user with ID {GetUserSession()?.Id.ToString() ?? "Unknown"} was updating severity of request with ID {id}.");
-                ModelState.AddModelError("", "An error occurred while making a request: " + ex.Message);
             }
         }
 
@@ -1031,17 +1210,25 @@ namespace TROUBLESHOOTING_REPAIR_SERVICE_REQUEST_SYSTEM.Controllers
                         throw new Exception("Invalid service type.");
                 }
 
+                var inactiveStatusIds = new int[]
+                {
+                    (int)TechnicalServiceRequestStatusEnum.RESOLVED,
+                    (int)TechnicalServiceRequestStatusEnum.CANCELLED,
+                    (int)TechnicalServiceRequestStatusEnum.CLOSED
+                };
+
                 /**
                  * Get fully booked days based on the count of scheduled requests for the selected
                  * service type, within the next 30 days, that have reached the per-day limit
                  */
                 var fullyBookedStringDates = _db.TechnicalServiceRequests
                     .Where(r =>
-                        r.TechnicalServiceRequestStatusId != (int)TechnicalServiceRequestStatusEnum.CANCELLED &&
-                        r.TechnicalServiceTypeId == selectedTypeId
-                        && r.TechnicalServiceRequestScheduledDate >= startDate
-                        && r.TechnicalServiceRequestScheduledDate < endDate)
-                    .GroupBy(r => DbFunctions.TruncateTime(r.TechnicalServiceRequestScheduledDate))
+                        r.TechnicalServiceRequestStatusId.HasValue &&
+                        !inactiveStatusIds.Contains(r.TechnicalServiceRequestStatusId.Value) &&
+                        r.TechnicalServiceTypeId == selectedTypeId &&
+                        r.ScheduledControlProcessDetail.TechnicalServiceRequestScheduledDate >= startDate &&
+                        r.ScheduledControlProcessDetail.TechnicalServiceRequestScheduledDate < endDate)
+                    .GroupBy(r => DbFunctions.TruncateTime(r.ScheduledControlProcessDetail.TechnicalServiceRequestScheduledDate))
                     .Where(g => g.Count() >= selectedTypeLimit)
                     .Select(g => g.Key)
                     .Where(date => date.HasValue)
@@ -1078,6 +1265,13 @@ namespace TROUBLESHOOTING_REPAIR_SERVICE_REQUEST_SYSTEM.Controllers
                 var startTime = TimeSpan.FromHours(8);   // 8:00 AM
                 var endTime = TimeSpan.FromHours(16);    // 4:00 PM
 
+                var inactiveStatusIds = new int[]
+                {
+                     (int)TechnicalServiceRequestStatusEnum.RESOLVED,
+                     (int)TechnicalServiceRequestStatusEnum.CANCELLED,
+                     (int)TechnicalServiceRequestStatusEnum.CLOSED
+                };
+
                 var fullyBookedStringDates = new List<string>();
 
                 /**
@@ -1089,13 +1283,17 @@ namespace TROUBLESHOOTING_REPAIR_SERVICE_REQUEST_SYSTEM.Controllers
                     var thisDate = date;
                     var events = _db.TechnicalServiceRequests
                         .Where(r =>
-                            DbFunctions.TruncateTime(r.TechnicalServiceRequestScheduledDate) ==
+                            // Fetch only requests that are active 
+                            r.TechnicalServiceRequestStatusId.HasValue &&
+                            !inactiveStatusIds.Contains(r.TechnicalServiceRequestStatusId.Value) &&
+                            // Check if the request is scheduled on the same date as the new request
+                            DbFunctions.TruncateTime(r.ScheduledControlProcessDetail.TechnicalServiceRequestScheduledDate) ==
                             DbFunctions.TruncateTime(thisDate)
                         )
                         .Select(r => new
                         {
-                            Start = r.TechnicalServiceRequestScheduledStartTime,
-                            End = r.TechnicalServiceRequestScheduledEndTime
+                            Start = r.ScheduledControlProcessDetail.TechnicalServiceRequestScheduledStartTime,
+                            End = r.ScheduledControlProcessDetail.TechnicalServiceRequestScheduledEndTime
                         })
                         .OrderBy(e => e.Start)
                         .ToList();
@@ -1184,10 +1382,8 @@ namespace TROUBLESHOOTING_REPAIR_SERVICE_REQUEST_SYSTEM.Controllers
         {
             var itAccountTypeName = AccountTypeEnum.DisplayName(AccountTypeEnum.IT);
 
-            var activeStatusIds = new List<int>()
-            {
-                (int)TechnicalServiceRequestStatusEnum.ONGOING,
-            };
+            var activeStatusIds = TechnicalServiceRequestStatusEnum.GetActiveStatusIds();
+            var scheduledControlProcessRequestIds = TechnicalServiceTypeEnum.GetScheduledServiceIds();
             var nonAssistedRequestIds = TechnicalServiceTypeEnum.GetNonAssistedServiceIds();
 
             var today = DateTime.Now.Date;
@@ -1195,13 +1391,22 @@ namespace TROUBLESHOOTING_REPAIR_SERVICE_REQUEST_SYSTEM.Controllers
             // Build a set of technicians currently busy with active requests
             var busyTechnicianIds = _db.TechnicalServiceRequests
                 .Where(r =>
-                    r.DateRequest != null &&
-                    DbFunctions.TruncateTime(r.DateRequest) == today &&
-
+                    // Check only active requests
                     r.TechnicalServiceRequestStatusId.HasValue &&
                     activeStatusIds.Contains(r.TechnicalServiceRequestStatusId.Value) &&
-
-                    (r.TechnicalServiceTypeId.HasValue && !nonAssistedRequestIds.Contains(r.TechnicalServiceTypeId.Value))) // Exclude non-assisted requests
+                    // Check only assisted service requests
+                    r.TechnicalServiceTypeId.HasValue &&
+                    !nonAssistedRequestIds.Contains(r.TechnicalServiceTypeId.Value) &&
+                    (
+                        // Busy now
+                        !scheduledControlProcessRequestIds.Contains(r.TechnicalServiceTypeId.Value)
+                        ||
+                        // Busy only on scheduled day
+                        (r.ScheduledControlProcessDetail != null &&
+                         r.ScheduledControlProcessDetail.TechnicalServiceRequestScheduledDate.HasValue &&
+                         DbFunctions.TruncateTime(r.ScheduledControlProcessDetail.TechnicalServiceRequestScheduledDate.Value) == DbFunctions.TruncateTime(today))
+                    )
+                )
                 .Select(r => r.TechnicalServiceRequestHistories
                     .OrderByDescending(h => h.UpdatedAt)
                     .Select(h => h.ActionTakenByRegistrationId)
@@ -1211,26 +1416,26 @@ namespace TROUBLESHOOTING_REPAIR_SERVICE_REQUEST_SYSTEM.Controllers
                 .Distinct()
                 .ToList();
 
-            // Pick the least recently assigned (fairness), then by Id.
+            // Pick the least recently assigned, then by Id.
             var availableTechnicianId = _db.Registrations
-                .Where(r =>
-                    r.IsActive &&
-                    r.AccountType == itAccountTypeName)
-                .Where(r => !r.ITAvailabilities.Any(a =>
-                    DbFunctions.TruncateTime(a.BlockDate) == today))
-                .Where(r => !busyTechnicianIds.Contains(r.Id))
-                .Select(r => new
-                {
-                    r.Id,
-                    LastAssignedAt = _db.TechnicalServiceRequestHistories
-                        .Where(h => h.ActionTakenByRegistrationId == r.Id)
-                        .Select(h => (DateTime?)h.UpdatedAt)
-                        .Max()
-                })
-                .OrderBy(r => r.LastAssignedAt ?? DateTime.MinValue)
-                .ThenBy(r => r.Id)
-                .Select(r => (int?)r.Id)
-                .FirstOrDefault();
+               .Where(r =>
+                   r.IsActive &&
+                   r.AccountType == itAccountTypeName)
+               .Where(r => !r.ITAvailabilities.Any(a =>
+                   DbFunctions.TruncateTime(a.BlockDate) == today))
+               .Where(r => !busyTechnicianIds.Contains(r.Id))
+               .Select(r => new
+               {
+                   r.Id,
+                   LastAssignedAt = _db.TechnicalServiceRequestHistories
+                       .Where(h => h.ActionTakenByRegistrationId == r.Id)
+                       .Select(h => (DateTime?)h.UpdatedAt)
+                       .Max()
+               })
+               .OrderBy(r => r.LastAssignedAt ?? DateTime.MinValue)
+               .ThenBy(r => r.Id)
+               .Select(r => (int?)r.Id)
+               .FirstOrDefault();
 
             return availableTechnicianId;
         }
@@ -1246,29 +1451,34 @@ namespace TROUBLESHOOTING_REPAIR_SERVICE_REQUEST_SYSTEM.Controllers
 
             // Requests in these statuses are still actively consuming a technician
             var activeStatusIds = TechnicalServiceRequestStatusEnum.GetActiveStatusIds();
+            var scheduledControlProcessRequestIds = TechnicalServiceTypeEnum.GetScheduledServiceIds();
             var nonAssistedRequestIds = TechnicalServiceTypeEnum.GetNonAssistedServiceIds();
-
 
             // Build a set of technicians currently busy with active requests
             var busyTechnicianIds = _db.TechnicalServiceRequests
                 .Where(r =>
+                    // Check only active requests
                     r.TechnicalServiceRequestStatusId.HasValue &&
                     activeStatusIds.Contains(r.TechnicalServiceRequestStatusId.Value) &&
-                    (r.TechnicalServiceTypeId.HasValue && !nonAssistedRequestIds.Contains(r.TechnicalServiceRequestStatusId.Value)) && // Exclude non-assisted requests
-                                                                                                                                       // Check if the request is scheduled on the same date as the new request
-                    (DbFunctions.TruncateTime(r.TechnicalServiceRequestScheduledDate) == DbFunctions.TruncateTime(scheduleDate) &&
-                        (
-                            r.TechnicalServiceRequestScheduledStartTime.HasValue &&
-                            r.TechnicalServiceRequestScheduledEndTime.HasValue &&
-                            startTime.HasValue &&
-                            endTime.HasValue
-                        ) &&
-                        (
-                           // Check if the scheduled time overlaps with the new request's schedule
-                           (startTime >= r.TechnicalServiceRequestScheduledStartTime && startTime < r.TechnicalServiceRequestScheduledEndTime) ||
-                           (endTime > r.TechnicalServiceRequestScheduledStartTime && endTime <= r.TechnicalServiceRequestScheduledEndTime) ||
-                           (startTime <= r.TechnicalServiceRequestScheduledStartTime && endTime >= r.TechnicalServiceRequestScheduledEndTime)
-                        )
+                    // Check only scheduled control process requests
+                    r.TechnicalServiceTypeId.HasValue &&
+                    !nonAssistedRequestIds.Contains(r.TechnicalServiceTypeId.Value) &&
+                    scheduledControlProcessRequestIds.Contains(r.TechnicalServiceTypeId.Value) &&
+                    // Check if the request is scheduled on the same date as the new request
+                    r.ScheduledControlProcessDetail != null &&
+                    DbFunctions.TruncateTime(r.ScheduledControlProcessDetail.TechnicalServiceRequestScheduledDate) == DbFunctions.TruncateTime(scheduleDate) &&
+                    // Check if the scheduled time is overlapping with the new request's schedule
+                    r.ScheduledControlProcessDetail.TechnicalServiceRequestScheduledStartTime.HasValue &&
+                    r.ScheduledControlProcessDetail.TechnicalServiceRequestScheduledEndTime.HasValue &&
+                    startTime.HasValue &&
+                    endTime.HasValue &&
+                    (
+                        (startTime >= r.ScheduledControlProcessDetail.TechnicalServiceRequestScheduledStartTime &&
+                         startTime < r.ScheduledControlProcessDetail.TechnicalServiceRequestScheduledEndTime) ||
+                        (endTime > r.ScheduledControlProcessDetail.TechnicalServiceRequestScheduledStartTime &&
+                         endTime <= r.ScheduledControlProcessDetail.TechnicalServiceRequestScheduledEndTime) ||
+                        (startTime <= r.ScheduledControlProcessDetail.TechnicalServiceRequestScheduledStartTime &&
+                         endTime >= r.ScheduledControlProcessDetail.TechnicalServiceRequestScheduledEndTime)
                     )
                 )
                 .Select(r => r.TechnicalServiceRequestHistories
@@ -1279,6 +1489,7 @@ namespace TROUBLESHOOTING_REPAIR_SERVICE_REQUEST_SYSTEM.Controllers
                 .Select(id => id.Value)
                 .Distinct()
                 .ToList();
+
 
             // Pick the least recently assigned (fairness), then by Id.
             var availableTechnicianId = _db.Registrations
@@ -1305,8 +1516,10 @@ namespace TROUBLESHOOTING_REPAIR_SERVICE_REQUEST_SYSTEM.Controllers
             return availableTechnicianId;
         }
 
-        private void CreateEquipmentRepairTroubleshootingRequest(ref TechnicalServiceRequest technicalServiceRequest, ref bool isQueued)
+        private void CreateEquipmentRepairTroubleshootingRequest(ref TechnicalServiceRequest technicalServiceRequest, ref bool isQueued, out Equipment updatedEquipment)
         {
+            updatedEquipment = null;
+
             int? availableTechnicianId = GetAvailableTechnician();
             if (availableTechnicianId.HasValue)
             {
@@ -1331,15 +1544,93 @@ namespace TROUBLESHOOTING_REPAIR_SERVICE_REQUEST_SYSTEM.Controllers
                     (int)TechnicalServiceRequestStatusEnum.PENDING;
             }
 
+            /**
+            * If equipment details are provided, try to find the equipment  
+            * in the database and associate it with the request. 
+            */
+            var serviceType = technicalServiceRequest.TechnicalServiceTypeId.HasValue
+                ? technicalServiceRequest.TechnicalServiceTypeId.Value
+                : 0;
+            if (serviceType == (int)TechnicalServiceTypeEnum.EQUIPMENT_REPAIR_TROUBLESHOOTING)
+            {
+                var equipmentDetails = technicalServiceRequest.TechnicalServiceRequestEquipment;
+                if (equipmentDetails != null && !string.IsNullOrWhiteSpace(equipmentDetails.AssetTag))
+                {
+                    var equipmentService = new EquipmentService();
+
+                    // Normalize and search for existing equipment by Asset Tag
+                    var normalizedAssetTag = equipmentService.NormalizeAssetTag(equipmentDetails.AssetTag);
+                    equipmentDetails.AssetTag = normalizedAssetTag;
+
+                    var existingEquipment = equipmentService.GetEquipmentByAssetTag(normalizedAssetTag);
+                    if (existingEquipment != null)
+                    {
+                        // Check if equipment is active
+                        var activeEquipmentIds = EquipmentStatusEnum.GetActiveIds();
+                        var isActive =
+                            existingEquipment.IsActive &&
+                            existingEquipment.EquipmentStatusId.HasValue &&
+                            activeEquipmentIds.Contains(existingEquipment.EquipmentStatusId.Value);
+                        if (!isActive)
+                        {
+                            throw new Exception("You cannot select an inactive equipment.");
+                        }
+
+                        // Check if equipment is already uder repair
+                        var isUnderRepair = existingEquipment.EquipmentStatusId == (int)EquipmentStatusEnum.UNDER_REPAIR;
+                        if (isUnderRepair)
+                        {
+                            throw new Exception("Selected equipment is currently under repair.");
+                        }
+
+                        existingEquipment.EquipmentStatusId = EquipmentStatusEnum.UNDER_REPAIR;
+                        existingEquipment.RepairCount++;
+                        updatedEquipment = existingEquipment;
+
+                        // Associate existing equipment with the request
+                        technicalServiceRequest.TechnicalServiceRequestEquipmentId = existingEquipment.Id;
+                        technicalServiceRequest.TechnicalServiceRequestEquipment = null; // Set to null to avoid creating a new record
+
+                        _db.Entry(existingEquipment).State = EntityState.Modified;
+                    }
+                    else
+                    {
+                        // New equipment will be created
+                        equipmentDetails.EquipmentModel = equipmentDetails.EquipmentModel.Trim().ToUpperInvariant();
+                        equipmentDetails.EquipmentLocationId = null;
+                        equipmentDetails.EquipmentStatusId = (int)EquipmentStatusEnum.UNDER_REPAIR;
+                        equipmentDetails.RepairCount = 1;
+                        equipmentDetails.CreatedByRegistrationId = GetUserSession()?.Id;
+                        equipmentDetails.IsActive = true;
+                        equipmentDetails.CreatedAt = DateTime.UtcNow;
+                        equipmentDetails.UpdatedAt = DateTime.UtcNow;
+
+                        _db.Equipments.Add(equipmentDetails);
+                    }
+                }
+                else
+                {
+                    // No equipment details provided for repair request
+                    technicalServiceRequest.TechnicalServiceRequestEquipmentId = null;
+                    technicalServiceRequest.TechnicalServiceRequestEquipment = null;
+                }
+            }
+            else
+            {
+                // Service type is not Equipment Repair/Troubleshooting, invalidate equipment
+                technicalServiceRequest.TechnicalServiceRequestEquipmentId = null;
+                technicalServiceRequest.TechnicalServiceRequestEquipment = null;
+            }
+
             // Invalidate schedule fields
-            technicalServiceRequest.TechnicalServiceRequestScheduledDate = null;
-            technicalServiceRequest.TechnicalServiceRequestScheduledStartTime = null;
-            technicalServiceRequest.TechnicalServiceRequestScheduledEndTime = null;
+            technicalServiceRequest.ScheduledControlProcessDetailId = null;
+            technicalServiceRequest.ScheduledControlProcessDetail = null;
         }
 
         private void CreateScheduleControlProcessRequest(ref TechnicalServiceRequest technicalServiceRequest)
         {
-            var scheduledDate = technicalServiceRequest.TechnicalServiceRequestScheduledDate;
+            var scheduledControlProcessDetail = technicalServiceRequest.ScheduledControlProcessDetail;
+            var scheduledDate = scheduledControlProcessDetail.TechnicalServiceRequestScheduledDate;
             if (!scheduledDate.HasValue)
             {
                 throw new Exception("Schedule is not defined.");
@@ -1351,24 +1642,31 @@ namespace TROUBLESHOOTING_REPAIR_SERVICE_REQUEST_SYSTEM.Controllers
                 throw new Exception("Please select a valid service type.");
             }
 
-            var newScheduledDate = technicalServiceRequest.TechnicalServiceRequestScheduledDate;
-            var newStartTime = technicalServiceRequest.TechnicalServiceRequestScheduledStartTime;
-            var newEndTime = technicalServiceRequest.TechnicalServiceRequestScheduledEndTime;
+            var newScheduledDate = scheduledControlProcessDetail.TechnicalServiceRequestScheduledDate;
+            var newStartTime = scheduledControlProcessDetail.TechnicalServiceRequestScheduledStartTime;
+            var newEndTime = scheduledControlProcessDetail.TechnicalServiceRequestScheduledEndTime;
+            var inactiveStatusIds = new int[]
+            {
+                (int)TechnicalServiceRequestStatusEnum.RESOLVED,
+                (int)TechnicalServiceRequestStatusEnum.CANCELLED,
+                (int)TechnicalServiceRequestStatusEnum.CLOSED
+            };
 
             // Get all schedules on the same day
             var sameDaySchedules = _db.TechnicalServiceRequests
                 .Where(i =>
-                    DbFunctions.TruncateTime(i.TechnicalServiceRequestScheduledDate) == DbFunctions.TruncateTime(newScheduledDate) &&
-                    i.TechnicalServiceRequestStatusId != (int)TechnicalServiceRequestStatusEnum.CANCELLED
+                    DbFunctions.TruncateTime(i.ScheduledControlProcessDetail.TechnicalServiceRequestScheduledDate) == DbFunctions.TruncateTime(newScheduledDate) &&
+                    i.TechnicalServiceRequestStatusId.HasValue &&
+                    !inactiveStatusIds.Contains(i.TechnicalServiceRequestStatusId.Value)
                 )
                 .ToList();
 
             // Check whether the schedule is not conflictiing with other requests
             var isConflicting = sameDaySchedules.Any(i =>
-                (newStartTime >= i.TechnicalServiceRequestScheduledStartTime && newStartTime < i.TechnicalServiceRequestScheduledEndTime) ||
-                (newEndTime > i.TechnicalServiceRequestScheduledStartTime && newEndTime <= i.TechnicalServiceRequestScheduledEndTime) ||
-                (newStartTime <= i.TechnicalServiceRequestScheduledStartTime && newEndTime >= i.TechnicalServiceRequestScheduledEndTime)
-            );
+            (newStartTime >= i.ScheduledControlProcessDetail.TechnicalServiceRequestScheduledStartTime && newStartTime < i.ScheduledControlProcessDetail.TechnicalServiceRequestScheduledEndTime) ||
+            (newEndTime > i.ScheduledControlProcessDetail.TechnicalServiceRequestScheduledStartTime && newEndTime <= i.ScheduledControlProcessDetail.TechnicalServiceRequestScheduledEndTime) ||
+            (newStartTime <= i.ScheduledControlProcessDetail.TechnicalServiceRequestScheduledStartTime && newEndTime >= i.ScheduledControlProcessDetail.TechnicalServiceRequestScheduledEndTime)
+        );
             if (isConflicting == true)
             {
                 throw new Exception("Selected Date and Time is already reserved. Please select another schedule.");
@@ -1378,21 +1676,27 @@ namespace TROUBLESHOOTING_REPAIR_SERVICE_REQUEST_SYSTEM.Controllers
             switch (serviceType)
             {
                 case (int)TechnicalServiceTypeEnum.ZOOM_WEBEX_LINK:
-                    if (sameDaySchedules.Count(i => i.TechnicalServiceTypeId == serviceType) >=
+                    if (sameDaySchedules.Count(i =>
+                        i.TechnicalServiceTypeId == serviceType &&
+                        i.TechnicalServiceRequestStatusId == (int)TechnicalServiceRequestStatusEnum.PENDING) >=
                         TechnicalServiceRequestScheduleLimitEnum.ZOOM_WEBEX_LINK)
                     {
                         throw new Exception("The maximum number of requests for Zoom/Webex Link on the selected date has been reached. Please select another schedule.");
                     }
                     break;
                 case (int)TechnicalServiceTypeEnum.LIVESTREAM_SETUP:
-                    if (sameDaySchedules.Count(i => i.TechnicalServiceTypeId == serviceType) >=
+                    if (sameDaySchedules.Count(i =>
+                        i.TechnicalServiceTypeId == serviceType &&
+                        i.TechnicalServiceRequestStatusId == (int)TechnicalServiceRequestStatusEnum.PENDING) >=
                         TechnicalServiceRequestScheduleLimitEnum.LIVESTREAM_SETUP)
                     {
                         throw new Exception("The maximum number of requests for Livestream Setup on the selected date has been reached. Please select another schedule.");
                     }
                     break;
                 case (int)TechnicalServiceTypeEnum.AUDIO_VISUAL_SETUP:
-                    if (sameDaySchedules.Count(i => i.TechnicalServiceTypeId == serviceType) >=
+                    if (sameDaySchedules.Count(i =>
+                        i.TechnicalServiceTypeId == serviceType &&
+                        i.TechnicalServiceRequestStatusId == (int)TechnicalServiceRequestStatusEnum.PENDING) >=
                         TechnicalServiceRequestScheduleLimitEnum.AUDIO_VISUAL_SETUP)
                     {
                         throw new Exception("The maximum number of requests for Audio Visual Setup on the selected date has been reached. Please select another schedule.");
@@ -1414,14 +1718,17 @@ namespace TROUBLESHOOTING_REPAIR_SERVICE_REQUEST_SYSTEM.Controllers
                 {
                     ActionTakenByRegistrationId = assignedTechnician,
                     ActionTaken = "",
-                    DateAction = technicalServiceRequest.TechnicalServiceRequestScheduledDate.Value
-                        .Add(technicalServiceRequest.TechnicalServiceRequestScheduledStartTime.Value),
+                    DateAction = DateTime.Now,
                     UpdatedAt = DateTime.Now,
                     TechnicalServiceRequestStatusId = (int)TechnicalServiceRequestStatusEnum.PENDING
                 }
             };
             technicalServiceRequest.TechnicalServiceRequestStatusId =
                 (int)TechnicalServiceRequestStatusEnum.PENDING;
+
+            // Invalidate equipment fields
+            technicalServiceRequest.TechnicalServiceRequestEquipmentId = null;
+            technicalServiceRequest.TechnicalServiceRequestEquipment = null;
         }
 
         private void CreateNonAssistedRequest(ref TechnicalServiceRequest technicalServiceRequest)
@@ -1430,10 +1737,13 @@ namespace TROUBLESHOOTING_REPAIR_SERVICE_REQUEST_SYSTEM.Controllers
             technicalServiceRequest.TechnicalServiceRequestStatusId =
                 (int)TechnicalServiceRequestStatusEnum.ONGOING;
 
+            // Invalidate equipment fields
+            technicalServiceRequest.TechnicalServiceRequestEquipmentId = null;
+            technicalServiceRequest.TechnicalServiceRequestEquipment = null;
+
             // Invalidate schedule fields
-            technicalServiceRequest.TechnicalServiceRequestScheduledDate = null;
-            technicalServiceRequest.TechnicalServiceRequestScheduledStartTime = null;
-            technicalServiceRequest.TechnicalServiceRequestScheduledEndTime = null;
+            technicalServiceRequest.ScheduledControlProcessDetailId = null;
+            technicalServiceRequest.ScheduledControlProcessDetail = null;
         }
 
         #endregion

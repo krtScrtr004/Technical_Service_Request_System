@@ -50,7 +50,6 @@
             @using (Html.BeginForm("Login", "Account", new { ReturnUrl = ViewBag.ReturnUrl }, FormMethod.Post))
             {
                 @Html.AntiForgeryToken()
-                @Html.ValidationSummary(true, "", new { @class = "text-danger form- mb-3" })
 
                 <div class="form-group-sm">
                     @Html.ValidationMessageFor(m => m.Email, "", new { @class = "text-danger" })
@@ -70,6 +69,14 @@
             }
         </section>
     </div>
+
+    @* jQuery and Bootstrap JS *@
+    @Scripts.Render("~/bundles/jquery")
+    @Scripts.Render("~/bundles/bootstrap")
+
+    @* SweetAlert2 *@
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+    @Html.Partial("~/Views/Shared/_AlertModal.cshtml")
 
     <!-- Load particles.js -->
     <script src="https://cdn.jsdelivr.net/npm/particles.js@2.0.0/particles.min.js" defer></script>
