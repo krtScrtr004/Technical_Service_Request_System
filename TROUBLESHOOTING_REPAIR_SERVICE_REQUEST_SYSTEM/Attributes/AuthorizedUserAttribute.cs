@@ -54,7 +54,7 @@ namespace TROUBLESHOOTING_REPAIR_SERVICE_REQUEST_SYSTEM.Attributes
             using (var db = new ApplicationDbContext())
             {
                 var currentUser = new UserSessionProvider(db).GetCurrentUserSession(httpContext.User.Identity.Name);
-                if (currentUser == null || !AllowedPrivileges.Any(p => currentUser.PrivilegeIds.Contains(p)))
+                if (currentUser == null || !AllowedPrivileges.Contains(currentUser.RoleId))
                 {
                     return false;
                 }

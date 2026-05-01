@@ -21,24 +21,14 @@ namespace TROUBLESHOOTING_REPAIR_SERVICE_REQUEST_SYSTEM.Models
         public string Email { get; set; }
         public string ContactNumber { get; set; }
         public string Code { get; set; }
-        public bool UserProfilePicture { get; set; }
 
         public string Office { get; set; }
         public string Position { get; set; }
 
-        public bool IsVerified { get; set; }
+        // TODO: Remove IsDenied - use IsApproved with null value to indicate pending status
         public bool IsApproved { get; set; }
         public bool IsDenied { get; set; }
         public DateTime? RequestDate { get; set; }
-
-        public bool AccountInformation { get; set; }
-        public bool UserPrivilegeInformation { get; set; }
-        public bool EmployeeInformation { get; set; }
-    }
-
-    public class RegistrationRequestIndexViewModel
-    {
-        public List<RegistrationRequest> RegistrationRequests { get; set; }
     }
 
     public class RegistrationRequestCreateViewModel

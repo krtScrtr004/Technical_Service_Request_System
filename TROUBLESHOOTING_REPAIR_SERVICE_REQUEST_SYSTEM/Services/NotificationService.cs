@@ -191,24 +191,24 @@ namespace TROUBLESHOOTING_REPAIR_SERVICE_REQUEST_SYSTEM.Services
 
         public string BuildRecipientMessageFromRequestStatus(int statusId, string referenceCode, string technicianFirstName)
         {
-            var statusName = TechnicalServiceRequestStatusEnum.DisplayName(statusId).ToLowerInvariant();
+            var statusName = RequestStatusEnum.DisplayName(statusId).ToLowerInvariant();
             var reference = string.IsNullOrWhiteSpace(referenceCode) ? "your request" : ("request " + referenceCode);
 
             switch (statusId)
             {
-                case TechnicalServiceRequestStatusEnum.PENDING:
+                case RequestStatusEnum.PENDING:
                     return "Your " + reference + " is pending. We will assign a technician soon.";
 
-                case TechnicalServiceRequestStatusEnum.ONGOING:
+                case RequestStatusEnum.ONGOING:
                     return "Your " + reference + " is now in progress. Assigned technician: " + technicianFirstName + ".";
 
-                case TechnicalServiceRequestStatusEnum.RESOLVED:
+                case RequestStatusEnum.RESOLVED:
                     return "Your " + reference + " has been resolved. Please verify the solution.";
 
-                case TechnicalServiceRequestStatusEnum.CLOSED:
+                case RequestStatusEnum.CLOSED:
                     return "Your " + reference + " is now closed.";
 
-                case TechnicalServiceRequestStatusEnum.CANCELLED:
+                case RequestStatusEnum.CANCELLED:
                     return "Your " + reference + " has been cancelled. Please contact support if this is unexpected.";
 
                 default:
@@ -218,7 +218,7 @@ namespace TROUBLESHOOTING_REPAIR_SERVICE_REQUEST_SYSTEM.Services
 
         public string BuildRecipientMessageFromRequestSeverity(int severityId, string referenceCode, int? oldSeverityId = null)
         {
-            var severityName = TechnicalServicRequestSeverityEnum.DisplayName(severityId).ToLowerInvariant();
+            var severityName = RequestSeverityEnum.DisplayName(severityId).ToLowerInvariant();
 
             var isLowerSeverity = oldSeverityId.HasValue && severityId < oldSeverityId.Value;
             if (oldSeverityId.HasValue)

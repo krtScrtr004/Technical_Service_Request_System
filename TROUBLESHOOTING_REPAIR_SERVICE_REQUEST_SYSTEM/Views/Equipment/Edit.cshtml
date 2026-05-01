@@ -1,6 +1,12 @@
 ﻿@model TROUBLESHOOTING_REPAIR_SERVICE_REQUEST_SYSTEM.Models.EquipmentFormViewModel
+@using TROUBLESHOOTING_REPAIR_SERVICE_REQUEST_SYSTEM.Services
 
-@{ ViewBag.Title = "Edit"; }
+@{ 
+    ViewBag.Title = "Edit";
+
+    var assetTag = (new EquipmentService()).NormalizeAssetTag(Model.AssetTag);
+    var modelName = Model.Model.Trim().ToUpperInvariant();
+}
 
 @section Styles {
     <link rel="stylesheet" href="~/Content/App/Equipment/CreateEditForm.css" type="text/css" />
@@ -13,7 +19,7 @@
     <section class="panel panel-default equipment-form-panel fade-in flex-col">
         <section class="panel-heading flex-child-center-h">
             <h4 class="panel-title bold-text">
-                Edit <em>@(Model.AssetTag) - @(Model.EquipmentModel)</em> Information
+                Edit <em>@(assetTag) - @(modelName)</em> Information
             </h4>
         </section>
 

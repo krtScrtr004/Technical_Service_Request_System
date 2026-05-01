@@ -94,7 +94,7 @@ namespace TROUBLESHOOTING_REPAIR_SERVICE_REQUEST_SYSTEM.Controllers
                      *  - not expired
                      */
                     var currentUser = db.Registrations
-                        .Include(r => r.UserPrivileges)
+                        .Include(r => r.Role)
                         .Where(r => r.IsActive && r.Email == model.Email)
                         .FirstOrDefault();
                     if (currentUser == null)
@@ -132,10 +132,7 @@ namespace TROUBLESHOOTING_REPAIR_SERVICE_REQUEST_SYSTEM.Controllers
                                     contactNumber: currentUser.ContactNumber,
                                     office: currentUser.Office,
                                     position: currentUser.Position,
-                                    privilegeIds: currentUser.UserPrivileges
-                                        .Where(p => p.PrivilegeId.HasValue)
-                                        .Select(p => p.PrivilegeId.Value)
-                                        .ToArray()
+                                    roleId: currentUser.RoleId
                                 );
 
                                 return RedirectToLocal(returnUrl);

@@ -62,13 +62,13 @@
                 className: "asset-tag"
             },
             {
-                data: "EquipmentModel",
-                name: "EquipmentModel",
+                data: "Model",
+                name: "Model",
                 className: "model"
             },
             {
-                data: "EquipmentType",
-                name: "EquipmentType",
+                data: "Type",
+                name: "Type",
                 className: "type"
             },
             {
@@ -76,7 +76,7 @@
                 name: null,
                 className: "status",
                 render: function (data, type, row) {
-                    return buildStatusLabel(row["EquipmentStatus"])
+                    return buildStatusLabel(row["Status"])
                 }
             },
             {

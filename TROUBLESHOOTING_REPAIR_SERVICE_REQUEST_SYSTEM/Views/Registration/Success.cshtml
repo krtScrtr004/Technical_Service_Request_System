@@ -1,6 +1,25 @@
 ﻿@model TROUBLESHOOTING_REPAIR_SERVICE_REQUEST_SYSTEM.Models.RegistrationCreateViewModel
 
-@{ ViewBag.Title = "Registration Success"; }
+@{ 
+    ViewBag.Title = "Registration Success";
+
+    var id = Model.Registration.Id;
+    var fullName = Model.Registration.FirstName.Trim() + " " +
+        Model.Registration.MiddleName?.Trim() + " " +
+        Model.Registration.LastName.Trim() + " " +
+        Model.Registration.ExtensionName?.Trim();
+    var email = Model.Registration.Email.Trim();
+    var roleName = Model.Registration.Role.Name.Trim();
+    var office = Model.Registration.Office.Trim().ToUpperInvariant();
+    var position = Model.Registration.Position.Trim().ToUpperInvariant();
+    var registrationDate = Model.Registration.RegistrationDate.HasValue
+        ? Model.Registration.RegistrationDate.Value.ToString("MMMM dd, yyyy")
+        : "N/A";
+    var expiryDate = Model.Registration.ExpiryDate.HasValue
+        ? Model.Registration.ExpiryDate.Value.ToString("MMMM dd, yyyy")
+        : "N/A";
+    var code = Model.Registration.Code.Trim();
+}
 
 @section Styles
 {
@@ -35,58 +54,48 @@
                         @* Full Name *@
                         <tr>
                             <th>Full Name</th>
-                            <td colspan="3">@Model.Registration.FirstName @Model.Registration.MiddleName @Model.Registration.LastName @Model.Registration.ExtensionName</td>
+                            <td colspan="3">@fullName</td>
                         </tr>
 
                         <tr>
                             @* Email Address *@
                             <th>Email Address</th>
-                            <td>@Model.Registration.Email</td>
+                            <td>@email</td>
 
                             @* User Type *@
                             <th>User Type</th>
-                            <td>@Model.Registration.AccountType</td>
+                            <td>@roleName</td>
                         </tr>
 
                         <tr>
                             @* Office *@
                             <th>Office</th>
-                            <td>@Model.Registration.Office</td>
+                            <td>@office</td>
 
                             @* Position *@
                             <th>Position</th>
-                            <td>@Model.Registration.Position</td>
+                            <td>@position</td>
                         </tr>
 
                         <tr>
                             @* Registration Date *@
                             <th>Registration Date</th>
                             <td>
-                                @(Model.Registration.RegistrationDate.HasValue
-                                    ? Model.Registration.RegistrationDate.Value.ToString("MMMM dd, yyyy")
-                                    : "-")
+                                @registrationDate
                             </td>
 
-                            @* Username *@
-                            <th>User Name</th>
+                            @* Expiry Date *@
+                            <th>Expiry Date</th>
                             <td>
-                                <span class="label label-danger credential-chip">@Model.Registration.UserName</span>
+                                @expiryDate
                             </td>
                         </tr>
 
                         <tr>
-                            @* Expiry Date *@
-                            <th>Expiry Date</th>
-                            <td>
-                                @(Model.Registration.ExpiryDate.HasValue
-                                            ? Model.Registration.ExpiryDate.Value.ToString("MMMM dd, yyyy")
-                                            : "-")
-                            </td>
-
                             @* Default Password *@
                             <th>Default Password</th>
-                            <td>
-                                <span class="label label-danger credential-chip">@Model.Registration.Code</span>
+                            <td colspan="3">
+                                <span class="label label-danger credential-chip">@code</span>
                             </td>
                         </tr>
                     </tbody>
@@ -98,7 +107,7 @@
         @* Footer *@
         <section class="panel-footer success-footer-actions">
             <div class="text-right">
-                <a href="@Url.Action("Details", "Registration", new { id = Model.Registration.Id })" class="btn btn-primary">
+                <a href="@Url.Action("Details", "Registration", new { id = id })" class="btn btn-primary">
                     Done
                 </a>
             </div>

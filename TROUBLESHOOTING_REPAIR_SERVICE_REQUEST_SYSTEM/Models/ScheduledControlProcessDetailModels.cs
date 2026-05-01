@@ -11,8 +11,8 @@ namespace TROUBLESHOOTING_REPAIR_SERVICE_REQUEST_SYSTEM.Models
         public int Id { get; set; }
 
         [Index]
-        public DateTime? TechnicalServiceRequestScheduledDate { get; set; }
-        public TimeSpan? TechnicalServiceRequestScheduledStartTime { get; set; }
-        public TimeSpan? TechnicalServiceRequestScheduledEndTime { get; set; }
+        public DateTime? ScheduledDate { get; set; }
+        public TimeSpan? ScheduledStartTime { get; set; }
+        public TimeSpan? ScheduledEndTime { get; set; }
     }
 }

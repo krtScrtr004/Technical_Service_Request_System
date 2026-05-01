@@ -1,13 +1,20 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Globalization;
 using System.Linq;
 using System.Web;
 using System.Web.ModelBinding;
+using System.Web.SessionState;
 
 namespace TROUBLESHOOTING_REPAIR_SERVICE_REQUEST_SYSTEM.Utilities
 {
     public class GeneralUtilities
     {
+        public static string ToTitleCaseString(string stringInput)
+        {
+            return CultureInfo.CurrentCulture.TextInfo.ToTitleCase(stringInput);
+        }
+
         public static string DateToWord(DateTime date)
         {
             return date.ToString("MMMM dd, yyyy");

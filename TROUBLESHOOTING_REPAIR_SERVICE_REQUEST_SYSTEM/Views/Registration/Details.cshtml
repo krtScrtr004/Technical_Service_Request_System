@@ -1,25 +1,50 @@
 ﻿@model TROUBLESHOOTING_REPAIR_SERVICE_REQUEST_SYSTEM.Models.RegistrationDetailsViewModel
 @using TROUBLESHOOTING_REPAIR_SERVICE_REQUEST_SYSTEM.Enumerables
 @using TROUBLESHOOTING_REPAIR_SERVICE_REQUEST_SYSTEM.Core
+@using TROUBLESHOOTING_REPAIR_SERVICE_REQUEST_SYSTEM.Utilities
 
 @{
     ViewBag.Title = "Details";
 
     var currentUser = ViewBag.CurrentUser as UserSession;
     var isCurrentUser = currentUser.Id == Model.User.Id ? true : false;
-    var currentUserPrivilegeIds = currentUser.PrivilegeIds;
 
-    var isAdmin = AccountTypeEnum.IsAdmin(currentUserPrivilegeIds);
-    var isIT = AccountTypeEnum.IsIT(currentUserPrivilegeIds);
+    var isAdmin = AccountTypeEnum.IsAdmin(currentUser.RoleId);
+    var isIT = AccountTypeEnum.IsIT(currentUser.RoleId);
 
-    var nameParts = new[]
-    {
-        Model.User.FirstName,
-        Model.User.MiddleName,
-        Model.User.LastName,
-        Model.User.ExtensionName
-    }.Where(part => !string.IsNullOrWhiteSpace(part));
-    var fullName = string.Join(" ", nameParts).Trim();
+    // User (Target) Information
+    var id = Model.User.Id.ToString();
+    var firstName = Model.User.FirstName.Trim();
+    var lastName = Model.User.LastName.Trim();
+    var middleName = !string.IsNullOrEmpty(Model.User.MiddleName)
+        ? Model.User.MiddleName.Trim()
+        : "N/A";
+    var extensionName = !string.IsNullOrEmpty(Model.User.ExtensionName)
+        ? Model.User.ExtensionName.Trim()
+        : "N/A";
+    var email = Model.User.Email.Trim();
+    var contactNumber = Model.User.ContactNumber.Trim();
+    var office = !string.IsNullOrWhiteSpace(Model.User.Office)
+        ? Model.User.Office
+        : "N/A";
+    var position = !string.IsNullOrWhiteSpace(Model.User.Position) 
+        ? Model.User.Position 
+        : "N/A";
+    var registrationDate = Model.UserRegistrationRequest.RequestDate.HasValue
+        ? Model.UserRegistrationRequest.RequestDate.Value.ToString("MMMM dd, yyyy hh:mm tt")
+        : "N/A";
+    var expiryDate = Model.User.ExpiryDate.HasValue
+        ? Model.User.ExpiryDate.Value.ToString("MMMM dd, yyyy hh:mm tt")
+        : "N/A";
+    var isUserIT = AccountTypeEnum.IsIT(Model.User.RoleId);
+    var userRoleName = Model.User.Role.Name;
+
+    var fullName = GeneralUtilities.CreateFullName(
+        firstName,
+        lastName,
+        middleName != "N/A" ? middleName : null,
+        extensionName != "N/A" ? middleName : null
+    );
 
     var initials = string.Join("", new[]
     {
@@ -28,7 +53,6 @@
     }
     .Where(part => !string.IsNullOrWhiteSpace(part))
     .Select(part => part.Trim().Substring(0, 1).ToUpperInvariant()));
-
     if (string.IsNullOrWhiteSpace(initials))
     {
         initials = "NA";
@@ -48,6 +72,11 @@
     {
         statusName = "DEACTIVATED";
     }
+    var statusNameClass = statusName == "ACTIVE"
+        ? "status-chip-active"
+        : statusName == "DENIED"
+            ? "status-chip-danger"
+            : "status-chip-muted";
 }
 
 @section Styles {
@@ -65,10 +94,10 @@
                 <div>
                     <div class="profile-title-row flex-row flex-child-center-h flex-wrap">
                         <h4 class="profile-name">@fullName</h4>
-                        <span class="registration-id-chip light-text">ID: @Model.User.Id</span>
+                        <span class="registration-id-chip light-text">ID: @id</span>
                     </div>
 
-                    <span class="status-chip @(statusName == "ACTIVE" ? "status-chip-active" : statusName == "DENIED" ? "status-chip-danger" : "status-chip-muted")">
+                    <span class="status-chip @statusNameClass">
                         <span class="status-dot"></span>
                         @statusName
                     </span>
@@ -90,42 +119,42 @@
                 <div class="detail-grid detail-grid-3">
                     <div class="detail-item">
                         <p class="detail-label">FIRST NAME</p>
-                        <p class="detail-value">@Model.User.FirstName</p>
+                        <p class="detail-value">@firstName</p>
                     </div>
 
                     <div class="detail-item">
                         <p class="detail-label">MIDDLE NAME</p>
-                        <p class="detail-value">@(!string.IsNullOrWhiteSpace(Model.User.MiddleName) ? Model.User.MiddleName : "N/A")</p>
+                        <p class="detail-value">@middleName</p>
                     </div>
 
                     <div class="detail-item">
                         <p class="detail-label">LAST NAME</p>
-                        <p class="detail-value">@Model.User.LastName</p>
+                        <p class="detail-value">@lastName</p>
                     </div>
 
                     <div class="detail-item">
                         <p class="detail-label"><i class="glyphicon glyphicon-envelope"></i> EMAIL ADDRESS</p>
-                        <p class="detail-value">@Model.User.Email</p>
+                        <p class="detail-value">@email</p>
                     </div>
 
                     <div class="detail-item">
                         <p class="detail-label"><i class="glyphicon glyphicon-earphone"></i> CONTACT NUMBER</p>
-                        <p class="detail-value">@Model.User.ContactNumber</p>
+                        <p class="detail-value">@contactNumber</p>
                     </div>
 
                     <div class="detail-item">
                         <p class="detail-label">EXTENSION NAME</p>
-                        <p class="detail-value">@(!string.IsNullOrWhiteSpace(Model.User.ExtensionName) ? Model.User.ExtensionName : "N/A")</p>
+                        <p class="detail-value">@extensionName</p>
                     </div>
 
                     <div class="detail-item">
                         <p class="detail-label">OFFICE</p>
-                        <p class="detail-value">@(!string.IsNullOrWhiteSpace(Model.User.Office) ? Model.User.Office : "N/A")</p>
+                        <p class="detail-value">@office</p>
                     </div>
 
                     <div class="detail-item">
                         <p class="detail-label">POSITION</p>
-                        <p class="detail-value">@(!string.IsNullOrWhiteSpace(Model.User.Position) ? Model.User.Position : "N/A")</p>
+                        <p class="detail-value">@position</p>
                     </div>
                 </div>
             </section>
@@ -140,17 +169,7 @@
                 </div>
 
                 <div class="privileges-wrap flex-row flex-wrap">
-                    @if (Model.UserPrivileges != null && Model.UserPrivileges.Any())
-                    {
-                        foreach (var privilege in Model.UserPrivileges)
-                        {
-                            <span class="privilege-pill bold-text">@privilege.Privilege.PrivilegeName</span>
-                        }
-                    }
-                    else
-                    {
-                        <span class="detail-value">N/A</span>
-                    }
+                    <span class="privilege-pill bold-text">@userRoleName</span>
                 </div>
             </section>
 
@@ -167,18 +186,14 @@
                     <div class="detail-item">
                         <p class="detail-label"><i class="glyphicon glyphicon-calendar"></i> REGISTRATION DATE</p>
                         <p class="detail-value">
-                            @(Model.UserRegistrationRequest.RequestDate.HasValue
-                                ? Model.UserRegistrationRequest.RequestDate.Value.ToString("MMMM dd, yyyy hh:mm tt")
-                                : "N/A")
+                            @registrationDate
                         </p>
                     </div>
 
                     <div class="detail-item">
                         <p class="detail-label"><i class="glyphicon glyphicon-time"></i> EXPIRY DATE</p>
                         <p class="detail-value">
-                            @(Model.User.ExpiryDate.HasValue
-                                ? Model.User.ExpiryDate.Value.ToString("MMMM dd, yyyy hh:mm tt")
-                                : "N/A")
+                            @expiryDate
                         </p>
                     </div>
                 </div>
@@ -191,13 +206,9 @@
                 <p class="text-primary options-label light-text text-right bold-text">More Options</p>
 
                 <div class="buttons-container flex-row flex-child-end-v">
-                    @if (AccountTypeEnum.IsIT(@Model.UserPrivileges
-                            .Where(p => p.PrivilegeId.HasValue)
-                            .Select(p => p.PrivilegeId.Value)
-                            .ToArray())
-                        )
+                    @if (isUserIT)
                     {
-                        <a id="block_dates_button" href="@Url.Action("Manage", "ITAvailability", new { id = Model.User.Id })" class="btn btn-warning">
+                        <a id="block_dates_button" href="@Url.Action("Manage", "ITAvailability", new { id = id })" class="btn btn-warning">
                             <i class="glyphicon glyphicon-calendar"></i>
                             @(isIT ? "MANAGE" : "") AVAILABILITY
                         </a>
@@ -212,7 +223,7 @@
                             MANAGE PRIVILEGES
                         </button>
 
-                        <a id="deactivate_user_button" href="@Url.Action("Deactivate", "Registration", new { id = Model.User.Id })" class="btn btn-danger">
+                        <a id="deactivate_user_button" href="@Url.Action("Deactivate", "Registration", new { id = id })" class="btn btn-danger">
                             <i class="glyphicon glyphicon-ban-circle"></i>
                             DEACTIVATE USER
                         </a>

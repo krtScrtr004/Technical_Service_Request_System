@@ -1,0 +1,284 @@
+﻿@model TROUBLESHOOTING_REPAIR_SERVICE_REQUEST_SYSTEM.Models.RequestCreateViewModel
+@using TROUBLESHOOTING_REPAIR_SERVICE_REQUEST_SYSTEM.Models
+@using TROUBLESHOOTING_REPAIR_SERVICE_REQUEST_SYSTEM.Enumerables
+@using TROUBLESHOOTING_REPAIR_SERVICE_REQUEST_SYSTEM.Core
+
+@{
+
+    ViewBag.Title = "Create";
+
+    var currentUser = ViewBag.CurrentUser as UserSession;
+    var isMySubmission = Model.ClientEmailAddress == currentUser.Email ? true : false;
+    var isStandardUser = AccountTypeEnum.IsStandard(currentUser.RoleId);
+}
+
+@section Styles {
+    <link rel="stylesheet" href="~/Content/App/Request/Create.css" />
+}
+
+<section class="tsr-create-panel-container center-child">
+
+    <section class="panel panel-default tsr-create-panel fade-in">
+        <section class="panel-heading flex-child-center-h">
+            <h4 class="panel-title bold-text">
+                Request New Technical Service Assistance
+            </h4>
+        </section>
+
+        <section class="panel-body pt-0">
+            @using (Html.BeginForm())
+            {
+                @Html.AntiForgeryToken()
+                @Html.HiddenFor(model => model.Id)
+
+                <section class="tsr-form-section relative">
+                    <h5 class="text-primary tsr-section-title bold-text">
+                        <i class="glyphicon glyphicon-user"></i>
+                        CLIENT INFORMATION
+                    </h5>
+
+                    <div class="row flex-child-center-h flex-wrap">
+                        @Html.HiddenFor(model => model.ClientId)
+
+                        @* Last Name *@
+                        <div class="col-sm-3 form-group relative">
+                            @Html.LabelFor(model => model.ClientLastName)
+                            @Html.EditorFor(model => model.ClientLastName, new { htmlAttributes = new { @class = "form-control text-uppercase", @readonly = "readonly" } })
+                            @Html.ValidationMessageFor(model => model.ClientLastName, "", new { @class = "text-danger" })
+                        </div>
+
+                        @* First Name *@
+                        <div class="col-sm-3 form-group relative">
+                            @Html.LabelFor(model => model.ClientFirstName)
+                            @Html.EditorFor(model => model.ClientFirstName, new { htmlAttributes = new { @class = "form-control text-uppercase", @readonly = "readonly" } })
+                            @Html.ValidationMessageFor(model => model.ClientFirstName, "", new { @class = "text-danger" })
+                        </div>
+
+                        @* Middle Name *@
+                        <div class="col-sm-3 form-group relative">
+                            @Html.LabelFor(model => model.ClientMiddleName)
+                            @Html.EditorFor(model => model.ClientMiddleName, new { htmlAttributes = new { @class = "form-control text-uppercase", @readonly = "readonly" } })
+                            @Html.ValidationMessageFor(model => model.ClientMiddleName, "", new { @class = "text-danger" })
+                        </div>
+
+                        @* Extension Name *@
+                        <div class="col-sm-3 form-group relative">
+                            @Html.LabelFor(model => model.ClientExtensionName)
+                            @Html.EditorFor(model => model.ClientExtensionName, new { htmlAttributes = new { @class = "form-control text-uppercase", @readonly = "readonly" } })
+                            @Html.ValidationMessageFor(model => model.ClientExtensionName, "", new { @class = "text-danger" })
+                        </div>
+                    </div>
+
+                    <div class="row flex-child-center-h flex-wrap">
+                        @* Office *@
+                        <div class="col-sm-6 form-group relative">
+                            @Html.LabelFor(model => model.ClientOffice)
+                            @Html.EditorFor(model => model.ClientOffice, new { htmlAttributes = new { @class = "form-control text-uppercase", @readonly = "readonly" } })
+                            @Html.ValidationMessageFor(model => model.ClientOffice, "", new { @class = "text-danger" })
+                        </div>
+
+                        @* Position *@
+                        <div class="col-sm-6 form-group relative">
+                            @Html.LabelFor(model => model.ClientPosition)
+                            @Html.EditorFor(model => model.ClientPosition, new { htmlAttributes = new { @class = "form-control text-uppercase", @readonly = "readonly" } })
+                            @Html.ValidationMessageFor(model => model.ClientPosition, "", new { @class = "text-danger" })
+                        </div>
+                    </div>
+
+                    <div class="row flex-child-center-h flex-wrap">
+                        @* Contact Number *@
+                        <div class="col-sm-6 form-group relative">
+                            @Html.LabelFor(model => model.ClientContactNumber)
+                            @Html.EditorFor(model => model.ClientContactNumber, new { htmlAttributes = new { @class = "form-control", @readonly = "readonly" } })
+                            @Html.ValidationMessageFor(model => model.ClientContactNumber, "", new { @class = "text-danger" })
+                        </div>
+
+                        @* Email *@
+                        <div class="col-sm-6 form-group relative">
+                            @Html.LabelFor(model => model.ClientEmailAddress)
+                            @Html.EditorFor(model => model.ClientEmailAddress, new { htmlAttributes = new { @class = "form-control", @readonly = "readonly" } })
+                            @Html.ValidationMessageFor(model => model.ClientEmailAddress, "", new { @class = "text-danger" })
+                        </div>
+                    </div>
+                </section>
+
+                <section class="tsr-form-section relative">
+                    <h5 class="text-primary tsr-section-title bold-text">
+                        <i class="glyphicon glyphicon-wrench"></i>
+                        TECHNICAL SERVICES
+                    </h5>
+
+                    <div class="row flex-child-center-h flex-wrap">
+                        @* Service Type *@
+                        <div class="col-sm-4 form-group relative">
+                            @Html.LabelFor(model => model.Types)
+                            @Html.DropDownListFor(
+                                model => model.TypeId,
+                                Model.Types,
+                                "-- SELECT SERVICE TYPE --",
+                                new { id = "technical_service_type_select", @class = "form-control" }
+                            )
+                            @Html.ValidationMessageFor(model => model.TypeId, "", new { @class = "text-danger" })
+                        </div>
+
+                        @* Severity *@
+                        <div class="col-sm-4 form-group relative">
+                            @Html.LabelFor(model => model.Severities) <span><em class="light-text">(Optional)</em></span>
+
+                            @Html.DropDownListFor(
+                             model => model.SeverityId,
+                             Model.Severities,
+                             "-- SELECT SEVERITY --",
+                             new { id = "technical_service_request_severity_select", @class = "form-control" }
+                            )
+                            @Html.ValidationMessageFor(model => model.SeverityId, "", new { @class = "text-danger" })
+                        </div>
+
+                        @* Other *@
+                        <div class="col-sm-4 form-group relative">
+                            @Html.LabelFor(model => model.Others)
+                            @Html.EditorFor(model => model.Others, new { htmlAttributes = new { id = "other_service_input", @class = "form-control text-uppercase" } })
+                            @Html.ValidationMessageFor(model => model.Others, "", new { @class = "text-danger" })
+                        </div>
+                    </div>
+
+                    @{
+                        var equipmentInputsClass = Model.TypeId.GetValueOrDefault() == (int)RequestTypeEnum.EQUIPMENT_REPAIR_TROUBLESHOOTING
+                            ? "flex-row flex-wrap"
+                            : "no-display";
+                    }
+
+                    <div class="equipment-inputs row @equipmentInputsClass">
+                        <p class="text-primary bold-text col-sm-12">Equipment Information <em class="light-text">(Optional)</em></p>
+
+                        @* Equipnent Asset Tag *@
+                        <div class="col-sm-4 form-group relative">
+                            @Html.LabelFor(model => model.EquipmentAssetTag)
+
+                            <div class="asset-tag-wrapper">
+                                @Html.EditorFor(
+                                    model => model.EquipmentAssetTag,
+                                    new { htmlAttributes = new { @class = "form-control text-uppercase", id = "asset-tag-input", autocomplete = "off" } }
+                                )
+
+                                <div id="asset-tag-suggestions" class="asset-tag-suggestions" aria-hidden="true">
+                                    <!-- Suggestion items will be injected here at runtime -->
+                                </div>
+                            </div>
+
+                            @Html.ValidationMessageFor(model => model.EquipmentAssetTag, "", new { @class = "text-danger" })
+                        </div>
+
+                        @* Equipment Model *@
+                        <div class="col-sm-4 form-group relative">
+                            @Html.LabelFor(model => model.EquipmentModel)
+                            @Html.EditorFor(model => model.EquipmentModel, new { htmlAttributes = new { @class = "form-control text-uppercase" } })
+                            @Html.ValidationMessageFor(model => model.EquipmentModel, "", new { @class = "text-danger" })
+                        </div>
+
+                        @* Equipment Type *@
+                        <div class="col-sm-4 form-group relative">
+                            @Html.LabelFor(model => model.EquipmentTypes)
+                            @Html.DropDownListFor(
+                                model => model.EquipmentTypeId,
+                                Model.EquipmentTypes,
+                                "-- SELECT EQUIPMENT TYPE --",
+                                new { id = "technical_service_request_equipment_type_select", @class = "form-control" }
+                            )
+                            @Html.ValidationMessageFor(model => model.EquipmentTypeId, "", new { @class = "text-danger" })
+                        </div>
+                    </div>
+
+                    <div class="row flex-child-center-h flex-wrap">
+                        @* Description *@
+                        <div class="col-sm-12 form-group relative">
+                            @Html.LabelFor(model => model.Description) <i class="light-text">(Optional)</i>
+
+                            @Html.TextAreaFor(model => model.Description, new { @class = "form-control", rows = "8" })
+                            @Html.ValidationMessageFor(model => model.Description, "", new { @class = "text-danger" })
+                        </div>
+                    </div>
+
+                    @{
+                        var scheduleRequiredTypes = RequestTypeEnum.GetScheduledServiceIds();
+                        var scheduleInputsClass = scheduleRequiredTypes.Contains(Model.TypeId.GetValueOrDefault())
+                            ? "flex-row"
+                            : "no-display";
+                    }
+
+                    <div class="schedule-inputs @scheduleInputsClass flex-wrap">
+
+                        @* Schedule Date *@
+                        <div class="form-group flex-1 relative">
+                            @Html.LabelFor(model => model.ScheduledDate)
+
+                            <div class="input-group date form-group relative" id="datetime_picker"></div>
+                            @Html.HiddenFor(model => model.ScheduledDate)
+
+                            <p class="text-primary">
+                                <i class="glyphicon glyphicon-info-sign"></i>
+                                Activities must be scheduled at least 7 days ahead, but not later than 30 days.
+                            </p>
+
+                            @Html.ValidationMessageFor(model => model.ScheduledDate, "", new { @class = "text-danger" })
+                        </div>
+
+                        <div class="flex-col flex-1">
+                            @* Start Time *@
+                            <div class="form-group relative">
+                                @Html.LabelFor(model => model.ScheduledStartTime)
+                                @Html.EditorFor(model => model.ScheduledStartTime, new { htmlAttributes = new { @class = "form-control" } })
+                                @Html.ValidationMessageFor(model => model.ScheduledStartTime, "", new { @class = "text-danger" })
+                            </div>
+
+                            @* End Time *@
+                            <div class="form-group relative">
+                                @Html.LabelFor(model => model.ScheduledEndTime)
+                                @Html.EditorFor(model => model.ScheduledEndTime, new { htmlAttributes = new { @class = "form-control" } })
+                                @Html.ValidationMessageFor(model => model.ScheduledEndTime, "", new { @class = "text-danger" })
+                            </div>
+
+                            <p class="text-primary">
+                                <i class="glyphicon glyphicon-info-sign"></i>
+                                Activities must be set between 8:00 AM and 5:00 PM only.
+                            </p>
+                        </div>
+
+                    </div>
+                </section>
+
+                <section class="tsr-form-actions text-right flex-row-reverse flex-child-center-h">
+                    <button type="submit" class="btn btn-m btn-primary bold-text">
+                        <i class="glyphicon glyphicon-file"></i>
+                        Request
+                    </button>
+
+                    <a class="btn btn-danger bold-text" href="@Url.Action("Index", "TechnicalServiceRequests")">
+                        <i class="glyphicon glyphicon-remove-circle"></i>
+                        Cancel
+                    </a>
+                </section>
+            }
+
+        </section>
+    </section>
+
+</section>
+
+@section Scripts {
+<script>
+        const equipmentRepairTroubleshootId = parseInt("@((int)RequestTypeEnum.EQUIPMENT_REPAIR_TROUBLESHOOTING)", 10);
+        const requiredScheduleTypeIds = @Html.Raw(Json.Encode(RequestTypeEnum.GetScheduledServiceIds()));
+
+        const fullyBookedDayByLimitUrl = "@Url.Action("GetFullyBookedDayByLimit", "Request")";
+        const fullyBookedDayByScheduleUrl = "@Url.Action("GetFullyBookedDayBySchedule", "Request")";
+
+        const equipmentSuggestionUrl = "@Url.Action("GetEquipmentDetailByAssetTag", "Request")";
+</script>
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-datepicker/1.10.0/js/bootstrap-datepicker.min.js"></script>
+    <script src="~/Scripts/App/Request/ToggleConditionalInputs.js" defer></script>
+    <script src="~/Scripts/App/Request/InitializeDateTimePicker.js" defer></script>
+    <script src="~/Scripts/App/Request/ShowEquipmentSuggestions.js" defer></script>
+}
+

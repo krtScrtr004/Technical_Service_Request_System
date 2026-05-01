@@ -1,0 +1,486 @@
+﻿@model TROUBLESHOOTING_REPAIR_SERVICE_REQUEST_SYSTEM.Models.RequestFormViewModel
+@using TROUBLESHOOTING_REPAIR_SERVICE_REQUEST_SYSTEM.Enumerables
+@using TROUBLESHOOTING_REPAIR_SERVICE_REQUEST_SYSTEM.Utilities
+
+@{
+    ViewBag.Title = "Form";
+
+    var technicalServiceRequest = Model.Request;
+    var technicalServiceRequestHistory = Model.History;
+
+    var selectedType = technicalServiceRequest.TypeId;
+    var isOthers = !string.IsNullOrEmpty(technicalServiceRequest.Others) ||
+        selectedType == RequestTypeEnum.ACCOUNT_CREATION ||
+        selectedType == RequestTypeEnum.PASSWORD_ACCESS_ISSUE ||
+        selectedType == RequestTypeEnum.DATA_CORRECTION ||
+        selectedType == RequestTypeEnum.TECHNICAL_GUIDANCE ||
+        selectedType == RequestTypeEnum.PRODUCTION_MATERIAL_PRINTING;
+
+    var referenceCode = technicalServiceRequest.ReferenceCode;
+    var dateRequest = technicalServiceRequest.DateRequest.HasValue
+        ? technicalServiceRequest.DateRequest.Value.ToString("MM/dd/yyyy")
+        : "Unknown Date";
+    var dateReceived = technicalServiceRequest.DateReceived.HasValue
+        ? technicalServiceRequest.DateReceived.Value.ToString("MM/dd/yyyy")
+        : "Unknown Date";
+    var timeReceived = technicalServiceRequest.DateReceived.HasValue
+        ? technicalServiceRequest.DateReceived.Value.ToString("hh:mm")
+        : "Unknown Time";
+    var isAm = technicalServiceRequest.DateReceived.HasValue && technicalServiceRequest.DateReceived.Value.Hour < 12;
+    var isPm = technicalServiceRequest.DateReceived.HasValue && technicalServiceRequest.DateReceived.Value.Hour >= 12;
+
+    var actionTaken = !string.IsNullOrEmpty(technicalServiceRequestHistory.ActionTaken)
+        ? technicalServiceRequestHistory.ActionTaken
+        : "No action taken.";
+
+    var technicalPersonel = technicalServiceRequestHistory.ActionTakenById.HasValue
+        ? GeneralUtilities.CreateFullName(
+            technicalServiceRequestHistory.ActionTakenBy.FirstName,
+            technicalServiceRequestHistory.ActionTakenBy.LastName,
+            technicalServiceRequestHistory.ActionTakenBy.MiddleName
+        )
+        : "Unknown Personnel";
+}
+
+@section Styles {
+    <link rel="stylesheet" href="~/Content/App/Request/Form.css" type="text/css" />
+}
+
+<section class="tsr-form-page-container container bg-light">
+
+    @* Form *@
+    <section class="container tsr-form flex-col flex-child-start-h">
+
+        @* Heading *@
+        <section>
+            <table class="tsr-form-heading tsr-form-table table table-bordered">
+                <tbody>
+
+                    <tr>
+                        <td rowspan="3" class="logo">
+                            <img src="~/Content/Images/logo.png" alt="DOH Logo" title="DOH Logo" width="90" />
+                        </td>
+                    </tr>
+
+                    <tr>
+                        <th class="heading-text">
+                            Information Communications Technology Management Section
+                        </th>
+
+                        <td>
+
+                            <table class="upper nested-table table">
+                                <tbody>
+                                    <tr>
+                                        <td>Page No.</td>
+                                        <td class="text-center">Page 1 of 1</td>
+                                    </tr>
+
+                                    <tr>
+                                        <td>Revision No.</td>
+                                        <td class="text-center">2</td>
+                                    </tr>
+                                </tbody>
+                            </table>
+
+                        </td>
+                    </tr>
+
+                    <tr>
+                        <th class="heading-text">
+                            Technical Service Request Form
+                        </th>
+
+                        <td>
+
+                            <table class="lower nested-table table">
+                                <tbody>
+                                    <tr>
+                                        <td>Effectivity:</td>
+                                        <td class="text-center">March 1, 2026</td>
+                                    </tr>
+                                </tbody>
+                            </table>
+
+                        </td>
+                    </tr>
+
+                </tbody>
+            </table>
+        </section>
+
+        @* Client Information *@
+        <section class="tsr-form-client-info flex-col">
+
+            <div class="tsr-form-meta-info flex-row flex-space-between">
+                <section>
+                    <p class="inline">Reference Code: </p>
+                    <p class="inline">
+                        <u>@referenceCode</u>
+                    </p>
+                </section>
+
+                <section>
+                    <p class="inline">Date Of Request(mm/dd/yyyy): </p>
+                    <p class="inline">
+                        <u>@dateRequest</u>
+                    </p>
+                </section>
+            </div>
+
+            @* Table *@
+            <div class="tsr-form-client-info-table ">
+
+                <table class="tsr-form-table table table-bordered">
+                    <tbody>
+
+                        <tr>
+                            <th colspan="4">
+                                CLIENT INFORMATION
+                            </th>
+                        </tr>
+
+                        <tr>
+                            <td class="row-label">Name:</td>
+
+                            <td colspan="3">
+                                <div class="name-row-content">
+                                    <div class="name-row">
+                                        <p>@Model.Request.Client.LastName</p>
+                                        <p>@Model.Request.Client.FirstName</p>
+                                    @if (!string.IsNullOrEmpty(technicalServiceRequest.Client.MiddleName))
+                                        {
+                                        <p>@technicalServiceRequest.Client.MiddleName[0]</p>
+                                        }
+                                    @if (!string.IsNullOrEmpty(technicalServiceRequest.Client.ExtensionName))
+                                        {
+                                        <p>@technicalServiceRequest.Client.ExtensionName</p>
+                                        }
+                                    </div>
+
+                                    <div class="name-row">
+                                        <p>Last Name</p>
+                                        <p>First Name</p>
+                                        <p>Middle Initial</p>
+                                        <p>Ext.</p>
+                                    </div>
+                                </div>
+                            </td>
+                        </tr>
+
+                        <tr>
+                            <td class="row-label">Office:</td>
+                            <td colspan="3">@technicalServiceRequest.Client.Office</td>
+                        </tr>
+
+                        <tr>
+                            <td class="row-label">Position:</td>
+                            <td colspan="3">@technicalServiceRequest.Client.Position</td>
+                        </tr>
+
+                        <tr>
+                            <td class="row-label">Contact No:</td>
+                            <td>@technicalServiceRequest.Client.ContactNumber</td>
+
+                            <td class="row-label">Email Address:</td>
+                            <td>@technicalServiceRequest.Client.Email</td>
+                        </tr>
+
+                        <tr></tr>
+                    </tbody>
+                </table>
+
+            </div>
+
+        </section>
+
+        @* Technical Services *@
+        @{
+        }
+
+        @* Technical Services *@
+        <section>
+            <table class="tsr-form-technical-services tsr-form-table table table-bordered">
+                <tbody>
+                    <tr>
+                        <th colspan="3">
+                            TECHNICAL SERVICES
+                            <i class="light-text">(Check services that may apply)</i>
+                        </th>
+                    </tr>
+
+                    <tr>
+                        <td>
+                            <form class="tsr-form-technical-checkbox-form flex-row flex-child-center-h">
+                                <input type="checkbox"
+                                       id="equipment_repair_troubleshooting"
+                                       name="equipment_repair_troubleshooting"
+                                       @(RequestTypeEnum.EQUIPMENT_REPAIR_TROUBLESHOOTING == selectedType ? "checked" : "")
+                                       disabled />
+                                <label for="equipment_repair_troubleshooting" class="text-nowrap">Equipment Repair / Troubleshooting</label>
+                            </form>
+                        </td>
+
+                        <td>
+                            <form class="tsr-form-technical-checkbox-form flex-row flex-child-center-h">
+                                <input type="checkbox"
+                                       id="audio_video_setup"
+                                       name="audio_video_setup"
+                                       @(RequestTypeEnum.AUDIO_VISUAL_SETUP == selectedType ? "checked" : "")
+                                       disabled />
+                                <label for="audio_video_setup">Audio / Video Setup</label>
+                            </form>
+                        </td>
+
+                        <td>
+                            <form class="tsr-form-technical-checkbox-form flex-row flex-child-center-h">
+                                <input type="checkbox"
+                                       id="livestream_setup"
+                                       name="livestream_setup"
+                                       @(RequestTypeEnum.LIVESTREAM_SETUP == selectedType ? "checked" : "")
+                                       disabled />
+                                <label for="livestream_setup">Livestream Setup</label>
+                            </form>
+                        </td>
+                    </tr>
+
+                    <tr>
+                        <td>
+                            <form class="tsr-form-technical-checkbox-form flex-row flex-child-center-h">
+                                <input type="checkbox"
+                                       id="zoom_webex_link"
+                                       name="zoom_webex_link"
+                                       @(RequestTypeEnum.ZOOM_WEBEX_LINK == selectedType ? "checked" : "")
+                                       disabled />
+                                <label for="zoom_webex_link">Zoom / Webex Link</label>
+                            </form>
+                        </td>
+
+                        <td>
+                            <form class="tsr-form-technical-checkbox-form flex-row flex-child-center-h">
+                                <input type="checkbox"
+                                       id="internet_connectivity"
+                                       name="internet_connectivity"
+                                       @(RequestTypeEnum.INTERNET_CONNECTIVITY == selectedType ? "checked" : "")
+                                       disabled />
+                                <label for="internet_connectivity">Internet Connectivity</label>
+                            </form>
+                        </td>
+
+                        <td>
+                            <form class="tsr-form-technical-checkbox-form flex-row flex-child-center-h">
+                                <input type="checkbox"
+                                       id="system_support"
+                                       name="system_support"
+                                       @(RequestTypeEnum.SYSTEM_SUPPORT == selectedType ? "checked" : "")
+                                       disabled />
+                                <label for="system_support">System Support</label>
+                            </form>
+                        </td>
+                    </tr>
+
+                    <tr>
+                        <td>
+                            <form class="tsr-form-technical-checkbox-form flex-row flex-child-center-h">
+                                <input type="checkbox"
+                                       id="government_email_account"
+                                       name="government_email_account"
+                                       @(RequestTypeEnum.GOVERNMENT_EMAIL_ACCOUNT == selectedType ? "checked" : "")
+                                       disabled />
+                                <label for="government_email_account">Government Email / Account</label>
+                            </form>
+                        </td>
+
+                        <td colspan="2">
+                            <form class="tsr-form-technical-checkbox-form flex-row flex-child-center-h">
+                                <input type="checkbox"
+                                       id="others"
+                                       name="others"
+                                       @(isOthers ? "checked" : "")
+                                       disabled />
+                                <label for="others">Others: </label>
+                                @if (isOthers)
+                                {
+                                    <p class="inline">
+                                        @if (selectedType == RequestTypeEnum.ACCOUNT_CREATION)
+                                        {
+                                            @RequestTypeEnum.DisplayName(
+                                                RequestTypeEnum.ACCOUNT_CREATION
+                                            );
+                                        }
+                                        else if (selectedType == RequestTypeEnum.PASSWORD_ACCESS_ISSUE)
+                                        {
+                                            @RequestTypeEnum.DisplayName(
+                                                RequestTypeEnum.PASSWORD_ACCESS_ISSUE
+                                            );
+                                        }
+                                        else if (selectedType == RequestTypeEnum.DATA_CORRECTION)
+                                        {
+                                            @RequestTypeEnum.DisplayName(
+                                                RequestTypeEnum.DATA_CORRECTION
+                                            );
+                                        }
+                                        else if (selectedType == RequestTypeEnum.TECHNICAL_GUIDANCE)
+                                        {
+                                            @RequestTypeEnum.DisplayName(
+                                                RequestTypeEnum.TECHNICAL_GUIDANCE
+                                            );
+                                        }
+                                        else if (selectedType == RequestTypeEnum.PRODUCTION_MATERIAL_PRINTING)
+                                        {
+                                            @RequestTypeEnum.DisplayName(
+                                                RequestTypeEnum.PRODUCTION_MATERIAL_PRINTING
+                                            );
+                                        }
+                                        else
+                                        {
+                                            @Model.Request.Others
+                                        }
+                                    </p>
+                                }
+                            </form>
+                        </td>
+                    </tr>
+
+                    <tr>
+                        <td colspan="3"></td>
+                    </tr>
+
+                </tbody>
+            </table>
+        </section>
+
+        @* Signatures *@
+        <section>
+            <table class="tsr-form-table table table-bordered">
+                <tbody>
+                    <tr>
+                        <th>
+                            SIGNATURE OF THE EMPLOYEE
+                        </th>
+
+                        <th>
+                            APPROVED  BY:
+                        </th>
+                    </tr>
+
+                    <tr>
+                        <td class="tsr-form-signatures-body">
+                            <div class="flex-col flex-child-end-v flex-child-center-h">
+                                <p class="center-text">Signature</p>
+                            </div>
+                        </td>
+
+                        <td class="tsr-form-signatures-body">
+                            <div class="flex-col flex-child-end-v flex-child-center-h">
+                                <p class="center-text">Name and Signature of Office Head</p>
+                            </div>
+                        </td>
+                    </tr>
+
+                </tbody>
+            </table>
+        </section>
+
+        @* ICT Section *@
+        <section>
+            <table class="tsr-form-ict-section table table-bordered">
+
+                <tbody>
+
+                    <tr>
+                        <th colspan="2" class="center-text">
+                            (FOR INFORMATION COMMUNICATIONS TECHNOLOGY MANAGEMENT SECTION only)
+                        </th>
+                    </tr>
+
+                    <tr>
+                        <td>
+                            <p>
+                                Date Received (mm/dd/yyyy):
+                                @dateReceived
+                            </p>
+                        </td>
+
+                        <td>
+                            <div class="time-received-container flex-row flex-space-between">
+                                <div class="">
+                                    <p>
+                                        Time Received (hh:mm):
+                                        @timeReceived
+                                    </p>
+                                </div>
+
+                                <form class="flex-row">
+                                    <div class="flex-row flex-child-center-h tsr-form-technical-checkbox-form">
+                                        <input type="checkbox"
+                                               @(isAm ? "checked" : "")
+                                               disabled />
+                                        <label>AM</label>
+                                    </div>
+
+                                    <div class="flex-row flex-child-center-h tsr-form-technical-checkbox-form">
+                                        <input type="checkbox"
+                                               @(isPm ? "checked" : "")
+                                               disabled />
+                                        <label>PM</label>
+                                    </div>
+                                </form>
+                            </div>
+                        </td>
+                    </tr>
+
+                    <tr>
+                        <td class="" colspan="2">
+                            <div class="flex-col">
+                                <p>
+                                    <strong>ACTION TAKEN:</strong>
+                                </p>
+
+                                <div class="trs-form-ict-section-action-taken">
+                                    @actionTaken
+                                </div>
+                            </div>
+                        </td>
+                    </tr>
+
+                    <tr>
+                        <td class="tsr-form-ict-section-personel">
+                            <p>Technical Personel/s:</p>
+                            <p>
+                                @technicalPersonel
+                            </p>
+                        </td>
+
+                        <td class="tsr-form-ict-section-personel">
+                            Signature:
+                        </td>
+                    </tr>
+
+                </tbody>
+
+            </table>
+
+            <div>
+                <p class="text-right">DOHNCRO-KMITS-SR Form 01 Rev. 02</p>
+            </div>
+        </section>
+
+    </section>
+
+    @* Print Button *@
+    <section class="print-button-container center-child">
+        <div class="flex-1 flex-row">
+            <button class="btn btn-danger flex-1" type="button" onclick="history.back()">
+                <i class="glyphicon glyphicon-arrow-left"></i>
+                Return
+            </button>
+
+            <button class="btn btn-primary flex-1" type="button" onclick="window.print()">
+                <i class="glyphicon glyphicon-print"></i>
+                Print
+            </button>
+        </div>
+    </section>
+
+</section>

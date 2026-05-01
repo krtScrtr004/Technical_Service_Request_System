@@ -46,22 +46,22 @@ namespace TROUBLESHOOTING_REPAIR_SERVICE_REQUEST_SYSTEM.Controllers
                 var visibleRequests = GetVisibleRequestQuery(currentUser).AsNoTracking();
                 var totalRequests = visibleRequests.Count();
 
-                var activeStatusIds = TechnicalServiceRequestStatusEnum.GetActiveStatusIds();
+                var activeStatusIds = RequestStatusEnum.GetActiveStatusIds();
                 var activeRequests = visibleRequests.Count(i =>
-                    i.TechnicalServiceRequestStatusId.HasValue &&
-                    activeStatusIds.Contains(i.TechnicalServiceRequestStatusId.Value)
+                    i.StatusId.HasValue &&
+                    activeStatusIds.Contains(i.StatusId.Value)
                 );
 
                 var resolvedRequests = visibleRequests.Count(i =>
-                    i.TechnicalServiceRequestStatusId == TechnicalServiceRequestStatusEnum.RESOLVED ||
-                    i.TechnicalServiceRequestStatusId == TechnicalServiceRequestStatusEnum.CLOSED
+                    i.StatusId == RequestStatusEnum.RESOLVED ||
+                    i.StatusId == RequestStatusEnum.CLOSED
                 );
 
                 var unreadNotifications = GetUnreadNotificationCount(currentUser);
 
                 var statusData = visibleRequests
-                    .Where(i => i.TechnicalServiceRequestStatusId.HasValue)
-                    .GroupBy(i => i.TechnicalServiceRequestStatusId.Value)
+                    .Where(i => i.StatusId.HasValue)
+                    .GroupBy(i => i.StatusId.Value)
                     .Select(g => new
                     {
                         StatusId = g.Key,
@@ -70,7 +70,7 @@ namespace TROUBLESHOOTING_REPAIR_SERVICE_REQUEST_SYSTEM.Controllers
                     .ToList()
                     .Select(g => new
                     {
-                        Name = TechnicalServiceRequestStatusEnum.DisplayName(g.StatusId),
+                        Name = RequestStatusEnum.DisplayName(g.StatusId),
                         Count = g.Count
                     })
                     .ToList();
@@ -78,8 +78,8 @@ namespace TROUBLESHOOTING_REPAIR_SERVICE_REQUEST_SYSTEM.Controllers
                 var serviceTypeData = visibleRequests
                     .Select(i => new
                     {
-                        Name = i.TechnicalServiceTypeId.HasValue
-                            ? i.TechnicalServiceType.TechnicalServiceTypeName
+                        Name = i.TypeId.HasValue
+                            ? i.Type.Name
                             : "Others"
                     })
                     .GroupBy(i => i.Name)
@@ -113,12 +113,12 @@ namespace TROUBLESHOOTING_REPAIR_SERVICE_REQUEST_SYSTEM.Controllers
                     .Select(month => new
                     {
                         Label = month.ToString("MMM yyyy"),
-                        Count = _db.TechnicalServiceRequestHistories.Count(h =>
-                            h.TechnicalServiceRequestId.HasValue &&
-                            requestIds.Contains(h.TechnicalServiceRequestId.Value) &&
-                            h.TechnicalServiceRequestStatusId.HasValue &&
-                            (h.TechnicalServiceRequestStatusId.Value == TechnicalServiceRequestStatusEnum.RESOLVED ||
-                             h.TechnicalServiceRequestStatusId.Value == TechnicalServiceRequestStatusEnum.CLOSED) &&
+                        Count = _db.RequestHistories.Count(h =>
+                            h.RequestId.HasValue &&
+                            requestIds.Contains(h.RequestId.Value) &&
+                            h.StatusId.HasValue &&
+                            (h.StatusId.Value == RequestStatusEnum.RESOLVED ||
+                             h.StatusId.Value == RequestStatusEnum.CLOSED) &&
                             h.DateAction.HasValue &&
                             h.DateAction.Value.Year == month.Year &&
                             h.DateAction.Value.Month == month.Month)
@@ -134,9 +134,9 @@ namespace TROUBLESHOOTING_REPAIR_SERVICE_REQUEST_SYSTEM.Controllers
                 return Json(new
                 {
                     success = true,
-                    role = AccountTypeEnum.IsAdmin(currentUser.PrivilegeIds)
+                    role = AccountTypeEnum.IsAdmin(currentUser.RoleId)
                         ? "ADMIN"
-                        : AccountTypeEnum.IsIT(currentUser.PrivilegeIds)
+                        : AccountTypeEnum.IsIT(currentUser.RoleId)
                             ? "IT"
                             : "STANDARD",
                     cards = new
@@ -175,23 +175,23 @@ namespace TROUBLESHOOTING_REPAIR_SERVICE_REQUEST_SYSTEM.Controllers
 
         #region Helper
 
-        private IQueryable<Models.TechnicalServiceRequest> GetVisibleRequestQuery(UserSession currentUser)
+        private IQueryable<Models.Request> GetVisibleRequestQuery(UserSession currentUser)
         {
-            if (AccountTypeEnum.IsAdmin(currentUser.PrivilegeIds))
+            if (AccountTypeEnum.IsAdmin(currentUser.RoleId))
             {
-                return _db.TechnicalServiceRequests;
+                return _db.Requests;
             }
 
-            if (AccountTypeEnum.IsIT(currentUser.PrivilegeIds))
+            if (AccountTypeEnum.IsIT(currentUser.RoleId))
             {
-                var nonAssistedServiceIds = TechnicalServiceTypeEnum.GetNonAssistedServiceIds();
-                return _db.TechnicalServiceRequests.Where(i =>
-                    i.TechnicalServiceRequestHistories.Any(h => h.ActionTakenByRegistrationId == currentUser.Id) ||
-                    (i.TechnicalServiceTypeId.HasValue && nonAssistedServiceIds.Contains(i.TechnicalServiceTypeId.Value))
+                var nonAssistedServiceIds = RequestTypeEnum.GetNonAssistedServiceIds();
+                return _db.Requests.Where(i =>
+                    i.Histories.Any(h => h.ActionTakenById == currentUser.Id) ||
+                    (i.TypeId.HasValue && nonAssistedServiceIds.Contains(i.TypeId.Value))
                 );
             }
 
-            return _db.TechnicalServiceRequests.Where(i => i.ClientRegistrationId == currentUser.Id);
+            return _db.Requests.Where(i => i.ClientId == currentUser.Id);
         }
 
         private int GetUnreadNotificationCount(UserSession currentUser)
@@ -200,11 +200,11 @@ namespace TROUBLESHOOTING_REPAIR_SERVICE_REQUEST_SYSTEM.Controllers
                 .Where(i => !i.IsRead)
                 .AsQueryable();
 
-            if (AccountTypeEnum.IsAdmin(currentUser.PrivilegeIds))
+            if (AccountTypeEnum.IsAdmin(currentUser.RoleId))
             {
                 query = query.Where(i => i.ForAdmin || i.RecipientRegistrationId == currentUser.Id);
             }
-            else if (AccountTypeEnum.IsIT(currentUser.PrivilegeIds))
+            else if (AccountTypeEnum.IsIT(currentUser.RoleId))
             {
                 query = query.Where(i => i.ForIT || i.RecipientRegistrationId == currentUser.Id);
             }
@@ -216,18 +216,16 @@ namespace TROUBLESHOOTING_REPAIR_SERVICE_REQUEST_SYSTEM.Controllers
             return query.Count();
         }
 
-        private object BuildExtraCards(UserSession currentUser, IQueryable<Models.TechnicalServiceRequest> visibleRequests)
+        private object BuildExtraCards(UserSession currentUser, IQueryable<Models.Request> visibleRequests)
         {
-            if (AccountTypeEnum.IsAdmin(currentUser.PrivilegeIds))
+            if (AccountTypeEnum.IsAdmin(currentUser.RoleId))
             {
-                var itAccountDisplayName = AccountTypeEnum.DisplayName(AccountTypeEnum.IT);
-
                 var pendingRegistrationRequests = _db.RegistrationRequests
                     .Count(i => !i.IsApproved && !i.IsDenied);
                 var activeUsers = _db.Registrations.Count(i => i.IsActive);
                 var itUsers = _db.Registrations.Count(i => 
                     i.IsActive && 
-                    i.AccountType == itAccountDisplayName);
+                    i.RoleId == AccountTypeEnum.IT);
 
                 return new
                 {
@@ -240,24 +238,22 @@ namespace TROUBLESHOOTING_REPAIR_SERVICE_REQUEST_SYSTEM.Controllers
                 };
             }
 
-            if (AccountTypeEnum.IsIT(currentUser.PrivilegeIds))
+            if (AccountTypeEnum.IsIT(currentUser.RoleId))
             {
-                var activeStatusIds = TechnicalServiceRequestStatusEnum.GetActiveStatusIds();
+                var activeStatusIds = RequestStatusEnum.GetActiveStatusIds();
                 var myAssignedActive = visibleRequests.Count(i =>
-                    i.TechnicalServiceRequestStatusId.HasValue &&
-                    activeStatusIds.Contains(i.TechnicalServiceRequestStatusId.Value) &&
-                    i.TechnicalServiceRequestHistories.Any(h => 
-                        h.ActionTakenByRegistrationId == currentUser.Id
-                    )
+                    i.StatusId.HasValue &&
+                    activeStatusIds.Contains(i.StatusId.Value) &&
+                    i.Histories.Any(h => h.ActionTakenById == currentUser.Id)
                 );
 
                 var today = DateTime.Now.Date;
-                var todayResolved = _db.TechnicalServiceRequestHistories.Count(i =>
-                    i.ActionTakenByRegistrationId == currentUser.Id &&
-                    i.TechnicalServiceRequestStatusId.HasValue &&
-                    (i.TechnicalServiceRequestStatusId.Value == TechnicalServiceRequestStatusEnum.RESOLVED ||
-                     i.TechnicalServiceRequestStatusId.Value == TechnicalServiceRequestStatusEnum.CLOSED) &&
-                    i.DateAction.HasValue && DbFunctions.TruncateTime(i.DateAction.Value) == DbFunctions.TruncateTime(today)
+                var todayResolved = _db.RequestHistories.Count(i =>
+                    i.ActionTakenById == currentUser.Id &&
+                    i.StatusId.HasValue &&
+                    (i.StatusId.Value == RequestStatusEnum.RESOLVED ||
+                     i.StatusId.Value == RequestStatusEnum.CLOSED) &&
+                     i.DateAction.HasValue && DbFunctions.TruncateTime(i.DateAction.Value) == DbFunctions.TruncateTime(today)
                 );
 
                 var blockedDays = _db.ITAvailabilities.Count(i => 
@@ -277,9 +273,9 @@ namespace TROUBLESHOOTING_REPAIR_SERVICE_REQUEST_SYSTEM.Controllers
             }
 
             var pendingCount = visibleRequests.Count(i => 
-                i.TechnicalServiceRequestStatusId == TechnicalServiceRequestStatusEnum.PENDING);
+                i.StatusId == RequestStatusEnum.PENDING);
             var cancelledCount = visibleRequests.Count(i => 
-                i.TechnicalServiceRequestStatusId == TechnicalServiceRequestStatusEnum.CANCELLED);
+                i.StatusId == RequestStatusEnum.CANCELLED);
             var monthStartDate = new DateTime(DateTime.Now.Year, DateTime.Now.Month, 1);
             var submittedThisMonth = visibleRequests.Count(i => 
                 i.DateRequest.HasValue && 
@@ -301,16 +297,16 @@ namespace TROUBLESHOOTING_REPAIR_SERVICE_REQUEST_SYSTEM.Controllers
         {
             IQueryable<Models.Equipment> query;
 
-            if (AccountTypeEnum.IsAdmin(currentUser.PrivilegeIds) || AccountTypeEnum.IsIT(currentUser.PrivilegeIds))
+            if (AccountTypeEnum.IsAdmin(currentUser.RoleId) || AccountTypeEnum.IsIT(currentUser.RoleId))
             {
                 query = _db.Equipments.AsNoTracking();
             }
             else
             {
-                query = _db.TechnicalServiceRequests
+                query = _db.Requests
                     .AsNoTracking()
-                    .Where(r => r.ClientRegistrationId == currentUser.Id && r.TechnicalServiceRequestEquipmentId.HasValue)
-                    .Select(r => r.TechnicalServiceRequestEquipment)
+                    .Where(r => r.ClientId == currentUser.Id && r.EquipmentId.HasValue)
+                    .Select(r => r.Equipment)
                     .Where(e => e != null);
             }
 
@@ -321,7 +317,7 @@ namespace TROUBLESHOOTING_REPAIR_SERVICE_REQUEST_SYSTEM.Controllers
             };
 
             return query
-                .Where(e => e.EquipmentStatusId.HasValue && allowedStatuses.Contains(e.EquipmentStatusId.Value))
+                .Where(e => e.StatusId.HasValue && allowedStatuses.Contains(e.StatusId.Value))
                 .GroupBy(e => e.Id)
                 .Select(g => g.FirstOrDefault())
                 .OrderByDescending(e => e.RepairCount)
@@ -330,12 +326,12 @@ namespace TROUBLESHOOTING_REPAIR_SERVICE_REQUEST_SYSTEM.Controllers
                 {
                     e.Id,
                     e.AssetTag,
-                    e.EquipmentModel,
-                    EquipmentType = e.EquipmentTypeId.HasValue
-                        ? EquipmentTypeEnum.DisplayName(e.EquipmentTypeId.Value)
+                    e.Model,
+                    Type = e.TypeId.HasValue
+                        ? EquipmentTypeEnum.DisplayName(e.TypeId.Value)
                         : "N/A",
-                    EquipmentStatus = e.EquipmentStatusId.HasValue
-                        ? EquipmentStatusEnum.DisplayName(e.EquipmentStatusId.Value)
+                    Status = e.StatusId.HasValue
+                        ? EquipmentStatusEnum.DisplayName(e.StatusId.Value)
                         : "N/A",
                     e.RepairCount
                 });

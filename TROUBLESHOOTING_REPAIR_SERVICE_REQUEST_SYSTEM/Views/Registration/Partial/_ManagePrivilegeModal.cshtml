@@ -1,12 +1,7 @@
 ﻿@model TROUBLESHOOTING_REPAIR_SERVICE_REQUEST_SYSTEM.Models.Registration
 @using TROUBLESHOOTING_REPAIR_SERVICE_REQUEST_SYSTEM.Enumerables
 
-@{
-    var userCurrentPrivileges = Model.UserPrivileges
-        .Where(p => p.PrivilegeId.HasValue)
-        .Select(p => p.PrivilegeId.Value)
-        .ToArray();
-}
+@{ var userCurrentPrivilegeId = Model.RoleId; }
 
 
 <section id="manage_privilege_modal" class="modal fade" role="dialog">
@@ -37,23 +32,12 @@
                 <section class="modal-body">
                     <div class="form-group">
                         <label for="update_privilege" class="light-text">Update Privilege:</label>
-                        <select class="form-control" name="update_privilege">
-                            <option value="@AccountTypeEnum.ADMIN" @(AccountTypeEnum.IsAdmin(userCurrentPrivileges) ? "selected" : "")>
-                                @AccountTypeEnum.DisplayName(
-                                    AccountTypeEnum.ADMIN
-                               )
-                            </option>
-                            <option value="@AccountTypeEnum.IT" @(AccountTypeEnum.IsIT(userCurrentPrivileges) ? "selected" : "")>
-                                @AccountTypeEnum.DisplayName(
-                                    AccountTypeEnum.IT
-                               )
-                            </option>
-                            <option value="@AccountTypeEnum.STANDARD" @(AccountTypeEnum.IsStandard(userCurrentPrivileges) ? "selected" : "")>
-                                @AccountTypeEnum.DisplayName(
-                                    AccountTypeEnum.STANDARD
-                               )
-                            </option>
-                        </select>
+                        @Html.DropDownList(
+                            "update_privilege",
+                            AccountTypeEnum.GetSelectListItems(userCurrentPrivilegeId),
+                            null,
+                            new { @class = "form-control" }
+                        )
                     </div>
 
                     <p>

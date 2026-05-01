@@ -1,4 +1,5 @@
 ﻿@model TROUBLESHOOTING_REPAIR_SERVICE_REQUEST_SYSTEM.Models.RegistrationCreateViewModel
+@using TROUBLESHOOTING_REPAIR_SERVICE_REQUEST_SYSTEM.Enumerables
 
 @{ ViewBag.Title = "Create"; }
 
@@ -52,23 +53,23 @@
                     <div class="well flex-row flex-wrap flex-space-between account-type-well">
                         <div>
                             <label>
-                                @Html.RadioButtonFor(i => i.AccountType, "Administrator", new { required = "required" })
+                                @Html.RadioButtonFor(i => i.RoleId, AccountTypeEnum.ADMIN, new { required = "required" })
                                 <strong>Administrator</strong>
                             </label>
                         </div>
                         <div>
                             <label>
-                                @Html.RadioButtonFor(i => i.AccountType, "IT", new { required = "required" })
+                                @Html.RadioButtonFor(i => i.RoleId, AccountTypeEnum.IT, new { required = "required" })
                                 <strong>IT</strong>
                             </label>
                         </div>
                         <div>
                             <label>
-                                @Html.RadioButtonFor(i => i.AccountType, "Standard User", new { required = "required" })
+                                @Html.RadioButtonFor(i => i.RoleId, AccountTypeEnum.STANDARD, new { required = "required" })
                                 <strong>Standard User</strong>
                             </label>
                         </div>
-                        @Html.ValidationMessageFor(model => model.AccountType)
+                        @Html.ValidationMessageFor(model => model.RoleId)
                     </div>
                 </section>
 
@@ -181,7 +182,8 @@
 
 @section Scripts {
     <script>
-        const registrationRequestId = "@Model.RegistrationRequest.Id";
+        const registrationRequestId = parseInt("@Model.RegistrationRequest.Id", 10);
+
         const denyUrl = "@Url.Action("DenyRegistration", "Registration")";
         const denyRedirectUrl = "@Url.Action("Index", "RegistrationRequest")";
     </script>

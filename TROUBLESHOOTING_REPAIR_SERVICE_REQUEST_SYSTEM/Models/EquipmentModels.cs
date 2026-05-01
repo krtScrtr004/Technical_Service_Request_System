@@ -15,27 +15,26 @@ namespace TROUBLESHOOTING_REPAIR_SERVICE_REQUEST_SYSTEM.Models
     {
         public int Id { get; set; }
 
-        public string EquipmentModel { get; set; }
+        public string Model { get; set; }
 
         [MaxLength(100)]
         [Index(IsUnique = true)]
         public string AssetTag { get; set; } // Unique internal (organization) identifier for the equipment
 
-        public int? EquipmentTypeId { get; set; }
-        public virtual EquipmentType EquipmentType { get; set; }
+        public int? TypeId { get; set; }
+        public virtual EquipmentType Type { get; set; }
 
-        public int? EquipmentLocationId { get; set; }
-        public virtual EquipmentLocation EquipmentLocation { get; set; }
+        public int? LocationId { get; set; }
+        public virtual EquipmentLocation Location { get; set; }
 
-        public int? EquipmentStatusId { get; set; }
-        public virtual EquipmentStatus EquipmentStatus { get; set; }
+        public int? StatusId { get; set; }
+        public virtual EquipmentStatus Status { get; set; }
 
-        public int? CreatedByRegistrationId { get; set; }
-        public virtual Registration CreatedByRegistration { get; set; }
+        public int? CreatedById { get; set; }
+        public virtual Registration CreatedBy{ get; set; }
 
         public int RepairCount { get; set; }
 
-        public bool IsActive { get; set; }
         public DateTime CreatedAt { get; set; }
         public DateTime UpdatedAt { get; set; }
     }
@@ -52,7 +51,7 @@ namespace TROUBLESHOOTING_REPAIR_SERVICE_REQUEST_SYSTEM.Models
         [MaxLength(100, ErrorMessage = "The maximum length is 100")]
         [RegularExpression("^[\\w\\s-_\\/]+$",
             ErrorMessage = "Position field must only contain letters, numbers, spaces, hyphens ( - ), and underscores ( _ )")]
-        public string EquipmentModel { get; set; }
+        public string Model { get; set; }
 
         [Required]
         [DisplayName("Asset Tag")]
@@ -65,17 +64,16 @@ namespace TROUBLESHOOTING_REPAIR_SERVICE_REQUEST_SYSTEM.Models
 
         [Required]
         [DisplayName("Type")]
-        public int EquipmentTypeId { get; set; }
-        public IEnumerable<SelectListItem> EquipmentTypes { get; set; }
+        public int TypeId { get; set; }
+        public IEnumerable<SelectListItem> Types { get; set; }
 
         [Required]
         [DisplayName("Status")]
-        public int EquipmentStatusId { get; set; }
-        public IEnumerable<SelectListItem> EquipmentStatuses { get; set; }
+        public int StatusId { get; set; }
+        public IEnumerable<SelectListItem> Statuses { get; set; }
 
         [HiddenInput]
-        public int? EquipmentLocationId { get; set; }
-
+        public int? LocationId { get; set; }
         [DisplayName("Building Nuber")]
         [CompleteEquipmentField(
             propertyDisplayName: "Building Number",
@@ -107,8 +105,8 @@ namespace TROUBLESHOOTING_REPAIR_SERVICE_REQUEST_SYSTEM.Models
 
         public EquipmentFormViewModel()
         {
-            EquipmentTypes = EquipmentTypeEnum.GetSelectListItems();
-            EquipmentStatuses = EquipmentStatusEnum.GetSelectListItems();
+            Types = EquipmentTypeEnum.GetSelectListItems();
+            Statuses = EquipmentStatusEnum.GetSelectListItems();
             BuildingNumbers = new SelectList(new List<int> { 1, 2, 3, 4, 5 });
             FloorNumbers = new SelectList(new List<int> { 1, 2, 3 });
         }
@@ -118,20 +116,20 @@ namespace TROUBLESHOOTING_REPAIR_SERVICE_REQUEST_SYSTEM.Models
     {
         public int Id { get; set; }
 
-        public string EquipmentModel { get; set; }
+        public string Model { get; set; }
         public string AssetTag { get; set; }
-        public int EquipmentTypeId { get; set; }
+        public int TypeId { get; set; }
 
         public int? BuildingNumber { get; set; }
         public int? FloorNumber { get; set; }
         public string Office { get; set; }
 
-        public int EquipmentStatusId { get; set; }
+        public int StatusId { get; set; }
         public int RepairCount { get; set; }
 
-        public string CreatedByRegistrationFirstName { get; set; }
-        public string CreatedByRegistrationLastName { get; set; }
-        public string CreatedByRegistrationMiddleName { get; set; }
-        public string CreatedByRegistrationExtensionName { get; set; }
+        public string CreatedByFirstName { get; set; }
+        public string CreatedByLastName { get; set; }
+        public string CreatedByMiddleName { get; set; }
+        public string CreatedByExtensionName { get; set; }
     }
 }

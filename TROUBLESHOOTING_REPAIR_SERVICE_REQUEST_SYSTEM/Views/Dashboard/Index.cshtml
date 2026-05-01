@@ -6,11 +6,16 @@
     ViewBag.Title = "Dashboard";
 
     var currentUser = ViewBag.CurrentUser as UserSession;
-    var roleName = AccountTypeEnum.IsAdmin(currentUser.PrivilegeIds)
+
+    var isAdmin = AccountTypeEnum.IsAdmin(currentUser.RoleId);
+    var isIT = AccountTypeEnum.IsIT(currentUser.RoleId);
+    var isStandard = AccountTypeEnum.IsStandard(currentUser.RoleId);
+    var roleName = isAdmin
         ? "Administrator"
-        : AccountTypeEnum.IsIT(currentUser.PrivilegeIds)
-            ? "IT"
-            : "Standard User";
+        : isIT ? "IT" : "Standard User";
+
+    var firstName = currentUser.FirstName.Trim();
+    var lastName = currentUser.LastName.Trim();
 }
 
 @section Styles {
@@ -23,7 +28,7 @@
     <section class="dashboard-header panel panel-default">
         <section class="panel-body">
             @* Name *@
-            <h3 class="text-primary dashboard-title wrap-text">Welcome, @currentUser.FirstName @currentUser.LastName</h3>
+            <h3 class="text-primary dashboard-title wrap-text">Welcome, @firstName @lastName</h3>
 
             @* Role *@
             <p class="dashboard-subtitle wrap-text">
@@ -180,20 +185,20 @@
 
         <section class="panel-body">
             <div class="dashboard-action-buttons flex-row flex-wrap">
-                @if (AccountTypeEnum.IsStandard(currentUser.PrivilegeIds))
+                @if (isStandard)
                 {
-                    <a href="@Url.Action("Create", "TechnicalServiceRequests")" class="btn btn-primary dashboard-action-btn">
+                    <a href="@Url.Action("Create", "Request")" class="btn btn-primary dashboard-action-btn">
                         <i class="glyphicon glyphicon-plus"></i>
                         Create Request
                     </a>
-                    <a href="@Url.Action("Index", "TechnicalServiceRequests")" class="btn btn-default dashboard-action-btn">
+                    <a href="@Url.Action("Index", "Request")" class="btn btn-default dashboard-action-btn">
                         <i class="glyphicon glyphicon-list"></i>
                         My Requests
                     </a>
                 }
-                else if (AccountTypeEnum.IsIT(currentUser.PrivilegeIds))
+                else if (isIT)
                 {
-                    <a href="@Url.Action("Index", "TechnicalServiceRequests")" class="btn btn-primary dashboard-action-btn">
+                    <a href="@Url.Action("Index", "Request")" class="btn btn-primary dashboard-action-btn">
                         <i class="glyphicon glyphicon-briefcase"></i>
                         View Work Queue
                     </a>
@@ -212,7 +217,7 @@
                         <i class="glyphicon glyphicon-th-list"></i>
                         Manage Accounts
                     </a>
-                    <a href="@Url.Action("Index", "TechnicalServiceRequests")" class="btn btn-info dashboard-action-btn">
+                    <a href="@Url.Action("Index", "Request")" class="btn btn-info dashboard-action-btn">
                         <i class="glyphicon glyphicon-stats"></i>
                         All Service Requests
                     </a>

@@ -55,10 +55,10 @@
             },
             {
                 data: null,
-                name: 'AccountType',
+                name: 'RoleId',
                 className: "all",
                 render: function (data, type, row) {
-                    const userPrivilegeName = row.AccountType.toUpperCase();
+                    const userPrivilegeName = row.Role?.trim().toUpperCase() ?? "UNKNOWN";
 
                     let htmlClass = "label-default";
                     if (userPrivilegeName === "ADMINISTRATOR" || userPrivilegeName === "ADMIN") {

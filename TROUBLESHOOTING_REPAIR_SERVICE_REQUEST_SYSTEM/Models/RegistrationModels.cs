@@ -25,25 +25,20 @@ namespace TROUBLESHOOTING_REPAIR_SERVICE_REQUEST_SYSTEM.Models
         public string ContactNumber { get; set; }
         public DateTime? RegistrationDate { get; set; }
         public DateTime? ExpiryDate { get; set; }
-        public string AccountType { get; set; }
         public string Code { get; set; }
+        public int RoleId { get; set; }
+        public virtual RegistrationRole Role { get; set; }
 
         public string Office { get; set; }
         public string Position { get; set; }
 
-        public int? ProjectId { get; set; }
-        public virtual Project Project { get; set; }
-
         // Other Information
         public bool IsActive { get; set; }
-        public bool IsUpdated { get; set; }
         public int? RegistrationRequestId { get; set; }
         public int? DeactivatedByRegistrationId { get; set; }
         public string DeactivatedRemarks { get; set; }
-        public int? SessionPrivilegeId { get; set; }
 
         // Navigation Props
-        public virtual ICollection<UserPrivilege> UserPrivileges { get; set; }
         public virtual ICollection<ITAvailability> ITAvailabilities { get; set; }
     }
 
@@ -51,7 +46,6 @@ namespace TROUBLESHOOTING_REPAIR_SERVICE_REQUEST_SYSTEM.Models
     {
         public Registration User { get; set; }
         public RegistrationRequest UserRegistrationRequest { get; set; }
-        public List<UserPrivilege> UserPrivileges { get; set; }
     }
 
     public class RegistrationCreateViewModel
@@ -89,8 +83,6 @@ namespace TROUBLESHOOTING_REPAIR_SERVICE_REQUEST_SYSTEM.Models
             ErrorMessage = ValueConstants.VALID_NAME_REGEX_MESSAGE)]
         public string ExtensionName { get; set; }
 
-        //public string UserName { get; set; }
-
         [Required]
         [EmailAddress]
         [DataType(DataType.EmailAddress)]
@@ -123,7 +115,10 @@ namespace TROUBLESHOOTING_REPAIR_SERVICE_REQUEST_SYSTEM.Models
 
         public string Code { get; set; }
 
-        public string AccountType { get; set; }
+        [Required]
+        [Display(Name = "Role")]
+        [Range(AccountTypeEnum.ADMIN, AccountTypeEnum.STANDARD, ErrorMessage = "Invalid role.")]
+        public int RoleId { get; set; }
 
         [DataType(DataType.DateTime)]
         public DateTime? ExpiryDate { get; set; }

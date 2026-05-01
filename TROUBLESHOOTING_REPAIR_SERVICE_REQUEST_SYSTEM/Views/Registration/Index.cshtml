@@ -25,26 +25,12 @@
                 @* Type Filter *@
                 <div class="filter-selection">
                     <label for="account_type_filter">Account Type:</label>
-                    <select id="account_type_filter" class="form-control">
-                        <option value="0">All</option>
-                        <optgroup label="Account Type">
-                            <option value="@AccountTypeEnum.ADMIN">
-                                @AccountTypeEnum.DisplayName(
-                                    AccountTypeEnum.ADMIN
-                                )
-                            </option>
-                            <option value="@AccountTypeEnum.IT">
-                                @AccountTypeEnum.DisplayName(
-                                    AccountTypeEnum.IT
-                                )
-                            </option>
-                            <option value="@AccountTypeEnum.STANDARD">
-                                @AccountTypeEnum.DisplayName(
-                                    AccountTypeEnum.STANDARD
-                                )
-                            </option>
-                        </optgroup>
-                    </select>
+                    @Html.DropDownList(
+                        "account_type_filter",
+                        AccountTypeEnum.GetSelectListItems(),
+                        "All",
+                        new { @class = "form-control" }
+                   )
                 </div>
             </section>
 
@@ -86,7 +72,7 @@
 
 @section Scripts {
     <script>
-        const userId = "@currentUser.Id";
+        const userId = parseInt("@currentUser.Id", 10);
         const requestUrl = "@Url.Action("GetRegistrations", "Registration")";
     </script>
 

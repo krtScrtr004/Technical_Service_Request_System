@@ -30,9 +30,7 @@ namespace TROUBLESHOOTING_REPAIR_SERVICE_REQUEST_SYSTEM.Models
             return new ApplicationDbContext();
         }
 
-        public DbSet<Project> Projects { get; set; }
-        public DbSet<Privilege> Privileges { get; set; }
-        public DbSet<UserPrivilege> UserPrivileges { get; set; }
+        public DbSet<RegistrationRole> RegistrationRole { get; set; }
 
         public DbSet<Registration> Registrations { get; set; }
         public DbSet<RegistrationRequest> RegistrationRequests { get; set; }
@@ -43,13 +41,13 @@ namespace TROUBLESHOOTING_REPAIR_SERVICE_REQUEST_SYSTEM.Models
         public DbSet<EquipmentLocation> EquipmentLocations { get; set; }
         public DbSet<EquipmentStatus> EquipmentStatuses { get; set; }
 
-        public DbSet<TechnicalServiceRequest> TechnicalServiceRequests { get; set; }
-        public DbSet<TechnicalServiceRequestHistory> TechnicalServiceRequestHistories { get; set; }
-        public DbSet<TechnicalServiceRequestSeverity> TechnicalServiceRequestSeverities { get; set; }
-        public DbSet<TechnicalServiceRequestStatus> TechnicalServiceRequestStatus { get; set; }
-        public DbSet<TechnicalServiceType> TechnicalServiceTypes { get; set; }
+        public DbSet<Request> Requests { get; set; }
+        public DbSet<RequestHistory> RequestHistories { get; set; }
+        public DbSet<RequestSeverity> RequestSeverities { get; set; }
+        public DbSet<RequestStatus> RequestStatuses { get; set; }
+        public DbSet<RequestType> Types { get; set; }
         public DbSet<ScheduledControlProcessDetail> ScheduledControlProcessDetails { get; set; }
-        public DbSet<TechnicalServiceRequestQueue> TechnicalServiceRequestQueues { get; set; }
+        public DbSet<RequestQueue> RequestQueues { get; set; }
 
         public DbSet<ITAvailability> ITAvailabilities { get; set; }
         public DbSet<Notification> Notifications { get; set; }

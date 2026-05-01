@@ -32,6 +32,13 @@ namespace TROUBLESHOOTING_REPAIR_SERVICE_REQUEST_SYSTEM.Controllers
                 throw new HttpException(403, "Forbidden");
             }
 
+            // Only allow IT users to access their own schedule
+            var isIt = AccountTypeEnum.IsIT(currentUser.RoleId);
+            if (isIt && currentUser.Id != id)
+            {
+                throw new HttpException(403, "Forbidden");
+            }
+
             var user = _db.Registrations
                 .Where(r => r.Id == id)
                 .Select(r => new
@@ -95,9 +102,8 @@ namespace TROUBLESHOOTING_REPAIR_SERVICE_REQUEST_SYSTEM.Controllers
                                     throw new Exception($"Cannot block {blockDate:yyyy-MM-dd} as it is outside the allowed date range.");
                                 }
 
-                                var hasScheduledService = _db.TechnicalServiceRequestHistories
-                                   .Any(h => h.ActionTakenByRegistrationId == id &&
-                                             DbFunctions.TruncateTime(h.DateAction.Value) == blockDate.Date);
+                                var hasScheduledService = _db.RequestHistories
+                                   .Any(h => h.ActionTakenById == id && DbFunctions.TruncateTime(h.DateAction.Value) == blockDate.Date);
                                 // Check if there is a scheduled service on the block date
                                 if (hasScheduledService)
                                 {
@@ -191,16 +197,12 @@ namespace TROUBLESHOOTING_REPAIR_SERVICE_REQUEST_SYSTEM.Controllers
                 }
 
                 var userInfo = _db.Registrations
-                    .Include(r => r.UserPrivileges)
                     .Where(r => r.Id == id)
                     .AsEnumerable()
                     .Select(r => new
                     {
                         r.RegistrationDate,
-                        PrivilegeIds = r.UserPrivileges
-                            .Where(p => p.PrivilegeId.HasValue)
-                            .Select(p => p.PrivilegeId.Value)
-                            .ToArray()
+                        r.RoleId
                     })
                     .FirstOrDefault();
                 if (userInfo == null)
@@ -208,7 +210,7 @@ namespace TROUBLESHOOTING_REPAIR_SERVICE_REQUEST_SYSTEM.Controllers
                     throw new Exception("User not found");
                 }
 
-                if (!AccountTypeEnum.IsIT(userInfo.PrivilegeIds))
+                if (!AccountTypeEnum.IsIT(userInfo.RoleId))
                 {
                     throw new Exception("User is not an IT.");
                 }

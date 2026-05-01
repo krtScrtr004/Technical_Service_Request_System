@@ -1,0 +1,95 @@
+﻿@model TROUBLESHOOTING_REPAIR_SERVICE_REQUEST_SYSTEM.Models.RequestHistory
+@using TROUBLESHOOTING_REPAIR_SERVICE_REQUEST_SYSTEM.Enumerables
+@using TROUBLESHOOTING_REPAIR_SERVICE_REQUEST_SYSTEM.Utilities
+
+@{
+    Func<int, string> getStatusLabelClass = (status) =>
+    {
+        switch (status)
+        {
+            case RequestStatusEnum.PENDING:
+                return "label label-warning status-label";
+            case RequestStatusEnum.OPEN:
+                return "label label-primary status-label";
+            case RequestStatusEnum.ONGOING:
+                return "label label-info status-label";
+            case RequestStatusEnum.RESOLVED:
+                return "label label-success status-label";
+            case RequestStatusEnum.CANCELLED:
+                return "label label-danger status-label";
+            case RequestStatusEnum.CLOSED:
+                return "label label-default status-label";
+            default:
+                return "label label-default status-label";
+        }
+    };
+
+    var fullName = GeneralUtilities.CreateFullName(
+        Model.ActionTakenBy.FirstName.Trim(),
+        Model.ActionTakenBy.LastName.Trim(),
+        Model.ActionTakenBy.MiddleName?.Trim(),
+        Model.ActionTakenBy.ExtensionName?.Trim()
+    );
+    var dateAction = Model.DateAction.HasValue
+        ? Model.DateAction.Value.ToString("MMMM dd, yyyy hh:mm tt")
+        : "N/A";
+    var statusId = Model.StatusId.HasValue && Model.StatusId > 0
+        ? Model.StatusId.Value
+        : 0;
+    var statusName = statusId > 0
+        ? RequestStatusEnum.DisplayName(statusId)
+        : "N/A";
+    var actionTaken = !string.IsNullOrEmpty(Model.ActionTaken)
+        ? Model.ActionTaken.Trim()
+        : "N/A";
+}
+
+<tr class="action-history-row">
+    <td colspan="4" class="action-history-entry-cell">
+        <div class="panel panel-default action-history-entry-panel">
+            <div class="panel-body action-history-entry-body">
+                <div class="row action-history-meta-row">
+                    @* Full Name *@
+                    <div class="col-sm-5 col-xs-12 action-history-meta-item">
+                        <p class="action-history-label light-text">TAKEN BY</p>
+                        <p class="action-history-value">
+                            @fullName
+                        </p>
+                    </div>
+
+                    @* Date Action *@
+                    <div class="col-sm-4 col-xs-12 action-history-meta-item">
+                        <p class="action-history-label">DATE</p>
+                        <p class="action-history-value">
+                            @dateAction
+                        </p>
+                    </div>
+
+                    <div class="col-sm-3 col-xs-12 action-history-meta-item">
+                        @* Status *@
+                        <p class="action-history-label">STATUS</p>
+                        @if (statusId > 0)
+                        {
+                            <span class="@getStatusLabelClass(statusId)">
+                                @statusName
+                            </span>
+                        }
+                        else
+                        {
+                            <span class="label label-default">N/A</span>
+                        }
+                    </div>
+                </div>
+
+                <div class="action-history-divider"></div>
+
+                <div class="action-history-action-wrap">
+                    <p class="action-history-label">ACTION TAKEN</p>
+                    <p class="action-taken-text wrap-text">
+                        @actionTaken
+                    </p>
+                </div>
+            </div>
+        </div>
+    </td>
+</tr>

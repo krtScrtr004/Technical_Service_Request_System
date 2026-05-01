@@ -13,6 +13,6 @@ namespace TROUBLESHOOTING_REPAIR_SERVICE_REQUEST_SYSTEM.Models
 
         [Required, MaxLength(150)]
         [Index(IsUnique = true)]
-        public string EquipmentCategoryName { get; set; }
+        public string Name { get; set; }
     }
 }

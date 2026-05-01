@@ -1,0 +1,175 @@
+﻿$(document).ready(function () {
+    $.fn.dataTable.ext.pager.numbers_length = 5;
+
+    function buildRequestStatusLabel(status) {
+        var normalizedStatus = (status.replaceAll(" ", "") || "").toString().trim().toUpperCase();
+        var labelClass = "label-default";
+
+        switch (normalizedStatus) {
+            case "PENDING":
+                labelClass = "label-warning";
+                break;
+            case "ONGOING":
+                labelClass = "label-info";
+                break;
+            case "RESOLVED":
+                labelClass = "label-success";
+                break;
+            case "CANCELLED":
+                labelClass = "label-danger";
+                break;
+            case "OPEN":
+                labelClass = "label-primary";
+                break;
+            case "CLOSED":
+                labelClass = "label-default";
+                break;
+        }
+
+        return `<span class="label ${labelClass}">${normalizedStatus || "N/A"}</span>`;
+    }
+
+    var table = $("#technical_request_table").DataTable({
+        processing: true,
+        serverSide: true,
+        responsive: {
+            details: {
+                type: "column",
+                target: "td.dtr-control"
+            }
+        },
+        autoWidth: false,
+        ajax: {
+            url: requestUrl,
+            type: 'GET',
+            data: function (d) {
+                d.userId = userId,
+                d.typeFilter = $("#type_filter").val(),
+                d.statusFilter = $("#status_filter").val(),
+                d.dateRequestFilter = $("#date_request_filter").val()
+            },
+            error: function (xhr, error, thrown) {
+                console.error('Error loading data:', error);
+            }   
+        },
+        columns: [
+              {
+                data: null,
+                name: "",
+                orderable: false,
+                className: "dtr-control all",
+                render: function(data, type, row) {
+                    return "";
+                }
+            },
+            {
+                data: 'ReferenceCode',
+                name: 'ReferenceCode',
+                className: "reference-code"
+            },
+            {
+                data: null,
+                orderable: false,
+                className: "client-info",
+                render: function (data, type, row) {
+                    var fullName = row.FirstName + ' ';
+                    if (row.MiddleName) {
+                        fullName += row.MiddleName.charAt(0) + '. ';
+                    }
+                    fullName += row.LastName;
+                    if (row.ExtensionName) {
+                        fullName += ' ' + row.ExtensionName
+                    }
+
+                    return `<div class="flex-col">
+                                <section><strong>${fullName}</strong></section>
+                                <section class="client-sub-info flex-row">
+                                    <p class="contact-info single-line-ellipsis" title="${row.Email}">${row.Email}</p>
+                                    <span class="separator">|</span>
+                                    <p class="contact-info single-line-ellipsis" title="${row.ContactNumber}">${row.ContactNumber}</p>
+                                    <span class="separator">|</span>
+                                    <p class="single-line-ellipsis" title="${row.Office}">${row.Office}</p>
+                                </section>
+                            </div>`;
+                }
+            },
+            {
+                data: null,
+                orderable: false,
+                className: "wrap-text",
+                render: function (data, type, row) {
+                    return row.Type!== null
+                        ? row.Type
+                        : row.Others;
+                }
+            },
+            {
+                data: 'Status',
+                name: 'Status',
+                orderable: false,
+                render: function (data) {
+                    return buildRequestStatusLabel(data);
+                }
+            },
+            {
+                data: 'DateRequest',
+                name: 'DateRequest',
+                render: function (data, type, row) {
+                    if (data) {
+                        var date = new Date(data);
+                        var options = { year: 'numeric', month: 'long', day: 'numeric' };
+                        return date.toLocaleDateString('en-US', options);
+                    }
+                    return 'Unknown Date';
+                }
+            },
+            {
+                data: null,
+                orderable: false,
+                render: function (data, type, row) {
+                    let buttons = `<a class="btn btn-sm btn-primary" href="/Request/Details/${row.Id}">
+                                        <i class="glyphicon glyphicon-eye-open"></i>
+                                    </a>`;
+
+                    return `<div class="action-buttons flex-row">${buttons}</div>`;
+                }
+            }
+        ],
+        columnDefs: [
+            { responsivePriority: 1, targets: [1, 2, 3] },
+            { responsivePriority: 100, targets: [4, 5, 6] }
+        ],
+        order: [[5, 'desc']], // Sort by date requested descending
+        pageLength: 10,
+        lengthMenu: [[5, 10, 25, 50], [5, 10, 25, 50]],
+        ordering: true,
+        searching: true
+    });
+
+    $("#type_filter").on("change", function () {
+        table.ajax.reload();
+    });
+
+    $("#status_filter").on("change", function () {
+        table.ajax.reload(null, false);
+    });
+
+    $("#date_request_filter").on("change", function () {
+        table.ajax.reload(null, false);
+    });
+
+    // Setup SignalR connection
+    var hub = $.connection.technicalServiceRequestHub;
+
+    // Listen for new request notifications
+    hub.client.refreshTechnicalServiceRequestList = function () {
+        table.ajax.reload(null, false); // false keeps current page
+    };
+
+    // Start the SignalR connection
+    $.connection.hub.start().done(function () {
+        console.log('SignalR connected');
+    }).fail(function (error) {
+        console.error('SignalR connection failed:', error);
+    });
+});

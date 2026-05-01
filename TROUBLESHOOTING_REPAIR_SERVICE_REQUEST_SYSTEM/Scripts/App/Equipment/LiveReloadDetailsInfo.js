@@ -15,19 +15,19 @@
 
     // Asset Tag / Model
     const assetTagContainer = $(".asset-tag");
-    const equipmentModelContainer = $(".equipment-model");
+    const modelContainer = $(".model");
     if (assetTagContainer.length === 0 || equipmentModelContainer.length === 0) {
         console.warn("Asset tag or equipment model container not found");
     } else {
-        hub.client.refreshEquipmentAssetTag = function (equipmentId, assetTag) {
-            if (isCurrentEquipment(equipmentId)) {
+        hub.client.refreshEquipmentAssetTag = function (id, assetTag) {
+            if (isCurrentEquipment(id)) {
                 assetTagContainer.text(buildEquipmentLabel(assetTag));
             }
         };
 
-        hub.client.refreshEquipmentModel = function (equipmentId, equipmentModel) {
-            if (isCurrentEquipment(equipmentId)) {
-                equipmentModelContainer.text(buildEquipmentLabel(equipmentModel));
+        hub.client.refreshEquipmentModel = function (id, model) {
+            if (isCurrentEquipment(id)) {
+                modelContainer.text(buildEquipmentLabel(model));
             }
         };
     }
@@ -37,8 +37,8 @@
     if (equipmentTypeContainer.length === 0) {
         console.warn("Equipment type container not found");
     } else {
-        hub.client.refreshEquipmentType = function (equipmentId, type) {
-            if (isCurrentEquipment(equipmentId)) {
+        hub.client.refreshEquipmentType = function (id, type) {
+            if (isCurrentEquipment(id)) {
                 equipmentTypeContainer.text(buildEquipmentLabel(type));
             }
         };
@@ -49,8 +49,8 @@
     if (equipmentStatusContainer.length === 0) {
         console.warn("Equipment status container not found");
     } else {
-        hub.client.refreshEquipmentStatus = function (equipmentId, status) {
-            if (isCurrentEquipment(equipmentId)) {
+        hub.client.refreshEquipmentStatus = function (id, status) {
+            if (isCurrentEquipment(id)) {
                 equipmentStatusContainer.text(buildEquipmentLabel(status));
             }
         };
@@ -61,8 +61,8 @@
     if (buildingNumberContainer.length === 0) {
         console.warn("Building number container not found");
     } else {
-        hub.client.refreshEquipmentBuildingNumber = function (equipmentId, buildingNumber) {
-            if (isCurrentEquipment(equipmentId)) {
+        hub.client.refreshEquipmentBuildingNumber = function (id, buildingNumber) {
+            if (isCurrentEquipment(id)) {
                 buildingNumberContainer.text(buildEquipmentLabel(buildingNumber));
             }
         };
@@ -73,8 +73,8 @@
     if (floorNumberContainer.length === 0) {
         console.warn("Floor number container not found");
     } else {
-        hub.client.refreshEquipmentFloorNumber = function (equipmentId, floorNumber) {
-            if (isCurrentEquipment(equipmentId)) {
+        hub.client.refreshEquipmentFloorNumber = function (id, floorNumber) {
+            if (isCurrentEquipment(id)) {
                 floorNumberContainer.text(buildEquipmentLabel(floorNumber));
             }
         };
@@ -85,8 +85,8 @@
     if (officeContainer.length === 0) {
         console.warn("Office container not found");
     } else {
-        hub.client.refreshEquipmentOffice = function (equipmentId, office) {
-            if (isCurrentEquipment(equipmentId)) {
+        hub.client.refreshEquipmentOffice = function (id, office) {
+            if (isCurrentEquipment(id)) {
                 officeContainer.text(buildEquipmentLabel(office));
             }
         };
@@ -97,8 +97,8 @@
     if (repairCountContainer.length === 0) {
         console.warn("Repair count container not found");
     } else {
-        hub.client.refreshEquipmentRepairCount = function (equipmentId, repairCount) {
-            if (isCurrentEquipment(equipmentId)) {
+        hub.client.refreshEquipmentRepairCount = function (id, repairCount) {
+            if (isCurrentEquipment(id)) {
                 repairCountContainer.text(buildEquipmentLabel(repairCount));
             }
         };

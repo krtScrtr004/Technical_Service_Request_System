@@ -112,25 +112,24 @@ namespace TROUBLESHOOTING_REPAIR_SERVICE_REQUEST_SYSTEM.Controllers
 
                     var equipment = new Equipment
                     {
-                        EquipmentModel = equipmentFormViewModel.EquipmentModel.ToUpperInvariant(),
+                        Model = equipmentFormViewModel.Model.ToUpperInvariant(),
                         AssetTag = normalizedAssetTag,
-                        EquipmentTypeId = equipmentFormViewModel.EquipmentTypeId,
-                        EquipmentStatusId = equipmentFormViewModel.EquipmentStatusId,
-                        CreatedByRegistrationId = currentUser.Id,
+                        TypeId = equipmentFormViewModel.TypeId,
+                        StatusId = equipmentFormViewModel.StatusId,
+                        CreatedById = currentUser.Id,
                         CreatedAt = DateTime.UtcNow,
                         UpdatedAt = DateTime.UtcNow,
-                        IsActive = true
                     };
 
                     if (locationRecordId > 0)
                     {
                         // Refer to existing location entry if it already exists
-                        equipment.EquipmentLocationId = locationRecordId;
+                        equipment.LocationId = locationRecordId;
                     }
                     else
                     {
                         // Create a new equipment location entry
-                        equipment.EquipmentLocation = equipmentLocation;
+                        equipment.Location = equipmentLocation;
                     }
 
                     _db.Equipments.Add(equipment);
@@ -173,6 +172,7 @@ namespace TROUBLESHOOTING_REPAIR_SERVICE_REQUEST_SYSTEM.Controllers
             }
         }
 
+        [AuthenticateUserPrivilege(new int[] { AccountTypeEnum.IT, AccountTypeEnum.ADMIN })]
         public ActionResult Edit(int id)
         {
             if (id < 0)
@@ -187,19 +187,19 @@ namespace TROUBLESHOOTING_REPAIR_SERVICE_REQUEST_SYSTEM.Controllers
             }
 
             var equipment = _db.Equipments
-                .Include(e => e.EquipmentLocation)
+                .Include(e => e.Location)
                 .Where(e => e.Id == id)
                 .Select(e => new
                 {
                     e.Id,
                     e.AssetTag,
-                    e.EquipmentModel,
-                    e.EquipmentTypeId,
-                    e.EquipmentLocationId,
-                    e.EquipmentStatusId,
-                    BuildingNumber = (int?)e.EquipmentLocation.BuildingNumber,
-                    FloorNumber = (int?)e.EquipmentLocation.FloorNumber,
-                    e.EquipmentLocation.Office
+                    e.Model,
+                    e.TypeId,
+                    e.LocationId,
+                    e.StatusId,
+                    BuildingNumber = (int?)e.Location.BuildingNumber,
+                    FloorNumber = (int?)e.Location.FloorNumber,
+                    e.Location.Office
                 })
                 .FirstOrDefault();
             if (equipment == null)
@@ -212,11 +212,11 @@ namespace TROUBLESHOOTING_REPAIR_SERVICE_REQUEST_SYSTEM.Controllers
             {
                 Id = equipment.Id,
                 AssetTag = equipment.AssetTag,
-                EquipmentModel = equipment.EquipmentModel,
-                EquipmentTypeId = (int)equipment.EquipmentTypeId,
-                EquipmentStatusId = (int)equipment.EquipmentStatusId,
+                Model = equipment.Model,
+                TypeId = (int)equipment.TypeId,
+                StatusId = (int)equipment.StatusId,
 
-                EquipmentLocationId = equipment.EquipmentLocationId,
+                LocationId = equipment.LocationId,
                 BuildingNumber = equipment.BuildingNumber.HasValue
                     ? equipment.BuildingNumber.Value
                     : (int?)null,
@@ -270,7 +270,7 @@ namespace TROUBLESHOOTING_REPAIR_SERVICE_REQUEST_SYSTEM.Controllers
                         return View(equipmentFormViewModel);
                     }
                     var equipment = _db.Equipments
-                        .Include(e => e.EquipmentLocation)
+                        .Include(e => e.Location)
                         .Where(e => e.Id == id)
                         .FirstOrDefault();
                     if (equipment == null)
@@ -286,46 +286,44 @@ namespace TROUBLESHOOTING_REPAIR_SERVICE_REQUEST_SYSTEM.Controllers
                         updatedDetails.Add("Asset Tag");
                     }
 
-                    var normalizedEquipmentModel = equipmentFormViewModel.EquipmentModel.Trim().ToUpperInvariant();
-                    if (!string.Equals(equipment.EquipmentModel, normalizedEquipmentModel, StringComparison.Ordinal))
+                    var normalizedEquipmentModel = equipmentFormViewModel.Model.Trim().ToUpperInvariant();
+                    if (!string.Equals(equipment.Model, normalizedEquipmentModel, StringComparison.Ordinal))
                     {
-                        equipment.EquipmentModel = normalizedEquipmentModel;
+                        equipment.Model = normalizedEquipmentModel;
                         updatedDetails.Add("Model");
                     }
 
-                    if (equipment.EquipmentTypeId != equipmentFormViewModel.EquipmentTypeId)
+                    if (equipment.TypeId != equipmentFormViewModel.TypeId)
                     {
-                        equipment.EquipmentTypeId = equipmentFormViewModel.EquipmentTypeId;
+                        equipment.TypeId = equipmentFormViewModel.TypeId;
                         updatedDetails.Add("Type");
                     }
 
-                    if (equipment.EquipmentStatusId != equipmentFormViewModel.EquipmentStatusId)
+                    if (equipment.StatusId != equipmentFormViewModel.StatusId)
                     {
-                        equipment.EquipmentStatusId = equipmentFormViewModel.EquipmentStatusId;
+                        equipment.StatusId = equipmentFormViewModel.StatusId;
                         updatedDetails.Add("Status");
 
                         var inactiveStatusIds = EquipmentStatusEnum.GetInActiveIds();
-                        if (inactiveStatusIds.Contains(equipmentFormViewModel.EquipmentStatusId))
+                        if (inactiveStatusIds.Contains(equipmentFormViewModel.StatusId))
                         {
                             // If status is being changed to an inactive status, check if it's currently under repair. If it is, prevent the update and show an error message.
-                            var isUnderRepair = equipment.EquipmentStatusId.HasValue &&
-                                equipment.EquipmentStatusId.Value == (int)EquipmentStatusEnum.UNDER_REPAIR;
+                            var isUnderRepair = equipment.StatusId.HasValue && 
+                                equipment.StatusId.Value == (int)EquipmentStatusEnum.UNDER_REPAIR;
                             if (isUnderRepair)
                             {
                                 TempData["alertModal"] = new AlertModalUtility()
                                 {
                                     Title = "Error",
-                                    Message = "Equipment is currently under repair. Status cannot be updated to " + EquipmentStatusEnum.DisplayName(equipmentFormViewModel.EquipmentStatusId),
+                                    Message = "Equipment is currently under repair. Status cannot be updated to " + EquipmentStatusEnum.DisplayName(equipmentFormViewModel.StatusId),
                                     Status = AlertModalStatus.Success
                                 };
                                 return View(equipmentFormViewModel);
                             }
-
-                            equipment.IsActive = false;
                         }
                     }
 
-                    var currentLocation = equipment.EquipmentLocation;
+                    var currentLocation = equipment.Location;
 
                     EquipmentLocation equipmentLocation = null;
                     var previousBuildingNumber = currentLocation?.BuildingNumber;
@@ -370,12 +368,12 @@ namespace TROUBLESHOOTING_REPAIR_SERVICE_REQUEST_SYSTEM.Controllers
                     if (locationRecordId > 0)
                     {
                         // Refer to existing location entry if it already exists
-                        equipment.EquipmentLocationId = locationRecordId;
+                        equipment.LocationId = locationRecordId;
                     }
                     else
                     {
                         // Create a new equipment location entry
-                        equipment.EquipmentLocation = equipmentLocation;
+                        equipment.Location = equipmentLocation;
                     }
 
                     if (locationChanged)
@@ -393,15 +391,15 @@ namespace TROUBLESHOOTING_REPAIR_SERVICE_REQUEST_SYSTEM.Controllers
 
                     if (updatedDetails.Contains("Model"))
                     {
-                        EquipmentHub.RefreshEquipmentModel(equipment.Id, equipment.EquipmentModel);
+                        EquipmentHub.RefreshEquipmentModel(equipment.Id, equipment.Model);
                     }
 
                     if (updatedDetails.Contains("Type"))
                     {
                         EquipmentHub.RefreshEquipmentType(
                             equipment.Id,
-                            equipment.EquipmentTypeId.HasValue
-                                ? EquipmentTypeEnum.DisplayName(equipment.EquipmentTypeId.Value)
+                            equipment.TypeId.HasValue
+                                ? EquipmentTypeEnum.DisplayName(equipment.TypeId.Value)
                                 : "N/A"
                         );
                     }
@@ -410,17 +408,17 @@ namespace TROUBLESHOOTING_REPAIR_SERVICE_REQUEST_SYSTEM.Controllers
                     {
                         EquipmentHub.RefreshEquipmentStatus(
                             equipment.Id,
-                            equipment.EquipmentStatusId.HasValue
-                                ? EquipmentStatusEnum.DisplayName(equipment.EquipmentStatusId.Value)
+                            equipment.StatusId.HasValue
+                                ? EquipmentStatusEnum.DisplayName(equipment.StatusId.Value)
                                 : "N/A"
                         );
                     }
 
                     if (updatedDetails.Contains("Location"))
                     {
-                        if (equipment.EquipmentLocationId.HasValue || equipment.EquipmentLocation != null)
+                        if (equipment.LocationId.HasValue || equipment.Location != null)
                         {
-                            var refreshedLocation = equipment.EquipmentLocation ?? _db.EquipmentLocations.Find(equipment.EquipmentLocationId);
+                            var refreshedLocation = equipment.Location ?? _db.EquipmentLocations.Find(equipment.LocationId);
                             if (refreshedLocation != null)
                             {
                                 EquipmentHub.RefreshEquipmentBuildingNumber(equipment.Id, refreshedLocation.BuildingNumber);
@@ -481,8 +479,8 @@ namespace TROUBLESHOOTING_REPAIR_SERVICE_REQUEST_SYSTEM.Controllers
             }
 
             var equipment = _db.Equipments
-                .Include(e => e.EquipmentLocation)
-                .Include(e => e.CreatedByRegistration)
+                .Include(e => e.Location)
+                .Include(e => e.CreatedBy)
                 .FirstOrDefault(e => e.Id == id);
 
             if (equipment == null)
@@ -496,17 +494,17 @@ namespace TROUBLESHOOTING_REPAIR_SERVICE_REQUEST_SYSTEM.Controllers
             {
                 Id = equipment.Id,
                 AssetTag = equipment.AssetTag,
-                EquipmentModel = equipment.EquipmentModel,
-                EquipmentTypeId = equipment.EquipmentTypeId ?? 0,
-                BuildingNumber = equipment.EquipmentLocation?.BuildingNumber,
-                FloorNumber = equipment.EquipmentLocation?.FloorNumber,
-                Office = equipment.EquipmentLocation?.Office,
-                EquipmentStatusId = equipment.EquipmentStatusId ?? 0,
+                Model = equipment.Model,
+                TypeId = equipment.TypeId ?? 0,
+                BuildingNumber = equipment.Location?.BuildingNumber,
+                FloorNumber = equipment.Location?.FloorNumber,
+                Office = equipment.Location?.Office,
+                StatusId = equipment.StatusId ?? 0,
                 RepairCount = equipment.RepairCount,
-                CreatedByRegistrationFirstName = equipment.CreatedByRegistration?.FirstName,
-                CreatedByRegistrationMiddleName = equipment.CreatedByRegistration?.MiddleName,
-                CreatedByRegistrationLastName = equipment.CreatedByRegistration?.LastName,
-                CreatedByRegistrationExtensionName = equipment.CreatedByRegistration?.ExtensionName
+                CreatedByFirstName = equipment.CreatedBy?.FirstName,
+                CreatedByMiddleName = equipment.CreatedBy?.MiddleName,
+                CreatedByLastName = equipment.CreatedBy?.LastName,
+                CreatedByExtensionName = equipment.CreatedBy?.ExtensionName
             });
         }
 
@@ -528,12 +526,6 @@ namespace TROUBLESHOOTING_REPAIR_SERVICE_REQUEST_SYSTEM.Controllers
                     throw new Exception("User not found.");
                 }
 
-                // Get user's privilege
-                var associatedUserPrivilege = _db.UserPrivileges
-                    .Where(j => j.RegistrationId == associatedUser.Id && j.PrivilegeId.HasValue)
-                    .Select(i => i.PrivilegeId.Value)
-                    .ToArray();
-
                 // Get DataTables parameters from request
                 var draw = Request["draw"];
                 var start = Request["start"];
@@ -553,19 +545,19 @@ namespace TROUBLESHOOTING_REPAIR_SERVICE_REQUEST_SYSTEM.Controllers
 
                 IQueryable<Equipment> query = null;
 
-                var isStandardUser = AccountTypeEnum.IsStandard(associatedUserPrivilege);
+                var isStandardUser = AccountTypeEnum.IsStandard(associatedUser.RoleId);
                 if (isStandardUser)
                 {
                     // Fetch only equipments associated with user requests
-                    query = _db.TechnicalServiceRequests
-                        .Include(r => r.TechnicalServiceRequestEquipment)
-                        .Include(r => r.TechnicalServiceRequestEquipment.EquipmentType)
-                        .Include(r => r.TechnicalServiceRequestEquipment.EquipmentStatus)
+                    query = _db.Requests
+                        .Include(r => r.Equipment)
+                        .Include(r => r.Equipment.Type)
+                        .Include(r => r.Equipment.Status)
                         .Where(r =>
-                            r.ClientRegistrationId == associatedUser.Id &&
-                            r.TechnicalServiceRequestEquipment != null
+                            r.ClientId == associatedUser.Id &&
+                            r.Equipment != null
                         )
-                        .Select(r => r.TechnicalServiceRequestEquipment)
+                        .Select(r => r.Equipment)
                         .GroupBy(e => e.AssetTag)
                         .Select(g => g.FirstOrDefault())
                         .AsQueryable();
@@ -573,18 +565,19 @@ namespace TROUBLESHOOTING_REPAIR_SERVICE_REQUEST_SYSTEM.Controllers
                 else
                 {
                     query = _db.Equipments
-                        .Include(e => e.EquipmentType)
-                        .Include(e => e.EquipmentStatus)
+                        .Include(e => e.Type)
+                        .Include(e => e.Status)
                         .AsQueryable();
                 }
 
+                // Apply status filter
                 if (!string.IsNullOrEmpty(statusFilter))
                 {
                     if (int.TryParse(statusFilter, out int statusIntValue) && statusIntValue > 0)
                     {
                         query = query.Where(e =>
-                                e.EquipmentStatusId.HasValue &&
-                                e.EquipmentStatusId.Value == statusIntValue
+                                e.StatusId.HasValue &&
+                                e.StatusId.Value == statusIntValue
                             )
                             .AsQueryable();
                     }
@@ -596,8 +589,8 @@ namespace TROUBLESHOOTING_REPAIR_SERVICE_REQUEST_SYSTEM.Controllers
                     if (int.TryParse(typeFilter, out int typeIntValue) && typeIntValue > 0)
                     {
                         query = query.Where(e =>
-                                e.EquipmentTypeId.HasValue &&
-                                e.EquipmentTypeId.Value == typeIntValue
+                                e.TypeId.HasValue &&
+                                e.TypeId.Value == typeIntValue
                             )
                             .AsQueryable();
                     }
@@ -611,9 +604,9 @@ namespace TROUBLESHOOTING_REPAIR_SERVICE_REQUEST_SYSTEM.Controllers
                 {
                     query = query.Where(e =>
                         e.AssetTag.Contains(searchValue) ||
-                        e.EquipmentModel.Contains(searchValue) ||
-                        e.EquipmentType.EquipmentTypeName.Contains(searchValue) ||
-                        e.EquipmentStatus.EquipmentStatusName.Contains(searchValue)
+                        e.Model.Contains(searchValue) ||
+                        e.Type.Name.Contains(searchValue) ||
+                        e.Status.Name.Contains(searchValue)
                     );
                 }
 
@@ -630,18 +623,18 @@ namespace TROUBLESHOOTING_REPAIR_SERVICE_REQUEST_SYSTEM.Controllers
                             break;
                         case 2:
                             query = sortDirection == "asc"
-                                ? query.OrderBy(e => e.EquipmentModel)
-                                : query.OrderByDescending(e => e.EquipmentModel);
+                                ? query.OrderBy(e => e.Model)
+                                : query.OrderByDescending(e => e.Model);
                             break;
                         case 3:
                             query = sortDirection == "asc"
-                                ? query.OrderBy(e => e.EquipmentType.EquipmentTypeName)
-                                : query.OrderByDescending(e => e.EquipmentType.EquipmentTypeName);
+                                ? query.OrderBy(e => e.Type.Name)
+                                : query.OrderByDescending(e => e.Type.Name);
                             break;
                         case 4:
                             query = sortDirection == "asc"
-                                ? query.OrderBy(e => e.EquipmentStatus.EquipmentStatusName)
-                                : query.OrderByDescending(e => e.EquipmentStatus.EquipmentStatusName);
+                                ? query.OrderBy(e => e.Status.Name)
+                                : query.OrderByDescending(e => e.Status.Name);
                             break;
                         case 5:
                             query = sortDirection == "asc"
@@ -669,12 +662,12 @@ namespace TROUBLESHOOTING_REPAIR_SERVICE_REQUEST_SYSTEM.Controllers
                     {
                         e.Id,
                         e.AssetTag,
-                        e.EquipmentModel,
-                        EquipmentType = e.EquipmentType != null
-                            ? e.EquipmentType.EquipmentTypeName
+                        e.Model,
+                        Type = e.Type != null
+                            ? e.Type.Name
                             : "N/A",
-                        EquipmentStatus = e.EquipmentStatus != null
-                            ? e.EquipmentStatus.EquipmentStatusName
+                        Status = e.Status != null
+                            ? e.Status.Name
                             : "N/A",
                         e.RepairCount
                     })

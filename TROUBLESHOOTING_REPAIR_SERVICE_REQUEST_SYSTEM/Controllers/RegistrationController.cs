@@ -71,36 +71,33 @@ namespace TROUBLESHOOTING_REPAIR_SERVICE_REQUEST_SYSTEM.Controllers
              * redirect them to their own details page instead.
              */
             if (id != currentUser.Id &&
-                (AccountTypeEnum.IsStandard(currentUser.PrivilegeIds) ||
-                 AccountTypeEnum.IsIT(currentUser.PrivilegeIds)))
+                (AccountTypeEnum.IsStandard(currentUser.RoleId) ||
+                 AccountTypeEnum.IsIT(currentUser.RoleId)))
             {
                 return RedirectToAction("Details", new { id = currentUser.Id });
             }
 
-            var user = _db.Registrations.Find(id);
+            var user = _db.Registrations
+                .Include(i => i.Role)
+                .FirstOrDefault(i => i.Id == id);
             if (user == null)
             {
                 throw new HttpException(404, "Not found");
             }
             var userRegistrationRequest = _db.RegistrationRequests
                 .FirstOrDefault(i => i.Id == user.RegistrationRequestId);
-            var userPrivileges = _db.UserPrivileges
-                .Where(i => i.RegistrationId == user.Id)
-                .ToList();
 
             // Populate model with foreign properties
             model.User = user;
             model.UserRegistrationRequest = userRegistrationRequest;
-            model.UserPrivileges = userPrivileges;
 
             ViewBag.CurrentUser = currentUser;
-            ViewBag.CurrentUserPrivileges = currentUser.PrivilegeIds;
             return View(model);
         }
 
         // GET: /Registration/Create
         [Authorize2]
-
+        [AuthenticateUserPrivilege(new int[] { AccountTypeEnum.ADMIN })]
         public ActionResult Create(int id)
         {
             var registrationRequest = _db.RegistrationRequests
@@ -209,10 +206,10 @@ namespace TROUBLESHOOTING_REPAIR_SERVICE_REQUEST_SYSTEM.Controllers
                         Position = registrationCreateViewModel.Position?.Trim().ToUpper(),
                         RegistrationDate = DateTime.Now,
                         ExpiryDate = registrationCreateViewModel.ExpiryDate,
-                        AccountType = registrationCreateViewModel.AccountType,
                         RegistrationRequestId = registrationRequest.Id,
                         ContactNumber = registrationCreateViewModel.ContactNumber.Trim(),
                         IsActive = true,
+                        RoleId = registrationCreateViewModel.RoleId
                     };
 
                     _db.Registrations.Add(registration);
@@ -227,40 +224,12 @@ namespace TROUBLESHOOTING_REPAIR_SERVICE_REQUEST_SYSTEM.Controllers
                     registration.LastName.Replace("Ñ", "N");
 
                     // Update the registration with the generated username and code
-                    //registration.UserName = registrationCreateViewModel.Email;
                     registration.Code = code;
 
                     this.CreateApplicationUser(ref registrationCreateViewModel, registration, code);
 
                     // this.SendEmailUponCreation(registration, code);
 
-                    var userprivilege = new UserPrivilege
-                    {
-                        RegistrationId = registration.Id
-                    };
-
-                    if (AccountTypeEnum.IsAdmin(registrationCreateViewModel.AccountType))
-                    {
-                        userprivilege.PrivilegeId = AccountTypeEnum.ADMIN;
-                    }
-                    else if (AccountTypeEnum.IsIT(registrationCreateViewModel.AccountType))
-                    {
-                        userprivilege.PrivilegeId = AccountTypeEnum.IT;
-                    }
-                    else if (AccountTypeEnum.IsStandard(registrationCreateViewModel.AccountType))
-                    {
-                        userprivilege.PrivilegeId = AccountTypeEnum.STANDARD;
-                    }
-                    else
-                    {
-                        throw new Exception("Invalid account type.");
-                    }
-                    _db.UserPrivileges.Add(userprivilege);
-
-                    // registration.SessionPrivilegeId = userprivilege.PrivilegeId;
-
-                    // Update the registration request to indicate that the account information has been provided
-                    registrationRequest.AccountInformation = true;
                     _db.Entry(registrationRequest).State = EntityState.Modified;
                     _db.SaveChanges();
 
@@ -352,23 +321,16 @@ namespace TROUBLESHOOTING_REPAIR_SERVICE_REQUEST_SYSTEM.Controllers
                 }
 
                 var registration = _db.Registrations
-                    .Include(r => r.UserPrivileges)
                     .FirstOrDefault(r => r.Id == id);
                 if (registration == null)
                 {
                     throw new HttpException(404, "Not found");
                 }
 
-                var currentPrivileges = registration.UserPrivileges.ToArray();
-                var currentPrivilegeIds = currentPrivileges
-                    .Where(p => p.PrivilegeId.HasValue)
-                    .Select(r => r.PrivilegeId.Value)
-                    .ToArray();
-
                 try
                 {
                     // Check for active service when user is an IT
-                    if (AccountTypeEnum.IsIT(currentPrivilegeIds) && IsTechnicianBusy(registration.Id))
+                    if (AccountTypeEnum.IsIT(registration.RoleId) && IsTechnicianBusy(registration.Id))
                     {
                         TempData["AlertModal"] = new AlertModalUtility
                         {
@@ -380,26 +342,17 @@ namespace TROUBLESHOOTING_REPAIR_SERVICE_REQUEST_SYSTEM.Controllers
                     }
 
                     // Check if user does not have the privilege that is being updated
-                    if (!currentPrivilegeIds.Contains(update_privilege))
+                    if (registration.RoleId != update_privilege)
                     {
-                        foreach (var privilege in currentPrivileges)
-                        {
-                            // Modify all existing privilege
-                            if (privilege.PrivilegeId.HasValue)
-                            {
-                                privilege.PrivilegeId = update_privilege;
-                                _db.Entry(privilege).State = EntityState.Modified;
-                            }
-                        }
+                        registration.RoleId = update_privilege;
 
-                        var privilegeName = AccountTypeEnum.DisplayName(update_privilege);
-                        registration.AccountType = privilegeName;
                         _db.Entry(registration).State = EntityState.Modified;
 
+                        var roleName = AccountTypeEnum.DisplayName(update_privilege);
                         _db.Notifications.Add(new Notification()
                         {
                             Title = "Privilege Update",
-                            Message = "Your privilege has been updated to " + privilegeName + ". Please log in again in order for this change to take effect.",
+                            Message = "Your privilege has been updated to " + roleName + ". Please log in again in order for this change to take effect.",
                             RecipientRegistrationId = registration.Id,
                             IsRead = false,
                             IsActive = true,
@@ -409,7 +362,7 @@ namespace TROUBLESHOOTING_REPAIR_SERVICE_REQUEST_SYSTEM.Controllers
                         });
 
                         // Update user roles based on the new privilege
-                        UpdateUserRoles(registration, privilegeName);
+                        UpdateUserRoles(registration, roleName);
 
                         _db.SaveChanges();
                         transaction.Commit();
@@ -423,7 +376,7 @@ namespace TROUBLESHOOTING_REPAIR_SERVICE_REQUEST_SYSTEM.Controllers
                             Message = "User privilege updated successfully.",
                             Status = AlertModalStatus.Success
                         };
-                        Log.Information($"User privilege updated successfully for registration ID {registration.Id} by admin ID {GetUserSession()?.Id.ToString() ?? "Unknown"}. New privilege: {privilegeName}");
+                        Log.Information($"User privilege updated successfully for registration ID {registration.Id} by admin ID {GetUserSession()?.Id.ToString() ?? "Unknown"}. New privilege: {roleName}");
                     }
                 }
                 catch (Exception ex)
@@ -481,7 +434,7 @@ namespace TROUBLESHOOTING_REPAIR_SERVICE_REQUEST_SYSTEM.Controllers
 
                     var currentUser = _db.Registrations
                         .FirstOrDefault(x => x.Email == User.Identity.Name);
-                    if (currentUser == null || !AccountTypeEnum.IsAdmin(currentUser.AccountType))
+                    if (currentUser == null || !AccountTypeEnum.IsAdmin(currentUser.RoleId))
                     {
                         throw new Exception("You do not have permission to perform this action.");
                     }
@@ -501,11 +454,7 @@ namespace TROUBLESHOOTING_REPAIR_SERVICE_REQUEST_SYSTEM.Controllers
                     }
 
                     // Check for active service when user is an IT
-                    var registrationPrivileges = registration.UserPrivileges
-                        .Where(p => p.PrivilegeId.HasValue)
-                        .Select(p => p.PrivilegeId.Value)
-                        .ToArray();
-                    if (AccountTypeEnum.IsIT(registrationPrivileges) && IsTechnicianBusy(registration.Id))
+                    if (AccountTypeEnum.IsIT(registration.RoleId) && IsTechnicianBusy(registration.Id))
                     {
                         TempData["AlertModal"] = new AlertModalUtility
                         {
@@ -566,11 +515,9 @@ namespace TROUBLESHOOTING_REPAIR_SERVICE_REQUEST_SYSTEM.Controllers
                     .Select(i => new
                     {
                         i.Id,
-                        i.AccountType,
+                        i.RoleId,
                         i.ContactNumber,
                         i.IsActive,
-                        UserPrivileges = i.UserPrivileges
-                            .Select(j => j.PrivilegeId)
                     })
                     .FirstOrDefault();
                 if (associatedUser == null || associatedUser?.IsActive == false)
@@ -578,7 +525,7 @@ namespace TROUBLESHOOTING_REPAIR_SERVICE_REQUEST_SYSTEM.Controllers
                     throw new Exception("User not found.");
                 }
 
-                if (!associatedUser.UserPrivileges.Contains(AccountTypeEnum.ADMIN))
+                if (!AccountTypeEnum.IsAdmin(associatedUser.RoleId))
                 {
                     throw new Exception("You do not have permission to access this resource.");
                 }
@@ -593,18 +540,14 @@ namespace TROUBLESHOOTING_REPAIR_SERVICE_REQUEST_SYSTEM.Controllers
 
                 var accountTypeFilter = Request["accountTypeFilter"];
 
-                var query = _db.Registrations.Where(i => i.IsActive == true);
+                var query = _db.Registrations
+                    .Include(i => i.Role)
+                    .Where(i => i.IsActive == true);
 
                 // Apply account type filter
                 if (int.TryParse(accountTypeFilter, out var accountTypeIntValue) && accountTypeIntValue > 0)
                 {
-                    query = query.Where(i =>
-                        i.UserPrivileges
-                            .Any(j =>
-                                j.PrivilegeId.HasValue &&
-                                j.PrivilegeId.Value == accountTypeIntValue
-                            )
-                    );
+                    query = query.Where(i => i.RoleId == accountTypeIntValue);
                 }
 
                 var recordsTotal = query.Count();
@@ -618,7 +561,7 @@ namespace TROUBLESHOOTING_REPAIR_SERVICE_REQUEST_SYSTEM.Controllers
                         i.LastName.Contains(searchValue) ||
                         i.Email.Contains(searchValue) ||
                         i.ContactNumber.Contains(searchValue) ||
-                        i.AccountType.Contains(searchValue)
+                        i.Role.Name.Contains(searchValue)
                     );
                 }
                 var recordsFiltered = query.Count();
@@ -646,8 +589,8 @@ namespace TROUBLESHOOTING_REPAIR_SERVICE_REQUEST_SYSTEM.Controllers
                             break;
                         case 4:
                             query = sortDirection == "asc"
-                                ? query.OrderBy(i => i.AccountType)
-                                : query.OrderByDescending(i => i.AccountType);
+                                ? query.OrderBy(i => i.Role.Name)
+                                : query.OrderByDescending(i => i.Role.Name);
                             break;
                         default:
                             query = query.OrderBy(i => i.LastName); // Default sorting
@@ -671,7 +614,7 @@ namespace TROUBLESHOOTING_REPAIR_SERVICE_REQUEST_SYSTEM.Controllers
                         i.LastName,
                         i.Email,
                         i.ContactNumber,
-                        i.AccountType,
+                        Role = i.Role.Name,
                         i.IsActive
                     })
                     .ToList();
@@ -761,21 +704,18 @@ namespace TROUBLESHOOTING_REPAIR_SERVICE_REQUEST_SYSTEM.Controllers
                 throw new Exception("Failed to create user: " + string.Join(", ", result.Errors));
             }
 
-            // If the user creation is successful, proceed to assign roles and privileges
-            var officerNew = _db.Registrations.Find(registration.Id);
-            //officerNew.UserName = username;
-
+            var roleName = AccountTypeEnum.DisplayName(registration.RoleId);
             var RoleManager = new RoleManager<IdentityRole>(new RoleStore<IdentityRole>(_db));
             // Check if the role for the officer's account type exists, and if not, create it
-            if (!RoleManager.RoleExists(officerNew.AccountType))
+            if (!RoleManager.RoleExists(roleName))
             {
-                var role = new IdentityRole(officerNew.AccountType);
+                var role = new IdentityRole(roleName);
                 RoleManager.Create(role);
             }
 
             // Assign the officer to the appropriate role based on their account type
             var temp = _db.Users.Single(i => i.UserName == user.UserName);
-            UserManager.AddToRole(temp.Id, officerNew.AccountType);
+            UserManager.AddToRole(temp.Id, roleName);
         }
 
         private void UpdateUserRoles(Registration registration, string privilegeName)
@@ -819,17 +759,17 @@ namespace TROUBLESHOOTING_REPAIR_SERVICE_REQUEST_SYSTEM.Controllers
 
         private bool IsTechnicianBusy(int technicianId)
         {
-            var activeStatusIds = TechnicalServiceRequestStatusEnum.GetActiveStatusIds();
-            var nonAssistedRequestIds = TechnicalServiceTypeEnum.GetNonAssistedServiceIds();
+            var activeStatusIds = RequestStatusEnum.GetActiveStatusIds();
+            var nonAssistedRequestIds = RequestTypeEnum.GetNonAssistedServiceIds();
 
-            return _db.TechnicalServiceRequests.Any(r =>
-                r.TechnicalServiceRequestStatusId.HasValue &&
-                activeStatusIds.Contains(r.TechnicalServiceRequestStatusId.Value) &&
-                r.TechnicalServiceTypeId.HasValue &&
-                !nonAssistedRequestIds.Contains(r.TechnicalServiceTypeId.Value) &&
-                r.TechnicalServiceRequestHistories
+            return _db.Requests.Any(r =>
+                r.StatusId.HasValue &&
+                activeStatusIds.Contains(r.StatusId.Value) &&
+                r.TypeId.HasValue &&
+                !nonAssistedRequestIds.Contains(r.TypeId.Value) &&
+                r.Histories
                     .OrderByDescending(h => h.UpdatedAt)
-                    .Select(h => h.ActionTakenByRegistrationId)
+                    .Select(h => h.ActionTakenById)
                     .FirstOrDefault() == technicianId
             );
         }

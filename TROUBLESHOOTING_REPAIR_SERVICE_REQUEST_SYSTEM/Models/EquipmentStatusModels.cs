@@ -8,7 +8,6 @@ namespace TROUBLESHOOTING_REPAIR_SERVICE_REQUEST_SYSTEM.Models
     public class EquipmentStatus
     {
         public int Id { get; set; }
-        public string EquipmentStatusName { get; set; }
-        public bool IsActive { get; set; }
+        public string Name { get; set; }
     }
 }

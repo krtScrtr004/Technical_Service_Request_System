@@ -30,18 +30,18 @@ namespace TROUBLESHOOTING_REPAIR_SERVICE_REQUEST_SYSTEM
             using (var _db = new ApplicationDbContext())
             {
                 // Look up the registration ID associated with the email.
-                var recipientRegistrationAccountType = _db.Registrations
+                var userPermission = _db.Registrations
                     .Where(r => r.Email == email)
-                    .Select(r => r.AccountType)
+                    .Select(r => r.Role.Name)
                     .FirstOrDefault();
-                if (recipientRegistrationAccountType != null)
+                if (!string.IsNullOrEmpty(userPermission))
                 {
-                    if (AccountTypeEnum.IsAdmin(recipientRegistrationAccountType))
+                    if (AccountTypeEnum.IsAdmin(userPermission))
                     {
                         // Add the connection to a group named "ADMIN" so that we can target notifications to admins
                         await Groups.Add(Context.ConnectionId, AdminGroupName);
                     }
-                    else if (AccountTypeEnum.IsIT(recipientRegistrationAccountType))
+                    else if (AccountTypeEnum.IsIT(userPermission))
                     {
                         // Add the connection to a group named "IT" so that we can target notifications to IT staff
                         await Groups.Add(Context.ConnectionId, ITGroupName);
@@ -113,52 +113,52 @@ namespace TROUBLESHOOTING_REPAIR_SERVICE_REQUEST_SYSTEM
             DashboardHub.RefreshDashboard();
         }
 
-        public static void RefreshEquipmentAssetTag(int equipmentId, string assetTag)
+        public static void RefreshEquipmentAssetTag(int id, string assetTag)
         {
             var context = GlobalHost.ConnectionManager.GetHubContext<EquipmentHub>();
-            context.Clients.All.refreshEquipmentAssetTag(equipmentId, assetTag);
+            context.Clients.All.refreshEquipmentAssetTag(id, assetTag);
         }
 
-        public static void RefreshEquipmentModel(int equipmentId, string equipmentModel)
+        public static void RefreshEquipmentModel(int id, string model)
         {
             var context = GlobalHost.ConnectionManager.GetHubContext<EquipmentHub>();
-            context.Clients.All.refreshEquipmentModel(equipmentId, equipmentModel);
+            context.Clients.All.refreshEquipmentModel(id, model);
         }
 
-        public static void RefreshEquipmentType(int equipmentId, string type)
+        public static void RefreshEquipmentType(int id, string type)
         {
             var context = GlobalHost.ConnectionManager.GetHubContext<EquipmentHub>();
-            context.Clients.All.refreshEquipmentType(equipmentId, type);
+            context.Clients.All.refreshEquipmentType(id, type);
         }
 
-        public static void RefreshEquipmentStatus(int equipmentId, string status)
+        public static void RefreshEquipmentStatus(int id, string status)
         {
             var context = GlobalHost.ConnectionManager.GetHubContext<EquipmentHub>();
-            context.Clients.All.refreshEquipmentStatus(equipmentId, status);
+            context.Clients.All.refreshEquipmentStatus(id, status);
         }
 
-        public static void RefreshEquipmentBuildingNumber(int equipmentId, int buildingNumber)
+        public static void RefreshEquipmentBuildingNumber(int id, int buildingNumber)
         {
             var context = GlobalHost.ConnectionManager.GetHubContext<EquipmentHub>();
-            context.Clients.All.refreshEquipmentBuildingNumber(equipmentId, buildingNumber);
+            context.Clients.All.refreshEquipmentBuildingNumber(id, buildingNumber);
         }
 
-        public static void RefreshEquipmentFloorNumber(int equipmentId, int floorNumber)
+        public static void RefreshEquipmentFloorNumber(int id, int floorNumber)
         {
             var context = GlobalHost.ConnectionManager.GetHubContext<EquipmentHub>();
-            context.Clients.All.refreshEquipmentFloorNumber(equipmentId, floorNumber);
+            context.Clients.All.refreshEquipmentFloorNumber(id, floorNumber);
         }
 
-        public static void RefreshEquipmentOffice(int equipmentId, string office)
+        public static void RefreshEquipmentOffice(int id, string office)
         {
             var context = GlobalHost.ConnectionManager.GetHubContext<EquipmentHub>();
-            context.Clients.All.refreshEquipmentOffice(equipmentId, office);
+            context.Clients.All.refreshEquipmentOffice(id, office);
         }
 
-        public static void RefreshEquipmentRepairCount(int equipmentId, int repairCount)
+        public static void RefreshEquipmentRepairCount(int id, int repairCount)
         {
             var context = GlobalHost.ConnectionManager.GetHubContext<EquipmentHub>();
-            context.Clients.All.refreshEquipmentRepairCount(equipmentId, repairCount);
+            context.Clients.All.refreshEquipmentRepairCount(id, repairCount);
         }
     }
 
@@ -178,42 +178,42 @@ namespace TROUBLESHOOTING_REPAIR_SERVICE_REQUEST_SYSTEM
             DashboardHub.RefreshDashboard();
         }
 
-        public static void RefreshTechnicalServiceRequestSeverity(int technicalServiceRequestId, string severityName)
+        public static void RefreshTechnicalServiceRequestSeverity(int id, string severity)
         {
             var context = GlobalHost.ConnectionManager.GetHubContext<TechnicalServiceRequestHub>();
-            context.Clients.All.refreshTechnicalServiceRequestSeverity(technicalServiceRequestId, severityName);
+            context.Clients.All.refreshTechnicalServiceRequestSeverity(id, severity);
 
             DashboardHub.RefreshDashboard();
         }
 
-        public static void RefreshTechnicalServiceRequestStatus(int technicalServiceRequestId, string statusName)
+        public static void RefreshTechnicalServiceRequestStatus(int id, string status)
         {
             var context = GlobalHost.ConnectionManager.GetHubContext<TechnicalServiceRequestHub>();
-            context.Clients.All.refreshTechnicalServiceRequestStatus(technicalServiceRequestId, statusName);
+            context.Clients.All.refreshTechnicalServiceRequestStatus(id, status);
 
             DashboardHub.RefreshDashboard();
         }
 
-        public static void RefreshTechnicalServiceRequestDescription(int technicalServiceRequestId, string description)
+        public static void RefreshTechnicalServiceRequestDescription(int id, string description)
         {
             var context = GlobalHost.ConnectionManager.GetHubContext<TechnicalServiceRequestHub>();
-            context.Clients.All.refreshTechnicalServiceRequestDescription(technicalServiceRequestId, description);
+            context.Clients.All.refreshTechnicalServiceRequestDescription(id, description);
 
             DashboardHub.RefreshDashboard();
         }
 
-        public static void RefreshTechnicalServiceRequestActionHistory(int technicalServiceRequestHistoryId, int technicalServiceRequestId)
+        public static void RefreshTechnicalServiceRequestActionHistory(int historyId, int requestId)
         {
             var context = GlobalHost.ConnectionManager.GetHubContext<TechnicalServiceRequestHub>();
-            context.Clients.All.refreshTechnicalServiceRequestActionHistory(technicalServiceRequestHistoryId, technicalServiceRequestId);
+            context.Clients.All.refreshTechnicalServiceRequestActionHistory(historyId, requestId);
 
             DashboardHub.RefreshDashboard();
         }
 
-        public static void RefreshTechnicalServiceRequestFormGeneration(int technicalServiceRequestId)
+        public static void RefreshTechnicalServiceRequestFormGeneration(int id)
         {
             var context = GlobalHost.ConnectionManager.GetHubContext<TechnicalServiceRequestHub>();
-            context.Clients.All.refreshTechnicalServiceRequestFormGeneration(technicalServiceRequestId);
+            context.Clients.All.refreshTechnicalServiceRequestFormGeneration(id);
 
             DashboardHub.RefreshDashboard();
         }
@@ -256,18 +256,18 @@ namespace TROUBLESHOOTING_REPAIR_SERVICE_REQUEST_SYSTEM
 
         // By ID
 
-        public static void RefreshNotificationList(int recipientRegistrationId)
+        public static void RefreshNotificationList(int id)
         {
             var context = GlobalHost.ConnectionManager.GetHubContext<NotificationHub>();
-            context.Clients.Group(RecipientGroupName(recipientRegistrationId)).refreshNotificationList();
+            context.Clients.Group(RecipientGroupName(id)).refreshNotificationList();
 
             DashboardHub.RefreshDashboard();
         }
 
-        public static void RefreshNotificationBadge(int recipientRegistrationId)
+        public static void RefreshNotificationBadge(int id)
         {
             var context = GlobalHost.ConnectionManager.GetHubContext<NotificationHub>();
-            context.Clients.Group(RecipientGroupName(recipientRegistrationId)).refreshNotificationBadge();
+            context.Clients.Group(RecipientGroupName(id)).refreshNotificationBadge();
 
             DashboardHub.RefreshDashboard();
         }
@@ -317,10 +317,10 @@ namespace TROUBLESHOOTING_REPAIR_SERVICE_REQUEST_SYSTEM
             await base.OnConnected();
         }
 
-        public static void RefreshITAvailabilityTable(int itId)
+        public static void RefreshITAvailabilityTable(int id)
         {
             var context = GlobalHost.ConnectionManager.GetHubContext<ITAvailabilityHub>();
-            context.Clients.All.refreshITAvailabilityTable(itId);
+            context.Clients.All.refreshITAvailabilityTable(id);
 
             DashboardHub.RefreshDashboard();
         }

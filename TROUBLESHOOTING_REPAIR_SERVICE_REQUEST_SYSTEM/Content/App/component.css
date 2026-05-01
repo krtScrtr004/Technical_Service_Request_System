@@ -18,8 +18,9 @@
     }
 
     .filter-selection > select {
-        width: 25ch;
-        font-weight: 800;
+        width: 25ch !important;
+        padding: 8px !important;
+        font-weight: 800 !important;
     }
 
 /* Asset tag suggestion UI */

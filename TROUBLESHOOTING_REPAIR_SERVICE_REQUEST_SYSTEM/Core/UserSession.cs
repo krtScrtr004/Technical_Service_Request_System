@@ -20,7 +20,7 @@ namespace TROUBLESHOOTING_REPAIR_SERVICE_REQUEST_SYSTEM.Core
         private string _contactNumber;
         private string _office;
         private string _position;
-        private int[] _privilegeIds;
+        private int _roleId;
 
         public int Id => _id;
         public string FirstName => _firstName;
@@ -32,7 +32,7 @@ namespace TROUBLESHOOTING_REPAIR_SERVICE_REQUEST_SYSTEM.Core
         public string ContactNumber => _contactNumber;
         public string Office => _office;
         public string Position => _position;
-        public int[] PrivilegeIds => _privilegeIds;
+        public int RoleId => _roleId;
 
         public UserSession(
             int id,
@@ -45,7 +45,7 @@ namespace TROUBLESHOOTING_REPAIR_SERVICE_REQUEST_SYSTEM.Core
             string contactNumber,
             string office,
             string position,
-            int[] privilegeIds
+            int roleId
         )
         {
             if (HttpContext.Current?.Session == null)
@@ -63,7 +63,7 @@ namespace TROUBLESHOOTING_REPAIR_SERVICE_REQUEST_SYSTEM.Core
             _contactNumber = contactNumber;
             _office = office;
             _position = position;
-            _privilegeIds = privilegeIds;
+            _roleId = roleId;
 
             // Store in session for persistence across requests
             HttpContext.Current.Session["Id"] = id;
@@ -76,20 +76,11 @@ namespace TROUBLESHOOTING_REPAIR_SERVICE_REQUEST_SYSTEM.Core
             HttpContext.Current.Session["contactNumber"] = contactNumber;
             HttpContext.Current.Session["office"] = office;
             HttpContext.Current.Session["position"] = position;
-            HttpContext.Current.Session["privilegeIds"] = privilegeIds;
+            HttpContext.Current.Session["roleId"] = roleId;
         }
 
         public Registration ToRegistration()
         {
-            var privileges = new List<UserPrivilege>();
-            foreach (var privilegeId in this.PrivilegeIds)
-            {
-                privileges.Add(new UserPrivilege
-                {
-                    RegistrationId = this.Id,
-                    PrivilegeId = privilegeId
-                });
-            }
 
             return new Registration
             {
@@ -103,7 +94,7 @@ namespace TROUBLESHOOTING_REPAIR_SERVICE_REQUEST_SYSTEM.Core
                 ContactNumber = this.ContactNumber,
                 Office = this.Office,
                 Position = this.Position,
-                UserPrivileges = privileges
+                RoleId = this.RoleId
             };
         }
 
@@ -131,7 +122,7 @@ namespace TROUBLESHOOTING_REPAIR_SERVICE_REQUEST_SYSTEM.Core
                 (string)session["contactNumber"],
                 (string)session["office"],
                 (string)session["position"],
-                (int[])session["privilegeIds"]
+                (int)session["roleId"]
             );
         }
     }
@@ -157,7 +148,6 @@ namespace TROUBLESHOOTING_REPAIR_SERVICE_REQUEST_SYSTEM.Core
 
             // Session expired/missing — load from DB
             var registration = _db.Registrations
-                .Include(r => r.UserPrivileges)
                 .Where(r => r.Email == userEmail)
                 .FirstOrDefault();
             if (registration == null)
@@ -177,10 +167,7 @@ namespace TROUBLESHOOTING_REPAIR_SERVICE_REQUEST_SYSTEM.Core
                 contactNumber: registration.ContactNumber,
                 office: registration.Office,
                 position: registration.Position,
-                privilegeIds: registration.UserPrivileges
-                    .Where(p => p.PrivilegeId.HasValue)
-                    .Select(p => p.PrivilegeId.Value)
-                    .ToArray()
+                roleId: registration.RoleId
             );
 
             return newSession;

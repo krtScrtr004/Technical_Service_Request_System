@@ -139,8 +139,8 @@
     
     const itAvailabilityHub = $.connection.iTAvailabilityHub;
 
-    itAvailabilityHub.client.refreshITAvailabilityTable = function(itId) {
-        if (parseInt(itId) === parseInt(selectedITId)) {
+    itAvailabilityHub.client.refreshITAvailabilityTable = function(id) {
+        if (parseInt(id, 10) === parseInt(selectedITId, 10)) {
             fetchAndRenderCalendar();
         }
     }

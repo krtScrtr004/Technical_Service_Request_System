@@ -21,7 +21,7 @@
                 )
 
                 <div id="asset-tag-suggestions" class="asset-tag-suggestions" aria-hidden="true">
-                    <!-- Suggestion items will be injected here at runtime -->
+                    <!-- Suggestion items will be injected here -->
                 </div>
             </div>
 
@@ -30,33 +30,33 @@
 
         @* Model *@
         <div class="flex-wrap flex-1 form-group relative">
-            @Html.LabelFor(model => model.EquipmentModel)
-            @Html.EditorFor(model => model.EquipmentModel, new { htmlAttributes = new { @class = "form-control text-uppercase" } })
-            @Html.ValidationMessageFor(model => model.EquipmentModel, "", new { @class = "text-danger" })
+            @Html.LabelFor(model => model.Model)
+            @Html.EditorFor(model => model.Model, new { htmlAttributes = new { @class = "form-control text-uppercase" } })
+            @Html.ValidationMessageFor(model => model.Model, "", new { @class = "text-danger" })
         </div>
 
         @* Status *@
         <div class="flex-wrap flex-1 form-group relative">
-            @Html.LabelFor(model => model.EquipmentStatusId)
+            @Html.LabelFor(model => model.StatusId)
             @Html.DropDownListFor(
-                model => model.EquipmentStatusId,
-                Model.EquipmentStatuses,
+                model => model.StatusId,
+                Model.Statuses,
                 "-- SELECT EQUIPMENT STATUS --",
                 new { id = "technical_service_request_equipment_status_select", @class = "form-control" }
             )
-            @Html.ValidationMessageFor(model => model.EquipmentStatusId, "", new { @class = "text-danger" })
+            @Html.ValidationMessageFor(model => model.StatusId, "", new { @class = "text-danger" })
         </div>
 
         @* Type *@
         <div class="flex-wrap flex-1 form-group relative">
-            @Html.LabelFor(model => model.EquipmentTypeId)
+            @Html.LabelFor(model => model.TypeId)
             @Html.DropDownListFor(
-                model => model.EquipmentTypeId,
-                Model.EquipmentTypes,
+                model => model.TypeId,
+                Model.Types,
                 "-- SELECT EQUIPMENT TYPE --",
                 new { id = "technical_service_request_equipment_type_select", @class = "form-control" }
             )
-            @Html.ValidationMessageFor(model => model.EquipmentTypeId, "", new { @class = "text-danger" })
+            @Html.ValidationMessageFor(model => model.TypeId, "", new { @class = "text-danger" })
         </div>
     </div>
 </section>

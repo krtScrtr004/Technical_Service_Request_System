@@ -39,10 +39,7 @@ namespace TROUBLESHOOTING_REPAIR_SERVICE_REQUEST_SYSTEM.Core
                 contactNumber: currentUser.ContactNumber,
                 office: currentUser.Office,
                 position: currentUser.Position,
-                privilegeIds: currentUser.UserPrivileges
-                    .Where(p => p.PrivilegeId.HasValue)
-                    .Select(p => p.PrivilegeId.Value)
-                    .ToArray()
+                roleId: currentUser.RoleId
             );
         }
 

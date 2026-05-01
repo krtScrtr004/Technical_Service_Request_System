@@ -221,7 +221,7 @@
     <Compile Include="App_Start\Startup.Auth.cs" />
     <Compile Include="Attributes\DateAttribute.cs" />
     <Compile Include="Attributes\EquipmentAttribute.cs" />
-    <Compile Include="Attributes\TechnicalServiceTypeAttribute.cs" />
+    <Compile Include="Attributes\RequestTypeAttribute.cs" />
     <Compile Include="Attributes\TimeAttribute.cs" />
     <Compile Include="Controllers\AccountController.cs" />
     <Compile Include="Attributes\AuthorizedUserAttribute.cs" />
@@ -234,13 +234,16 @@
     <Compile Include="Controllers\NotificationController.cs" />
     <Compile Include="Controllers\RegistrationController.cs" />
     <Compile Include="Controllers\RegistrationRequestController.cs" />
-    <Compile Include="Controllers\TechnicalServiceRequestHistoryController.cs" />
-    <Compile Include="Controllers\TechnicalServiceRequestsController.cs" />
+    <Compile Include="Controllers\RequestHistoryController.cs" />
+    <Compile Include="Controllers\RequestController.cs" />
     <Compile Include="Core\BaseController.cs" />
     <Compile Include="Core\Hubs.cs" />
     <Compile Include="Core\Jobs.cs" />
     <Compile Include="Core\UserSession.cs" />
+    <Compile Include="Enumerables\AccountTypeEnum.cs" />
+    <Compile Include="Enumerables\EquipmentEnum.cs" />
     <Compile Include="Enumerables\GlobalEnumerable.cs" />
+    <Compile Include="Enumerables\RequestEnum.cs" />
     <Compile Include="Global.asax.cs">
       <DependentUpon>Global.asax</DependentUpon>
     </Compile>
@@ -344,6 +347,14 @@
     <Compile Include="Migrations\202604250530564_addCreatedByInEquipmentModel.Designer.cs">
       <DependentUpon>202604250530564_addCreatedByInEquipmentModel.cs</DependentUpon>
     </Compile>
+    <Compile Include="Migrations\202605010637057_renameDatabaseTables.cs" />
+    <Compile Include="Migrations\202605010637057_renameDatabaseTables.Designer.cs">
+      <DependentUpon>202605010637057_renameDatabaseTables.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Migrations\202605010715315_removeProjectModel.cs" />
+    <Compile Include="Migrations\202605010715315_removeProjectModel.Designer.cs">
+      <DependentUpon>202605010715315_removeProjectModel.cs</DependentUpon>
+    </Compile>
     <Compile Include="Migrations\Configuration.cs" />
     <Compile Include="Models\AccountViewModels.cs" />
     <Compile Include="Models\EquipmentCategoryModels.cs" />
@@ -355,22 +366,20 @@
     <Compile Include="Models\ITAvailabilityModels.cs" />
     <Compile Include="Models\ManageViewModels.cs" />
     <Compile Include="Models\NotificationModels.cs" />
-    <Compile Include="Models\PrivilegeModels.cs" />
-    <Compile Include="Models\ProjectModels.cs" />
+    <Compile Include="Models\RegistrationRoleModels.cs" />
     <Compile Include="Models\RegistrationModels.cs" />
     <Compile Include="Models\RegistrationRequestModels.cs" />
     <Compile Include="Models\ScheduledControlProcessDetailModels.cs" />
-    <Compile Include="Models\TechnicalServiceRequestHistoryModels.cs" />
-    <Compile Include="Models\TechnicalServiceRequestModels.cs" />
-    <Compile Include="Models\TechnicalServiceRequestQueueModels.cs" />
-    <Compile Include="Models\TechnicalServiceRequestSeverityModels.cs" />
-    <Compile Include="Models\TechnicalServiceRequestStatusModels.cs" />
-    <Compile Include="Models\TechnicalServiceTypeModels.cs" />
-    <Compile Include="Models\UserPrivilegeModels.cs" />
+    <Compile Include="Models\RequestHistoryModels.cs" />
+    <Compile Include="Models\RequestModels.cs" />
+    <Compile Include="Models\RequestQueueModels.cs" />
+    <Compile Include="Models\RequestSeverityModels.cs" />
+    <Compile Include="Models\RequestStatusModels.cs" />
+    <Compile Include="Models\RequestTypeModels.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="Services\EquipmentService.cs" />
     <Compile Include="Services\NotificationService.cs" />
-    <Compile Include="Services\TechnicalServiceRequestQueueService.cs" />
+    <Compile Include="Services\RequestQueueService.cs" />
     <Compile Include="Utilities\AlertUtilities.cs" />
     <Compile Include="Utilities\CustomControllers.cs" />
     <Compile Include="Utilities\GeneralUtilities.cs" />
@@ -396,10 +405,10 @@
     <Content Include="Content\App\Registration\Index.css" />
     <Content Include="Content\App\Registration\Success.css" />
     <Content Include="Content\App\root.css" />
-    <Content Include="Content\App\TechnicalServiceRequest\Create.css" />
-    <Content Include="Content\App\TechnicalServiceRequest\Details.css" />
-    <Content Include="Content\App\TechnicalServiceRequest\Form.css" />
-    <Content Include="Content\App\TechnicalServiceRequest\Index.css" />
+    <Content Include="Content\App\Request\Create.css" />
+    <Content Include="Content\App\Request\Details.css" />
+    <Content Include="Content\App\Request\Form.css" />
+    <Content Include="Content\App\Request\Index.css" />
     <Content Include="Content\App\utility.css" />
     <Content Include="Content\bootstrap-theme.css" />
     <Content Include="Content\bootstrap-theme.min.css" />
@@ -3023,17 +3032,16 @@
     <Content Include="Scripts\App\Notification\ViewNotificationDetailModal.js" />
     <Content Include="Scripts\App\RegistrationRequest\DenyNonLetterKey.js" />
     <Content Include="Scripts\App\RegistrationRequest\InitializeListingDataTable.js" />
-    <Content Include="Scripts\App\RegistrationRequest\Psgc.js" />
     <Content Include="Scripts\App\Registration\DenyRegistration.js" />
     <Content Include="Scripts\App\Registration\InitializeListingDataTable.js" />
-    <Content Include="Scripts\App\TechnicalServiceRequest\CancelRequest.js" />
-    <Content Include="Scripts\App\TechnicalServiceRequest\InitializeDateTimePicker.js" />
-    <Content Include="Scripts\App\TechnicalServiceRequest\InitializeListingDataTable.js" />
-    <Content Include="Scripts\App\TechnicalServiceRequest\LiveReloadDetailsActionHistory.js" />
-    <Content Include="Scripts\App\TechnicalServiceRequest\LiveReloadDetailsInfo.js" />
-    <Content Include="Scripts\App\TechnicalServiceRequest\ShowEquipmentSuggestions.js" />
-    <Content Include="Scripts\App\TechnicalServiceRequest\ToggleConditionalInputs.js" />
-    <Content Include="Scripts\App\TechnicalServiceRequest\UpdateSeverity.js" />
+    <Content Include="Scripts\App\Request\CancelRequest.js" />
+    <Content Include="Scripts\App\Request\InitializeDateTimePicker.js" />
+    <Content Include="Scripts\App\Request\InitializeListingDataTable.js" />
+    <Content Include="Scripts\App\Request\LiveReloadDetailsActionHistory.js" />
+    <Content Include="Scripts\App\Request\LiveReloadDetailsInfo.js" />
+    <Content Include="Scripts\App\Request\ShowEquipmentSuggestions.js" />
+    <Content Include="Scripts\App\Request\ToggleConditionalInputs.js" />
+    <Content Include="Scripts\App\Request\UpdateSeverity.js" />
     <Content Include="Scripts\bootstrap.js" />
     <Content Include="Scripts\bootstrap.min.js" />
     <Content Include="Content\Highcharts-11.4.5\code\es5\highcharts-3d.js.map" />
@@ -3427,10 +3435,9 @@
     <Content Include="Views\Registration\Details.cshtml" />
     <Content Include="Views\Registration\Index.cshtml" />
     <Content Include="Views\Registration\Success.cshtml" />
-    <Content Include="Views\TechnicalServiceRequests\Create.cshtml" />
-    <Content Include="Views\TechnicalServiceRequests\Details.cshtml" />
-    <Content Include="Views\TechnicalServiceRequests\Index.cshtml" />
-    <Content Include="Views\TechnicalServiceRequests\Edit.cshtml" />
+    <Content Include="Views\Request\Create.cshtml" />
+    <Content Include="Views\Request\Details.cshtml" />
+    <Content Include="Views\Request\Index.cshtml" />
     <Content Include="Views\Notification\Index.cshtml" />
     <Content Include="Views\Notification\Partial\_HeaderNotificationBadge.cshtml" />
     <Content Include="Views\Notification\Partial\_NotificationList.cshtml" />
@@ -3441,12 +3448,12 @@
     <Content Include="Views\Error\Unauthorized.cshtml" />
     <Content Include="Views\Account\OLDLogin.cshtml" />
     <Content Include="Views\Shared\_AlertModal.cshtml" />
-    <Content Include="Views\TechnicalServiceRequests\Form.cshtml" />
-    <Content Include="Views\TechnicalServiceRequests\Partial\_ActionHistoryRow.cshtml" />
-    <Content Include="Views\TechnicalServiceRequests\Partial\_AddActionHistoryModal.cshtml" />
-    <Content Include="Views\TechnicalServiceRequests\Partial\_UpdateSeverityModal.cshtml" />
+    <Content Include="Views\Request\Form.cshtml" />
+    <Content Include="Views\Request\Partial\_ActionHistoryRow.cshtml" />
+    <Content Include="Views\Request\Partial\_AddActionHistoryModal.cshtml" />
+    <Content Include="Views\Request\Partial\_UpdateSeverityModal.cshtml" />
     <Content Include="Views\Registration\Partial\_ManagePrivilegeModal.cshtml" />
-    <Content Include="Views\TechnicalServiceRequests\Partial\_EditDescriptionModal.cshtml" />
+    <Content Include="Views\Request\Partial\_EditDescriptionModal.cshtml" />
     <Content Include="Views\Equipment\Index.cshtml" />
     <Content Include="Views\Equipment\Create.cshtml" />
     <Content Include="Views\Equipment\Partial\_CreateEditForm.cshtml" />
@@ -3540,6 +3547,12 @@
     </EmbeddedResource>
     <EmbeddedResource Include="Migrations\202604250530564_addCreatedByInEquipmentModel.resx">
       <DependentUpon>202604250530564_addCreatedByInEquipmentModel.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Migrations\202605010637057_renameDatabaseTables.resx">
+      <DependentUpon>202605010637057_renameDatabaseTables.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Migrations\202605010715315_removeProjectModel.resx">
+      <DependentUpon>202605010715315_removeProjectModel.cs</DependentUpon>
     </EmbeddedResource>
   </ItemGroup>
   <PropertyGroup>

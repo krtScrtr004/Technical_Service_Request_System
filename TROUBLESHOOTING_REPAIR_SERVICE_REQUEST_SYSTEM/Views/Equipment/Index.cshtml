@@ -25,104 +25,21 @@
                 @* Status Filter *@
                 <div class="filter-selection">
                     <label for="status_filter">Status:</label>
-                    <select id="status_filter" class="form-control">
-                        <optgroup label="Status">
-                            <option value="0" selected>All</option>
-                            <option value="@EquipmentStatusEnum.OPERATIONAL">
-                                @EquipmentStatusEnum.DisplayName(
-                                    EquipmentStatusEnum.OPERATIONAL
-                                )
-                            </option>
-                            <option value="@EquipmentStatusEnum.UNDER_REPAIR">
-                                @EquipmentStatusEnum.DisplayName(
-                                    EquipmentStatusEnum.UNDER_REPAIR
-                                )
-                            </option>
-                            <option value="@EquipmentStatusEnum.INACTIVE">
-                                @EquipmentStatusEnum.DisplayName(
-                                    EquipmentStatusEnum.INACTIVE
-                                )
-                            </option>
-                        </optgroup>
-                    </select>
+                    @Html.DropDownList(
+                        "status_filter",
+                        EquipmentStatusEnum.GetSelectListItems(),
+                        "All"
+                    );
                 </div>
 
                 @* Type Filter *@
                 <div class="filter-selection">
                     <label for="type_filter">Type:</label>
-                    <select id="type_filter" class="form-control">
-                        <option value="0">All</option>
-
-                        <optgroup label="@EquipmentCategoryEnum.DisplayName(EquipmentCategoryEnum.COMPUTING_DEVICES)">
-                            @foreach (var typeId in EquipmentTypeEnum.GetComputingDeviceIds())
-                            {
-                                <option value="@typeId">@EquipmentTypeEnum.DisplayName(typeId)</option>
-                            }
-                        </optgroup>
-
-                        <optgroup label="@EquipmentCategoryEnum.DisplayName(EquipmentCategoryEnum.INPUT_DEVICES)">
-                            @foreach (var typeId in EquipmentTypeEnum.GetInputDeviceIds())
-                            {
-                                <option value="@typeId">@EquipmentTypeEnum.DisplayName(typeId)</option>
-                            }
-                        </optgroup>
-
-                        <optgroup label="@EquipmentCategoryEnum.DisplayName(EquipmentCategoryEnum.OUTPUT_DEVICES)">
-                            @foreach (var typeId in EquipmentTypeEnum.GetOutputDeviceIds())
-                            {
-                                <option value="@typeId">@EquipmentTypeEnum.DisplayName(typeId)</option>
-                            }
-                        </optgroup>
-
-                        <optgroup label="@EquipmentCategoryEnum.DisplayName(EquipmentCategoryEnum.NETWORK_CONNECTIVITY)">
-                            @foreach (var typeId in EquipmentTypeEnum.GetNetworkConnectivityIds())
-                            {
-                                <option value="@typeId">@EquipmentTypeEnum.DisplayName(typeId)</option>
-                            }
-                        </optgroup>
-
-                        <optgroup label="@EquipmentCategoryEnum.DisplayName(EquipmentCategoryEnum.STORAGE_DEVICES)">
-                            @foreach (var typeId in EquipmentTypeEnum.GetStorageDeviceIds())
-                            {
-                                <option value="@typeId">@EquipmentTypeEnum.DisplayName(typeId)</option>
-                            }
-                        </optgroup>
-
-                        <optgroup label="@EquipmentCategoryEnum.DisplayName(EquipmentCategoryEnum.POWER_ELECTRICAL)">
-                            @foreach (var typeId in EquipmentTypeEnum.GetPowerElectricalIds())
-                            {
-                                <option value="@typeId">@EquipmentTypeEnum.DisplayName(typeId)</option>
-                            }
-                        </optgroup>
-
-                        <optgroup label="@EquipmentCategoryEnum.DisplayName(EquipmentCategoryEnum.COMMUNICATION_DEVICES)">
-                            @foreach (var typeId in EquipmentTypeEnum.GetCommunicationDeviceIds())
-                            {
-                                <option value="@typeId">@EquipmentTypeEnum.DisplayName(typeId)</option>
-                            }
-                        </optgroup>
-
-                        <optgroup label="@EquipmentCategoryEnum.DisplayName(EquipmentCategoryEnum.SECURITY_EQUIPMENT)">
-                            @foreach (var typeId in EquipmentTypeEnum.GetSecurityEquipmentIds())
-                            {
-                                <option value="@typeId">@EquipmentTypeEnum.DisplayName(typeId)</option>
-                            }
-                        </optgroup>
-
-                        <optgroup label="@EquipmentCategoryEnum.DisplayName(EquipmentCategoryEnum.PERIPHERALS_ACCESSORIES)">
-                            @foreach (var typeId in EquipmentTypeEnum.GetPeripheralsAccessoryIds())
-                            {
-                                <option value="@typeId">@EquipmentTypeEnum.DisplayName(typeId)</option>
-                            }
-                        </optgroup>
-
-                        <optgroup label="@EquipmentCategoryEnum.DisplayName(EquipmentCategoryEnum.SERVER_ROOM_DATA_CENTER)">
-                            @foreach (var typeId in EquipmentTypeEnum.GetServerRoomDataCenterIds())
-                            {
-                                <option value="@typeId">@EquipmentTypeEnum.DisplayName(typeId)</option>
-                            }
-                        </optgroup>
-                    </select>
+                    @Html.DropDownList(
+                        "type_filter",
+                        EquipmentTypeEnum.GetSelectListItems(),
+                        "All"
+                   )
                 </div>
             </section>
 
@@ -154,7 +71,6 @@
                     </thead>
 
                     <tbody>
-                        @**@
                     </tbody>
 
                 </table>
@@ -167,7 +83,7 @@
 
 @section Scripts {
     <script>
-        const userId = "@currentUser.Id";
+        const userId = parseInt("@currentUser.Id", 10);
         const requestUrl = "@Url.Action("GetEquipment", "Equipment")";
     </script>
 

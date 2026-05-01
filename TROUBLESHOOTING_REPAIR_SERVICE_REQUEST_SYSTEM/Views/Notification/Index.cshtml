@@ -2,11 +2,11 @@
 @using TROUBLESHOOTING_REPAIR_SERVICE_REQUEST_SYSTEM.Utilities
 @using PagedList.Mvc
 
+@{ ViewBag.Title = "Notifications"; }
+
 @section Styles {
     <link rel="stylesheet" href="~/Content/App/Notification/Index.css" type="text/css" />
 }
-
-@{ ViewBag.Title = "Notifications"; }
 
 <section class="container flex-rwo flex-child-center-v notification-index-page">
 
@@ -55,8 +55,9 @@
 
 @section Scripts {
     <script>
-        const pageSize = parseInt("@Model.Notifications.PageSize");
-        const currentPage = parseInt("@Model.Notifications.PageNumber");
+        const pageSize = parseInt("@Model.Notifications.PageSize", 10);
+        const currentPage = parseInt("@Model.Notifications.PageNumber", 10);
+
         const getNotificationUrl = "@Url.Action("ListPartial", "Notification")";
         const markAsReadUrl = "@Url.Action("MarkAsRead", "Notification")";
     </script>

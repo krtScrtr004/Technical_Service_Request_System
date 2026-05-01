@@ -33,13 +33,13 @@ namespace TROUBLESHOOTING_REPAIR_SERVICE_REQUEST_SYSTEM.Controllers
                  .ThenByDescending(r => r.Id)
                  .AsQueryable();
 
-            if (AccountTypeEnum.IsAdmin(currentUser.PrivilegeIds))
+            if (AccountTypeEnum.IsAdmin(currentUser.RoleId))
             {
                 notificationsQuery = notificationsQuery.Where(r =>
                     r.ForAdmin == true ||
                     r.RecipientRegistrationId == currentUser.Id);
             }
-            else if (AccountTypeEnum.IsIT(currentUser.PrivilegeIds))
+            else if (AccountTypeEnum.IsIT(currentUser.RoleId))
             {
                 notificationsQuery = notificationsQuery.Where(r =>
                     r.ForIT == true ||
@@ -74,14 +74,14 @@ namespace TROUBLESHOOTING_REPAIR_SERVICE_REQUEST_SYSTEM.Controllers
                 .ThenByDescending(r => r.Id)
                 .Take(pageSize);
 
-            if (AccountTypeEnum.IsAdmin(currentUser.PrivilegeIds))
+            if (AccountTypeEnum.IsAdmin(currentUser.RoleId))
             {
                 notifications = notifications.Where(i =>
                     i.ForAdmin == true ||
                     i.RecipientRegistrationId == currentUser.Id
                 );
             }
-            else if (AccountTypeEnum.IsIT(currentUser.PrivilegeIds))
+            else if (AccountTypeEnum.IsIT(currentUser.RoleId))
             {
                 notifications = notifications.Where(i =>
                     i.ForIT == true ||
@@ -108,18 +108,18 @@ namespace TROUBLESHOOTING_REPAIR_SERVICE_REQUEST_SYSTEM.Controllers
                 throw new HttpException(403, "Forbidden");
             }
 
-            var isAdmin = AccountTypeEnum.IsAdmin(currentUser.PrivilegeIds);
+            var isAdmin = AccountTypeEnum.IsAdmin(currentUser.RoleId);
             var query = _db.Notifications
                 .Where(i => i.IsRead == false)
                 .AsQueryable();
-            if (AccountTypeEnum.IsAdmin(currentUser.PrivilegeIds))
+            if (AccountTypeEnum.IsAdmin(currentUser.RoleId))
             {
                 query = query.Where(i =>
                     i.ForAdmin == true ||
                     i.RecipientRegistrationId == currentUser.Id
                 );
             }
-            else if (AccountTypeEnum.IsIT(currentUser.PrivilegeIds))
+            else if (AccountTypeEnum.IsIT(currentUser.RoleId))
             {
                 query = query.Where(i =>
                     i.ForIT == true ||
@@ -159,8 +159,8 @@ namespace TROUBLESHOOTING_REPAIR_SERVICE_REQUEST_SYSTEM.Controllers
                     throw new Exception("Notification not found.");
                 }
 
-                if ((AccountTypeEnum.IsAdmin(currentUser.PrivilegeIds) && notification.ForAdmin) ||
-                    (AccountTypeEnum.IsIT(currentUser.PrivilegeIds) && notification.ForIT) ||
+                if ((AccountTypeEnum.IsAdmin(currentUser.RoleId) && notification.ForAdmin) ||
+                    (AccountTypeEnum.IsIT(currentUser.RoleId) && notification.ForIT) ||
                     (notification.RecipientRegistrationId == currentUser.Id))
                 {
                     notification.IsRead = true;

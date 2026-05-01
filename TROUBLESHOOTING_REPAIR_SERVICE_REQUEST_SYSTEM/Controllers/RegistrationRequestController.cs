@@ -174,11 +174,9 @@ namespace TROUBLESHOOTING_REPAIR_SERVICE_REQUEST_SYSTEM.Controllers
                     .Select(i => new
                     {
                         i.Id,
-                        i.AccountType,
+                        i.RoleId,
                         i.ContactNumber,
                         i.IsActive,
-                        UserPrivileges = i.UserPrivileges
-                            .Select(j => j.PrivilegeId)
                     })
                     .FirstOrDefault();
                 if (associatedUser == null || associatedUser?.IsActive == false)
@@ -186,7 +184,7 @@ namespace TROUBLESHOOTING_REPAIR_SERVICE_REQUEST_SYSTEM.Controllers
                     throw new Exception("User not found.");
                 }
 
-                if (!associatedUser.UserPrivileges.Contains(AccountTypeEnum.ADMIN))
+                if (associatedUser.RoleId != (int)AccountTypeEnum.ADMIN)
                 {
                     throw new Exception("You do not have permission to access this resource.");
                 }

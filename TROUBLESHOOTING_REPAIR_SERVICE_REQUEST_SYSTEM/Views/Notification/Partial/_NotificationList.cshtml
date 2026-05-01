@@ -7,26 +7,32 @@
     {
         var isReadClass = notification.IsRead ? "bg-light" : "";
 
+        var id = notification.Id.ToString();
+        var title = notification.Title.Trim();
+        var message = notification.Message.Trim();
+        var isRead = notification.IsRead ? "true" : "false";
+        var createdAt = notification.CreatedAt.ToString("MMMM dd yyyy, hh:mm tt");
+
         <button class="unset-button notification-box-container js-open-notification-detail" type="button"
-                data-id="@notification.Id"
-                data-title="@notification.Title"
-                data-message="@notification.Message"
-                data-is-read="@(notification.IsRead ? "true" : "false" )"
-                data-created-at="@notification.CreatedAt.ToString("MMMM dd yyyy, hh:mm tt")">
+                data-id="@id"
+                data-title="@title"
+                data-message="@message"
+                data-is-read="@isRead"
+                data-created-at="@createdAt">
             <div class="notification-box well flex-col @isReadClass">
-                <h4 class="title single-line-ellipsis text-primary bold-text" title="@notification.Title">
-                    @notification.Title
+                <h4 class="title single-line-ellipsis text-primary bold-text" title="@title">
+                    @title
                 </h4>
 
                 <hr class="bg-default" />
 
                 <div class="notification-content-row flex-row flex-wrap flex-space-between">
-                    <p class="message light-text multi-line-ellipsis-2 text-primary" title="@notification.Message">
-                        @notification.Message
+                    <p class="message light-text multi-line-ellipsis-2 text-primary" title="@message">
+                        @message
                     </p>
 
                     <p class="date light-text text-right">
-                        @notification.CreatedAt.ToString("MMMM dd, yyyy - hh:mm tt")
+                        @createdAt
                     </p>
                 </div>
             </div>

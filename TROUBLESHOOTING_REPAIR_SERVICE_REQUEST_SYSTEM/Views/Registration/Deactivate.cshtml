@@ -1,6 +1,10 @@
 ﻿@model TROUBLESHOOTING_REPAIR_SERVICE_REQUEST_SYSTEM.Models.Deactivation
 
-@{ ViewBag.Title = "Deactivate"; }
+@{ 
+    ViewBag.Title = "Deactivate";
+
+    var id = Model.Registration.Id.ToString();
+}
 
 @section Styles
 {
@@ -28,13 +32,6 @@
                 </section>
 
                 <section class="panel-body center-text">
-                    @if (!ViewData.ModelState.IsValid)
-                    {
-                        <div class="alert alert-danger text-left" role="alert">
-                            @Html.ValidationSummary(true)
-                        </div>
-                    }
-
                     <div class="deactivate-icon-wrap center-child">
                         <i class="glyphicon glyphicon-ban-circle deactivate-icon"></i>
                     </div>
@@ -46,7 +43,7 @@
                     </p>
 
                     <p class="light-text account-label">
-                        Account ID: @Model.Registration.Id
+                        Account ID: @id
                     </p>
                 </section>
 

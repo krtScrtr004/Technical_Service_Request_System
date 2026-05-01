@@ -21,7 +21,7 @@ namespace TROUBLESHOOTING_REPAIR_SERVICE_REQUEST_SYSTEM.Job
         {
             Log.Information($"AssignedQueuedRequestJob started at {DateTime.Now}.");
 
-            var controller = new TechnicalServiceRequestsController();
+            var controller = new RequestController();
             var notificationService = new NotificationService();
 
             var assignedRequests = 0;
@@ -32,13 +32,13 @@ namespace TROUBLESHOOTING_REPAIR_SERVICE_REQUEST_SYSTEM.Job
                 {
                     try
                     {
-                        var queuedRequests = _db.TechnicalServiceRequestQueues
-                            .Include(r => r.TechnicalServiceRequest)
+                        var queuedRequests = _db.RequestQueues
+                            .Include(r => r.Request)
                             .Where(r =>
                                 !r.IsProcessed &&
-                                 r.TechnicalServiceRequest.TechnicalServiceRequestStatusId == (int)TechnicalServiceRequestStatusEnum.PENDING)
+                                 r.Request.StatusId == (int)RequestStatusEnum.PENDING)
                             .OrderBy(r => r.QueuedAt)
-                            .Select(r => r.TechnicalServiceRequest)
+                            .Select(r => r.Request)
                             .ToList();
 
                         // Process each queued request
@@ -52,20 +52,19 @@ namespace TROUBLESHOOTING_REPAIR_SERVICE_REQUEST_SYSTEM.Job
                             }
 
                             // Create new history for the request
-                            request.TechnicalServiceRequestHistories = new List<TechnicalServiceRequestHistory>
+                            request.Histories = new List<RequestHistory>
                             {
-                                new TechnicalServiceRequestHistory
+                                new RequestHistory
                                 {
-                                    ActionTakenByRegistrationId = availableTechnicianId,
-                                    TechnicalServiceRequestStatusId = (int)TechnicalServiceRequestStatusEnum.ONGOING,
+                                    ActionTakenById = availableTechnicianId,
+                                    StatusId = (int)RequestStatusEnum.ONGOING,
                                     DateAction = DateTime.Now,
                                     UpdatedAt = DateTime.Now
                                 }
                             };
 
                             request.DateReceived = DateTime.Now;
-                            request.TechnicalServiceRequestStatusId =
-                                (int)TechnicalServiceRequestStatusEnum.ONGOING;
+                            request.StatusId = (int)RequestStatusEnum.ONGOING;
 
                             _db.Entry(request).State = EntityState.Modified;
 
@@ -76,7 +75,7 @@ namespace TROUBLESHOOTING_REPAIR_SERVICE_REQUEST_SYSTEM.Job
                             );
 
                             // Notify the client
-                            notificationService.RefreshUserUi(request.ClientRegistrationId);
+                            notificationService.RefreshUserUi(request.ClientId);
                             TechnicalServiceRequestHub.RefreshTechnicalServiceRequestList();
 
                             assignedRequests++;
@@ -119,19 +118,19 @@ namespace TROUBLESHOOTING_REPAIR_SERVICE_REQUEST_SYSTEM.Job
                         var nowTime = now.TimeOfDay;
 
                         // Find all control processes that are scheduled for today and are still pending
-                        var scheduledControlProcesses = _db.TechnicalServiceRequests
+                        var scheduledControlProcesses = _db.Requests
                             .Where(r =>
                                 // Check if the request status is pending
-                                r.TechnicalServiceRequestStatusId == (int)TechnicalServiceRequestStatusEnum.PENDING &&
+                                r.StatusId == (int)RequestStatusEnum.PENDING &&
                                 // Check if the request has a scheduled date and it is today
-                                r.ScheduledControlProcessDetail.TechnicalServiceRequestScheduledDate.HasValue &&
-                                DbFunctions.TruncateTime(now) == DbFunctions.TruncateTime(r.ScheduledControlProcessDetail.TechnicalServiceRequestScheduledDate.Value) &&
+                                r.ScheduledControlProcessDetail.ScheduledDate.HasValue &&
+                                DbFunctions.TruncateTime(now) == DbFunctions.TruncateTime(r.ScheduledControlProcessDetail.ScheduledDate.Value) &&
                                 // Check if the request has a scheduled start time and it has passed
-                                r.ScheduledControlProcessDetail.TechnicalServiceRequestScheduledStartTime.HasValue &&
-                                nowTime >= r.ScheduledControlProcessDetail.TechnicalServiceRequestScheduledStartTime.Value &&
+                                r.ScheduledControlProcessDetail.ScheduledStartTime.HasValue &&
+                                nowTime >= r.ScheduledControlProcessDetail.ScheduledStartTime.Value &&
                                 // Check if the request has a scheduled end time and it has not passed
-                                r.ScheduledControlProcessDetail.TechnicalServiceRequestScheduledEndTime.HasValue &&
-                                nowTime <= r.ScheduledControlProcessDetail.TechnicalServiceRequestScheduledEndTime.Value
+                                r.ScheduledControlProcessDetail.ScheduledEndTime.HasValue &&
+                                nowTime <= r.ScheduledControlProcessDetail.ScheduledEndTime.Value
                             )
                             .ToList();
 
@@ -139,18 +138,18 @@ namespace TROUBLESHOOTING_REPAIR_SERVICE_REQUEST_SYSTEM.Job
                         foreach (var process in scheduledControlProcesses)
                         {
                             // Get the latest history entry for the process to determine the technician who will be taking the action
-                            var latestHistory = _db.TechnicalServiceRequestHistories
-                                .Where(h => h.TechnicalServiceRequestId == process.Id)
+                            var latestHistory = _db.RequestHistories
+                                .Where(h => h.RequestId == process.Id)
                                 .OrderByDescending(h => h.UpdatedAt)
                                 .Select(h => new
                                 {
-                                    h.ActionTakenByRegistrationId,
-                                    TechnicianFirstName = h.ActionTakenByRegistration.FirstName
+                                    h.ActionTakenById,
+                                    TechnicianFirstName = h.ActionTakenBy.FirstName
                                 })
                                 .FirstOrDefault();
 
                             var technicianId = latestHistory != null
-                                ? latestHistory.ActionTakenByRegistrationId
+                                ? latestHistory.ActionTakenById
                                 : null;
                             if (!technicianId.HasValue)
                             {
@@ -158,21 +157,21 @@ namespace TROUBLESHOOTING_REPAIR_SERVICE_REQUEST_SYSTEM.Job
                             }
 
                             // Create new history entry for the status update
-                            _db.TechnicalServiceRequestHistories.Add(new TechnicalServiceRequestHistory()
+                            _db.RequestHistories.Add(new RequestHistory()
                             {
-                                TechnicalServiceRequestId = process.Id,
-                                TechnicalServiceRequestStatusId = (int)TechnicalServiceRequestStatusEnum.ONGOING,
+                                RequestId = process.Id,
+                                StatusId = (int)RequestStatusEnum.ONGOING,
                                 DateAction = now,
                                 UpdatedAt = now,
                                 ActionTaken = "Service has started.",
-                                ActionTakenByRegistrationId = technicianId.Value,
+                                ActionTakenById = technicianId.Value,
                             });
 
-                            process.TechnicalServiceRequestStatusId = (int)TechnicalServiceRequestStatusEnum.ONGOING;
+                            process.StatusId = (int)RequestStatusEnum.ONGOING;
                             _db.Entry(process).State = EntityState.Modified;
 
                             statusUpdates.Add(Tuple.Create(
-                                process.ClientRegistrationId,
+                                process.ClientId,
                                 process.ReferenceCode,
                                 string.IsNullOrWhiteSpace(latestHistory.TechnicianFirstName) ? "Technician" : latestHistory.TechnicianFirstName
                             ));
@@ -228,7 +227,7 @@ namespace TROUBLESHOOTING_REPAIR_SERVICE_REQUEST_SYSTEM.Job
         {
             var notificationService = new NotificationService();
             var notificationMessage = notificationService.BuildRecipientMessageFromRequestStatus(
-                (int)TechnicalServiceRequestStatusEnum.ONGOING,
+                (int)RequestStatusEnum.ONGOING,
                 referenceCode,
                 technicianFirstName
             );
@@ -301,14 +300,11 @@ namespace TROUBLESHOOTING_REPAIR_SERVICE_REQUEST_SYSTEM.Job
                 {
                     try
                     {
-                        var adminPrivcilegeId = AccountTypeEnum.ADMIN;
 
                         var adminId = db.Registrations
                             .Where(r =>
                                 r.IsActive &&
-                                r.UserPrivileges
-                                    .Select(p => p.PrivilegeId)
-                                    .Contains(adminPrivcilegeId)
+                                r.RoleId == AccountTypeEnum.ADMIN
                             )
                             .Select(r => r.Id)
                             .FirstOrDefault();

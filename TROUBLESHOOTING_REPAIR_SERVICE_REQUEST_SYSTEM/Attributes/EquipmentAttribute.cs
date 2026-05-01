@@ -40,7 +40,7 @@ namespace TROUBLESHOOTING_REPAIR_SERVICE_REQUEST_SYSTEM.Attributes
                 }
 
                 var serviceTypeValue = (int?)serviceTypeProp.GetValue(validationContext.ObjectInstance);
-                if (serviceTypeValue != TechnicalServiceTypeEnum.EQUIPMENT_REPAIR_TROUBLESHOOTING)
+                if (serviceTypeValue != RequestTypeEnum.EQUIPMENT_REPAIR_TROUBLESHOOTING)
                 {
                     return ValidationResult.Success;
                 }

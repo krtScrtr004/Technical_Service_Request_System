@@ -102,7 +102,7 @@
                                 <div class="form-group flex-row flex-wrap registration-request-create-row">
                                     @Html.LabelFor(model => model.Office, new { @class = "control-label col-md-4" })
                                     <div class="flex-1 registration-request-create-input-wrap">
-                                        @Html.TextBoxFor(model => model.Office, new { @class = "input-sm form-control req registration-request-create-input", @required = true })
+                                        @Html.TextBoxFor(model => model.Office, new { @class = "input-sm form-control req text-uppercase registration-request-create-input", @required = true })
                                         @Html.ValidationMessageFor(model => model.Office)
                                     </div>
                                 </div>
@@ -111,7 +111,7 @@
                                 <div class="form-group flex-row flex-wrap registration-request-create-row">
                                     @Html.LabelFor(model => model.Position, new { @class = "control-label col-md-4" })
                                     <div class="flex-1 registration-request-create-input-wrap">
-                                        @Html.TextBoxFor(model => model.Position, new { @class = "input-sm form-control req registration-request-create-input", @required = true })
+                                        @Html.TextBoxFor(model => model.Position, new { @class = "input-sm form-control req text-uppercase registration-request-create-input", @required = true })
                                         @Html.ValidationMessageFor(model => model.Position)
                                     </div>
                                 </div>
@@ -141,5 +141,4 @@
 
 @section Scripts {
     <script src="~/Scripts/App/RegistrationRequest/DenyNonLetterKey.js" defer></script>
-    @*<script src="~/Scripts/App/RegistrationRequest/Psgc.js" defer></script>*@
 }    

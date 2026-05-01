@@ -6,7 +6,7 @@
     ViewBag.Title = "Manage";
 
     var currentUser = ViewBag.CurrentUser as UserSession;
-    var isAdmin = AccountTypeEnum.IsAdmin(currentUser.PrivilegeIds);
+    var isAdmin = AccountTypeEnum.IsAdmin(currentUser.RoleId);
 }
 
 @section Styles {
@@ -123,8 +123,9 @@
 
 @section Scripts {
     <script>
-        const selectedITId = "@Model.UserId";
-        const registrationYear = "@Model.UserRegistrationDate.Year";
+        const selectedITId = parseInt("@Model.UserId", 10);
+        const registrationYear = parseInt("@Model.UserRegistrationDate.Year", 10);
+
         const submitUrl = "@Url.Action("Manage", "ITAvailability", new { id = Model.UserId })";
         const getBlockedDatesUrl = "@Url.Action("GetBlockedDates", "ITAvailability", new { id = Model.UserId })";
     </script>

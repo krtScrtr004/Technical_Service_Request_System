@@ -28,9 +28,9 @@ $(document).ready(function () {
             return [
                 "<tr>",
                 "<td>", item.AssetTag || "N/A", "</td>",
-                "<td>", item.EquipmentModel || "N/A", "</td>",
-                "<td>", item.EquipmentType || "N/A", "</td>",
-                "<td>", item.EquipmentStatus || "N/A", "</td>",
+                "<td>", item.Model || "N/A", "</td>",
+                "<td>", item.Type || "N/A", "</td>",
+                "<td>", item.Status || "N/A", "</td>",
                 "<td class='text-right'>", item.RepairCount != null ? item.RepairCount : 0, "</td>",
                 "</tr>"
             ].join("");
