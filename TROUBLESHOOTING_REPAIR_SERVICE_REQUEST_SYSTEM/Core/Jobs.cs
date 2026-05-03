@@ -1,15 +1,17 @@
 ﻿using Quartz;
+using Serilog;
 using System;
 using System.Collections.Generic;
-using System.Threading.Tasks;
-using System.Linq;
 using System.Data.Entity;
+using System.Diagnostics;
+using System.Linq;
+using System.Threading.Tasks;
 using System.Web;
-using TROUBLESHOOTING_REPAIR_SERVICE_REQUEST_SYSTEM.Models;
-using TROUBLESHOOTING_REPAIR_SERVICE_REQUEST_SYSTEM.Enumerables;
+using TROUBLESHOOTING_REPAIR_SERVICE_REQUEST_SYSTEM.Core;
 using TROUBLESHOOTING_REPAIR_SERVICE_REQUEST_SYSTEM.Controllers;
+using TROUBLESHOOTING_REPAIR_SERVICE_REQUEST_SYSTEM.Enumerables;
+using TROUBLESHOOTING_REPAIR_SERVICE_REQUEST_SYSTEM.Models;
 using TROUBLESHOOTING_REPAIR_SERVICE_REQUEST_SYSTEM.Services;
-using Serilog;
 
 namespace TROUBLESHOOTING_REPAIR_SERVICE_REQUEST_SYSTEM.Job
 {
@@ -76,7 +78,7 @@ namespace TROUBLESHOOTING_REPAIR_SERVICE_REQUEST_SYSTEM.Job
 
                             // Notify the client
                             notificationService.RefreshUserUi(request.ClientId);
-                            TechnicalServiceRequestHub.RefreshTechnicalServiceRequestList();
+                            RequestHub.RefreshRequestList();
 
                             assignedRequests++;
                         }
@@ -98,6 +100,80 @@ namespace TROUBLESHOOTING_REPAIR_SERVICE_REQUEST_SYSTEM.Job
     }
 
     [DisallowConcurrentExecution]
+    public class NotifyTechnicianUpcomingServiceJob : IJob
+    {
+        // Notify technicians about their upcoming scheduled services within the next hour
+        public Task Execute(IJobExecutionContext context)
+        {
+            var notificationService = new NotificationService();
+
+            using (var db = new ApplicationDbContext())
+            {
+                try
+                {
+                    var now = DateTime.Now;
+                    var currentHour = TimeSpan.FromHours(now.Hour);
+                    var oneHourLater = currentHour.Add(TimeSpan.FromHours(1));
+
+                    var upcomingServices = db.Requests
+                        .Include(r => r.Client)
+                        .Include(r => r.ScheduledControlProcessDetail)
+                        .Where(r =>
+                            // Check if the request is pending
+                            r.StatusId == (int)RequestStatusEnum.PENDING &&
+
+                            r.ScheduledControlProcessDetailId.HasValue &&
+                            r.ScheduledControlProcessDetail.ScheduledDate.HasValue &&
+                            r.ScheduledControlProcessDetail.ScheduledStartTime.HasValue &&
+
+                            // Check if the scheduled date is today and the scheduled start time is within the next hour
+                            DbFunctions.TruncateTime(r.ScheduledControlProcessDetail.ScheduledDate.Value) == DbFunctions.TruncateTime(now) &&
+                            r.ScheduledControlProcessDetail.ScheduledStartTime.Value >= currentHour &&
+                            r.ScheduledControlProcessDetail.ScheduledStartTime.Value <= oneHourLater
+                        )
+                        .ToList();
+
+                    foreach (var service in upcomingServices)
+                    {
+                        var latestHistory = db.RequestHistories
+                            .Where(h => h.RequestId == service.Id)
+                            .OrderByDescending(h => h.UpdatedAt)
+                            .Select(h => new
+                            {
+                                h.ActionTakenById,
+                                TechnicianFirstName = h.ActionTakenBy.FirstName
+                            })
+                            .FirstOrDefault();
+
+                        var technicianId = latestHistory != null
+                            ? latestHistory.ActionTakenById
+                            : (int?)null;
+                        if (technicianId == null)
+                        {
+                            continue;
+                        }
+
+                        // Notify the technician about the upcoming service
+                        notificationService.NotifyTechnicianUpcomingService(
+                            technicianId.Value,
+                            service.ReferenceCode,
+                            service.ScheduledControlProcessDetail.ScheduledStartTime.Value
+                        );
+                    }
+
+                    Log.Information($"NotifyTechnicianUpcomingServiceJob executed successfully at {DateTime.Now}. Notified {upcomingServices.Count} technicians about upcoming services.");
+                }
+                catch (Exception ex)
+                {
+                    Log.Error(ex, $"An error occurred while executing NotifyTechnicianUpcomingServiceJob at {DateTime.Now}.");
+                }
+            }
+
+            return Task.CompletedTask;
+        }
+    }
+
+    [DisallowConcurrentExecution]
     public class UpdateScheduledControlProcessStatusJob : IJob
     {
         // Update the status of scheduled control processes to ongoing when their scheduled start time has passed
@@ -105,7 +181,7 @@ namespace TROUBLESHOOTING_REPAIR_SERVICE_REQUEST_SYSTEM.Job
         {
             Log.Information($"UpdateScheduledControlProcessStatusJob started at {DateTime.Now}.");
 
-            var statusUpdates = new List<Tuple<int, string, string>>(); // clientId, referenceCode, technicianFirstName
+            var statusUpdates = new List<Tuple<int, int, string, string>>(); // clientId, technicianId, referenceCode, technicianFirstName
             var hasUpdates = false;
 
             using (var _db = new ApplicationDbContext())
@@ -172,6 +248,7 @@ namespace TROUBLESHOOTING_REPAIR_SERVICE_REQUEST_SYSTEM.Job
 
                             statusUpdates.Add(Tuple.Create(
                                 process.ClientId,
+                                technicianId.Value,
                                 process.ReferenceCode,
                                 string.IsNullOrWhiteSpace(latestHistory.TechnicianFirstName) ? "Technician" : latestHistory.TechnicianFirstName
                             ));
@@ -201,16 +278,20 @@ namespace TROUBLESHOOTING_REPAIR_SERVICE_REQUEST_SYSTEM.Job
                     // Notify each client about their respective request status update
                     foreach (var update in statusUpdates)
                     {
-                        NotifyClient(update.Item1, update.Item2, update.Item3);
+                        NotifyClient(update.Item1, update.Item3, update.Item4);
+                        NotifyTechnician(update.Item2, update.Item3);
                     }
 
-                    // Refresh the UI for each affected client
-                    foreach (var clientId in statusUpdates.Select(i => i.Item1).Distinct())
+                    // Refresh the UI for each affected client and technician
+                    foreach (var id in statusUpdates.Select(i => new { i.Item1, i.Item2 }).Distinct())
                     {
-                        notificationService.RefreshUserUi(clientId);
+                        // Refresh client UI
+                        notificationService.RefreshUserUi(id.Item1);
+                        // Refresh technician UI
+                        notificationService.RefreshUserUi(id.Item2);
                     }
 
-                    TechnicalServiceRequestHub.RefreshTechnicalServiceRequestList();
+                    RequestHub.RefreshRequestList();
 
                     Log.Information($"Sending notifications completed at {DateTime.Now}.");
                 }
@@ -249,6 +330,29 @@ namespace TROUBLESHOOTING_REPAIR_SERVICE_REQUEST_SYSTEM.Job
             }
 
             notificationService.RefreshUserUi(clientId);
+        }
+
+        private void NotifyTechnician(int technicianId, string referenceCode)
+        {
+            var notificationService = new NotificationService();
+            var notificationMessage = $"Service for request with reference code: {referenceCode} is now on going.";
+
+            using (var db = new ApplicationDbContext())
+            {
+                db.Notifications.Add(new Notification()
+                {
+                    RecipientRegistrationId = technicianId,
+                    Title = "Technical Service Request Update",
+                    Message = notificationMessage,
+                    ForAdmin = false,
+                    ForIT = false,
+                    IsActive = true,
+                    IsRead = false,
+                    CreatedAt = DateTime.Now,
+                });
+                db.SaveChanges();
+            }
+            notificationService.RefreshUserUi(technicianId);
         }
     }
 

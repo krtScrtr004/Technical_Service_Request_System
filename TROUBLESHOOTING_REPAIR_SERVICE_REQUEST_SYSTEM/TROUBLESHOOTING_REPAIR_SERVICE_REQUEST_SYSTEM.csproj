@@ -237,8 +237,15 @@
     <Compile Include="Controllers\RequestHistoryController.cs" />
     <Compile Include="Controllers\RequestController.cs" />
     <Compile Include="Core\BaseController.cs" />
-    <Compile Include="Core\Hubs.cs" />
+    <Compile Include="Core\BaseHubs.cs" />
+    <Compile Include="Core\DashboardHub.cs" />
+    <Compile Include="Core\EquipmentHub.cs" />
+    <Compile Include="Core\ITAvailabilityHub.cs" />
     <Compile Include="Core\Jobs.cs" />
+    <Compile Include="Core\NotificationHub.cs" />
+    <Compile Include="Core\RegistrationHub.cs" />
+    <Compile Include="Core\RegistrationRequestHub.cs" />
+    <Compile Include="Core\RequestHub.cs" />
     <Compile Include="Core\UserSession.cs" />
     <Compile Include="Enumerables\AccountTypeEnum.cs" />
     <Compile Include="Enumerables\EquipmentEnum.cs" />
@@ -380,6 +387,7 @@
     <Compile Include="Services\EquipmentService.cs" />
     <Compile Include="Services\NotificationService.cs" />
     <Compile Include="Services\RequestQueueService.cs" />
+    <Compile Include="Services\RequestService.cs" />
     <Compile Include="Utilities\AlertUtilities.cs" />
     <Compile Include="Utilities\CustomControllers.cs" />
     <Compile Include="Utilities\GeneralUtilities.cs" />

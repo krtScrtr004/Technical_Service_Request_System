@@ -3,9 +3,9 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Web;
+using TROUBLESHOOTING_REPAIR_SERVICE_REQUEST_SYSTEM.Core;
 using TROUBLESHOOTING_REPAIR_SERVICE_REQUEST_SYSTEM.Enumerables;
 using TROUBLESHOOTING_REPAIR_SERVICE_REQUEST_SYSTEM.Models;
-using static TROUBLESHOOTING_REPAIR_SERVICE_REQUEST_SYSTEM.RegistrationRequestHub;
 
 namespace TROUBLESHOOTING_REPAIR_SERVICE_REQUEST_SYSTEM.Services
 {
@@ -31,42 +31,44 @@ namespace TROUBLESHOOTING_REPAIR_SERVICE_REQUEST_SYSTEM.Services
 
         public void NotifyTechnicianAssignment(int technicianId, string referenceCode)
         {
-            using (var _db = new ApplicationDbContext())
+            using (var db = new ApplicationDbContext())
             {
-                _db.Notifications.Add(new Notification()
+                db.Notifications.Add(new Notification()
                 {
                     RecipientRegistrationId = technicianId,
                     Title = "New Request Assignment",
-                    Message = "You have been assigned to a new request (" + referenceCode + "). Please check your assigned requests for details.",
+                    Message = "You have been assigned to a new request (" + referenceCode + "). " + 
+                        "Please check your assigned requests for details.",
                     ForAdmin = false,
                     ForIT = false,
                     IsActive = true,
                     IsRead = false,
                     CreatedAt = DateTime.Now,
                 });
-                _db.SaveChanges();
+                db.SaveChanges();
 
                 RefreshUserUi(technicianId);
-                TechnicalServiceRequestHub.RefreshTechnicalServiceRequestList();
+                RequestHub.RefreshRequestList();
             }
         }
 
         public void NotifyTechnicianNonAssistedService(string referenceCode)
         {
-            using (var _db = new ApplicationDbContext())
+            using (var db = new ApplicationDbContext())
             {
-                _db.Notifications.Add(new Notification()
+                db.Notifications.Add(new Notification()
                 {
                     RecipientRegistrationId = null,
                     Title = "Non-Assisted Service Request",
-                    Message = "A new non-assisted service request (" + referenceCode + ") has been submitted. Please check requests list for details.",
+                    Message = "A new non-assisted service request (" + referenceCode + ") has been submitted. " + 
+                        "Please check requests list for details.",
                     ForAdmin = false,
                     ForIT = true,
                     IsActive = true,
                     IsRead = false,
                     CreatedAt = DateTime.Now,
                 });
-                _db.SaveChanges();
+                db.SaveChanges();
 
                 RefreshAllTechniciansUi();
             }
@@ -74,22 +76,23 @@ namespace TROUBLESHOOTING_REPAIR_SERVICE_REQUEST_SYSTEM.Services
 
         public void NotifyTechnicianDescriptionUpdate(int? technicianId, string referenceCode)
         {
-            using (var _db = new ApplicationDbContext())
+            using (var db = new ApplicationDbContext())
             {
                 var forAll = technicianId == null ? true : false;
 
-                _db.Notifications.Add(new Notification()
+                db.Notifications.Add(new Notification()
                 {
                     RecipientRegistrationId = technicianId,
                     Title = "Request Description Update",
-                    Message = "The description for request (" + referenceCode + ") has been updated. Please check requests list for details.",
+                    Message = "The description for request (" + referenceCode + ") has been updated. " +
+                        "Please check requests list for details.",
                     ForAdmin = false,
                     ForIT = forAll,
                     IsActive = true,
                     IsRead = false,
                     CreatedAt = DateTime.Now,
                 });
-                _db.SaveChanges();
+                db.SaveChanges();
 
                 if (forAll)
                 {
@@ -99,6 +102,28 @@ namespace TROUBLESHOOTING_REPAIR_SERVICE_REQUEST_SYSTEM.Services
                 {
                     RefreshUserUi(technicianId.Value);
                 }
+            }
+        }
+
+        public void NotifyTechnicianUpcomingService(int technicianId, string referenceCode, TimeSpan scheduledStartTime)
+        {
+            using (var db = new ApplicationDbContext())
+            {
+                db.Notifications.Add(new Notification()
+                {
+                    RecipientRegistrationId = technicianId,
+                    Title = "Upcoming Scheduled Service",
+                    Message = "You have an upcoming scheduled service for request (" + referenceCode + ") starting at "
+                        + DateTime.Today.Add(scheduledStartTime).ToString("hh:mm tt")
+                        + " today. Please prepare accordingly.",
+                    ForAdmin = false,
+                    ForIT = false,
+                    IsActive = true,
+                    IsRead = false,
+                    CreatedAt = DateTime.Now,
+                });
+                db.SaveChanges();
+                RefreshUserUi(technicianId);
             }
         }
 
@@ -114,9 +139,9 @@ namespace TROUBLESHOOTING_REPAIR_SERVICE_REQUEST_SYSTEM.Services
 
         public void NotifyAdminNewRegistrationRequest()
         {
-            using (var _db = new ApplicationDbContext())
+            using (var db = new ApplicationDbContext())
             {
-                _db.Notifications.Add(new Notification()
+                db.Notifications.Add(new Notification()
                 {
                     RecipientRegistrationId = null,
                     Title = "New Registration Request",
@@ -127,7 +152,7 @@ namespace TROUBLESHOOTING_REPAIR_SERVICE_REQUEST_SYSTEM.Services
                     IsRead = false,
                     CreatedAt = DateTime.Now,
                 });
-                _db.SaveChanges();
+                db.SaveChanges();
 
                 RefreshAllAdminsUi();
                 RegistrationRequestHub.RefreshRegistrationRequestList();
@@ -140,20 +165,21 @@ namespace TROUBLESHOOTING_REPAIR_SERVICE_REQUEST_SYSTEM.Services
 
         public void NotifyClientOnEnqueuedRequest(int clientId, string refenceCode, string technicianFirstName)
         {
-            using (var _db = new ApplicationDbContext())
+            using (var db = new ApplicationDbContext())
             {
-                _db.Notifications.Add(new Notification()
+                db.Notifications.Add(new Notification()
                 {
                     RecipientRegistrationId = clientId,
                     Title = "Queued Request Status Update",
-                    Message = "Your queued (" + refenceCode + ") request is now on processed." + (string.IsNullOrEmpty(technicianFirstName) ? (" Assigned technician: " + technicianFirstName + ".") : ""),
+                    Message = "Your queued (" + refenceCode + ") request is now on processed." + 
+                        (string.IsNullOrEmpty(technicianFirstName) ? (" Assigned technician: " + technicianFirstName + ".") : ""),
                     ForAdmin = false,
                     ForIT = false,
                     IsActive = true,
                     IsRead = false,
                     CreatedAt = DateTime.Now,
                 });
-                _db.SaveChanges();
+                db.SaveChanges();
 
                 RefreshUserUi(clientId);
             }
@@ -165,9 +191,9 @@ namespace TROUBLESHOOTING_REPAIR_SERVICE_REQUEST_SYSTEM.Services
 
         public void NotifyNewEquipmentEntry(string equipmentAssetTag, string creatorFirstName)
         {
-            using (var _db = new ApplicationDbContext())
+            using (var db = new ApplicationDbContext())
             {
-                _db.Notifications.Add(new Notification()
+                db.Notifications.Add(new Notification()
                 {
                     RecipientRegistrationId = null,
                     Title = "New Equipment Entry",
@@ -178,7 +204,7 @@ namespace TROUBLESHOOTING_REPAIR_SERVICE_REQUEST_SYSTEM.Services
                     IsRead = false,
                     CreatedAt = DateTime.Now,
                 });
-                _db.SaveChanges();
+                db.SaveChanges();
 
                 RefreshAllAdminsUi();
                 RefreshAllTechniciansUi();

@@ -5,7 +5,7 @@
         return;
     }
 
-    const hub = $.connection.technicalServiceRequestHub;
+    const hub = $.connection.requestHub;
 
     function refreshFormGenerationButton() {
         const generateFormButton = $("#generate_tsrf_button");
@@ -37,7 +37,7 @@
     }
 
     // Update the status text when a request is cancelled
-    hub.client.refreshTechnicalServiceRequestActionHistory = function (technicalServiceRequestHistoryId, technicalServiceRequestId) {
+    hub.client.refreshRequestActionHistory = function (technicalServiceRequestHistoryId, technicalServiceRequestId) {
         if (!technicalServiceRequestHistoryId ||
              technicalServiceRequestHistoryId < 1) {
             return;
@@ -66,7 +66,7 @@
         });
     }
 
-    hub.client.refreshTechnicalServiceRequestFormGeneration = function (technicalServiceRequestId) {
+    hub.client.refreshRequestFormGeneration = function (technicalServiceRequestId) {
         if (parseInt(technicalServiceRequestId, 10) !== parseInt(currentTechnicalServiceRequestId, 10)) {
             return;
         }

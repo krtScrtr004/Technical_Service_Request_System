@@ -149,24 +149,24 @@ namespace TROUBLESHOOTING_REPAIR_SERVICE_REQUEST_SYSTEM.Controllers
                     _db.SaveChanges();
                     transaction.Commit();
 
-                    TechnicalServiceRequestHub.RefreshTechnicalServiceRequestStatus(
+                    RequestHub.RefreshRequestStatus(
                         id,
                         RequestStatusEnum.DisplayName(
                             technicalServiceRequestHistory.StatusId.Value
                         )
                     );
-                    TechnicalServiceRequestHub.RefreshTechnicalServiceRequestActionHistory(technicalServiceRequestHistory.Id, id);
+                    RequestHub.RefreshRequestActionHistory(technicalServiceRequestHistory.Id, id);
 
                     var completedStatusIdsForForm = RequestStatusEnum.GetCompletedStatusIds();
                     if (completedStatusIdsForForm.Contains(technicalServiceRequestHistory.StatusId.Value))
                     {
-                        TechnicalServiceRequestHub.RefreshTechnicalServiceRequestFormGeneration(id);
+                        RequestHub.RefreshRequestFormGeneration(id);
                     }
 
                     // If the new status is cancelled, refresh the details page
                     if (technicalServiceRequest.StatusId == (int)RequestStatusEnum.CANCELLED)
                     {
-                        TechnicalServiceRequestHub.RefreshTechnicalServiceRequestStatus(
+                        RequestHub.RefreshRequestStatus(
                             id,
                             technicalServiceRequest.Status.Name
                         );
@@ -184,7 +184,7 @@ namespace TROUBLESHOOTING_REPAIR_SERVICE_REQUEST_SYSTEM.Controllers
                     // Notify the IT
                     notificationService.RefreshUserUi(technicalServiceRequestHistory.ActionTakenById.Value);
 
-                    TechnicalServiceRequestHub.RefreshTechnicalServiceRequestList();
+                    RequestHub.RefreshRequestList();
 
                     TempData["alertModal"] = new AlertModalUtility
                     {

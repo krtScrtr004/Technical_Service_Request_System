@@ -67,6 +67,13 @@ namespace TROUBLESHOOTING_REPAIR_SERVICE_REQUEST_SYSTEM
             IScheduler scheduler = StdSchedulerFactory.GetDefaultScheduler().Result;
             scheduler.Start();
 
+            // Every day from 7:00 AM to 4:00 PM
+            var notifyTechnicianUpcomingServiceJob = JobBuilder.Create<NotifyTechnicianUpcomingServiceJob>().Build();
+            var notifyTechnicianUpcomingServiceTrigger = TriggerBuilder.Create()
+                .WithCronSchedule("0 0 7-16 * * ?")
+                .Build();
+            scheduler.ScheduleJob(notifyTechnicianUpcomingServiceJob, notifyTechnicianUpcomingServiceTrigger);
+
             // Every hour from 8:00 AM to 4:00 PM
             var updateScheduledControlProcessStatusJob = JobBuilder.Create<UpdateScheduledControlProcessStatusJob>().Build();
             var updateScheduledControlProcessStatusJobTrigger = TriggerBuilder.Create()

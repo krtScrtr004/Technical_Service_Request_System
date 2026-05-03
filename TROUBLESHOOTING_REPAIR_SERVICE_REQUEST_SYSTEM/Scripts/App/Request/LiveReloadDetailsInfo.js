@@ -1,5 +1,5 @@
 ﻿$(document).ready(function () {
-    const hub = $.connection.technicalServiceRequestHub;
+    const hub = $.connection.requestHub;
 
     function isSameRequest(technicalServiceRequestId) {
         return parseInt(technicalServiceRequestId, 10) === parseInt(currentTechnicalServiceRequestId, 10);
@@ -89,7 +89,7 @@
     if (severityContainer.length === 0) {
         console.warn('Severity container not found');
     } else {
-        hub.client.refreshTechnicalServiceRequestSeverity = function (id, severity) {
+        hub.client.refreshRequestSeverity = function (id, severity) {
             if (isSameRequest(id)) {
                 severityContainer.html(buildRequestSeverityLabel(severity));
             }
@@ -102,7 +102,7 @@
         console.warn('Status container not found');
     } else {
         // Update the status text when a request is cancelled
-        hub.client.refreshTechnicalServiceRequestStatus = function (id, status) {
+        hub.client.refreshRequestStatus = function (id, status) {
             if (isSameRequest(id)) {
                 statusContainer.html(buildRequestStatusLabel(status));
 
@@ -120,7 +120,7 @@
     if (descriptionContainer.length === 0) {
         console.warn('Description container not found');
     } else {
-        hub.client.refreshTechnicalServiceRequestDescription = function (id, description) {
+        hub.client.refreshRequestDescription = function (id, description) {
             if (isSameRequest(id)) {
                 const normalizedDescription = (description || "").toString().trim();
                 descriptionContainer.text(normalizedDescription || "N/A");

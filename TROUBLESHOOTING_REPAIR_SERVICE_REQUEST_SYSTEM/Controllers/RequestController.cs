@@ -99,7 +99,7 @@ namespace TROUBLESHOOTING_REPAIR_SERVICE_REQUEST_SYSTEM.Controllers
             }
 
             // Cast technical service request to details view model 
-            var casted = RequestTypeCaster
+            var casted = (new RequestService())
                 .ToRequestDetailsViewModel(technicalServiceRequest);
 
             // Get the latest history with a completed status to determine if the form can be generated
@@ -237,7 +237,7 @@ namespace TROUBLESHOOTING_REPAIR_SERVICE_REQUEST_SYSTEM.Controllers
                         throw new Exception("Client not found.");
                     }
 
-                    var technicalServiceRequest = RequestTypeCaster
+                    var technicalServiceRequest = (new RequestService())
                         .ToRequest(technicalServiceRequestCreateViewModel);
                     // Invalidate severity if user selected "Not Applicable" (option value -1)
                     if (technicalServiceRequest.SeverityId < 1)
@@ -328,7 +328,7 @@ namespace TROUBLESHOOTING_REPAIR_SERVICE_REQUEST_SYSTEM.Controllers
                     transaction.Commit();
 
                     // Notify all connected clients about the new request
-                    TechnicalServiceRequestHub.RefreshTechnicalServiceRequestList();
+                    RequestHub.RefreshRequestList();
 
                     // Refresh the equipment hub when the repair request changes an equipment's status/count
                     if (updatedEquipment != null)
@@ -882,7 +882,7 @@ namespace TROUBLESHOOTING_REPAIR_SERVICE_REQUEST_SYSTEM.Controllers
                 _db.Entry(technicalServiceRequest).State = EntityState.Modified;
                 _db.SaveChanges();
 
-                TechnicalServiceRequestHub.RefreshTechnicalServiceRequestDescription(
+                RequestHub.RefreshRequestDescription(
                     technicalServiceRequest.Id,
                     technicalServiceRequest.Description
                 );
@@ -1019,8 +1019,8 @@ namespace TROUBLESHOOTING_REPAIR_SERVICE_REQUEST_SYSTEM.Controllers
                 _db.SaveChanges();
 
                 // Notify all connected clients about the cancelled request
-                TechnicalServiceRequestHub.RefreshTechnicalServiceRequestList();
-                TechnicalServiceRequestHub.RefreshTechnicalServiceRequestStatus(
+                RequestHub.RefreshRequestList();
+                RequestHub.RefreshRequestStatus(
                     technicalServiceRequest.Id,
                     RequestStatusEnum.DisplayName(newStatus)
                 );
@@ -1111,7 +1111,7 @@ namespace TROUBLESHOOTING_REPAIR_SERVICE_REQUEST_SYSTEM.Controllers
                     _db.Entry(technicalServiceRequest).State = EntityState.Modified;
 
                     // Notify all connected clients about the updated severity
-                    TechnicalServiceRequestHub.RefreshTechnicalServiceRequestSeverity(
+                    RequestHub.RefreshRequestSeverity(
                         technicalServiceRequest.Id,
                         technicalServiceRequest.Severity.Name
                     );

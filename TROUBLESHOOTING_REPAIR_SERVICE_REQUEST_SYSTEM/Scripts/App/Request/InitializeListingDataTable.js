@@ -159,10 +159,10 @@
     });
 
     // Setup SignalR connection
-    var hub = $.connection.technicalServiceRequestHub;
+    var hub = $.connection.requestHub;
 
     // Listen for new request notifications
-    hub.client.refreshTechnicalServiceRequestList = function () {
+    hub.client.refreshRequestList = function () {
         table.ajax.reload(null, false); // false keeps current page
     };
 
