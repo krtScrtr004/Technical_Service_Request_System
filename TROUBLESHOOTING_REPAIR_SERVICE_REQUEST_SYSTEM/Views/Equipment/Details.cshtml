@@ -8,9 +8,9 @@
 @{
     ViewBag.Title = "Details";
 
-    var currentUser = ViewBag.CurrentUser as UserSession;
-    var isAdmin = AccountTypeEnum.IsAdmin(currentUser.RoleId);
-    var isIT = AccountTypeEnum.IsIT(currentUser.RoleId);
+    var currentUser = ViewBag.CurrentUser as AppUserSession;
+    var isAdmin = AppUserRoleEnum.IsAdmin(currentUser.RoleId);
+    var isIT = AppUserRoleEnum.IsIT(currentUser.RoleId);
 
     // Equipment Information
     var id = Model.Id.ToString();

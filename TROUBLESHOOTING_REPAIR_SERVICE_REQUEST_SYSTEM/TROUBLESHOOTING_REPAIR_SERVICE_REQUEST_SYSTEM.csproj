@@ -232,8 +232,8 @@
     <Compile Include="Controllers\LayoutController.cs" />
     <Compile Include="Controllers\ManageController.cs" />
     <Compile Include="Controllers\NotificationController.cs" />
-    <Compile Include="Controllers\RegistrationController.cs" />
-    <Compile Include="Controllers\RegistrationRequestController.cs" />
+    <Compile Include="Controllers\AppUserController.cs" />
+    <Compile Include="Controllers\AppUserRegistrationController.cs" />
     <Compile Include="Controllers\RequestHistoryController.cs" />
     <Compile Include="Controllers\RequestController.cs" />
     <Compile Include="Core\BaseController.cs" />
@@ -243,11 +243,11 @@
     <Compile Include="Core\ITAvailabilityHub.cs" />
     <Compile Include="Core\Jobs.cs" />
     <Compile Include="Core\NotificationHub.cs" />
-    <Compile Include="Core\RegistrationHub.cs" />
-    <Compile Include="Core\RegistrationRequestHub.cs" />
+    <Compile Include="Core\AppUserHub.cs" />
+    <Compile Include="Core\AppUserRegistrationHub.cs" />
     <Compile Include="Core\RequestHub.cs" />
-    <Compile Include="Core\UserSession.cs" />
-    <Compile Include="Enumerables\AccountTypeEnum.cs" />
+    <Compile Include="Core\AppUserSession.cs" />
+    <Compile Include="Enumerables\AppUserRoleEnum.cs" />
     <Compile Include="Enumerables\EquipmentEnum.cs" />
     <Compile Include="Enumerables\GlobalEnumerable.cs" />
     <Compile Include="Enumerables\RequestEnum.cs" />
@@ -362,6 +362,10 @@
     <Compile Include="Migrations\202605010715315_removeProjectModel.Designer.cs">
       <DependentUpon>202605010715315_removeProjectModel.cs</DependentUpon>
     </Compile>
+    <Compile Include="Migrations\202605031704037_renameRegistrationTables.cs" />
+    <Compile Include="Migrations\202605031704037_renameRegistrationTables.Designer.cs">
+      <DependentUpon>202605031704037_renameRegistrationTables.cs</DependentUpon>
+    </Compile>
     <Compile Include="Migrations\Configuration.cs" />
     <Compile Include="Models\AccountViewModels.cs" />
     <Compile Include="Models\EquipmentCategoryModels.cs" />
@@ -373,9 +377,9 @@
     <Compile Include="Models\ITAvailabilityModels.cs" />
     <Compile Include="Models\ManageViewModels.cs" />
     <Compile Include="Models\NotificationModels.cs" />
-    <Compile Include="Models\RegistrationRoleModels.cs" />
-    <Compile Include="Models\RegistrationModels.cs" />
-    <Compile Include="Models\RegistrationRequestModels.cs" />
+    <Compile Include="Models\AppUserRoleModels.cs" />
+    <Compile Include="Models\AppUserModels.cs" />
+    <Compile Include="Models\AppUserRegistrationModels.cs" />
     <Compile Include="Models\ScheduledControlProcessDetailModels.cs" />
     <Compile Include="Models\RequestHistoryModels.cs" />
     <Compile Include="Models\RequestModels.cs" />
@@ -404,14 +408,14 @@
     <Content Include="Scripts\App\Equipment\InitializeListingDataTable.js" />
     <Content Include="Content\App\ITAvailability\Manage.css" />
     <Content Include="Content\App\Notification\Index.css" />
-    <Content Include="Content\App\RegistrationRequest\Create.css" />
-    <Content Include="Content\App\RegistrationRequest\Index.css" />
-    <Content Include="Content\App\RegistrationRequest\Success.css" />
-    <Content Include="Content\App\Registration\Create.css" />
-    <Content Include="Content\App\Registration\Deactivate.css" />
-    <Content Include="Content\App\Registration\Details.css" />
-    <Content Include="Content\App\Registration\Index.css" />
-    <Content Include="Content\App\Registration\Success.css" />
+    <Content Include="Content\App\AppUserRegistration\Create.css" />
+    <Content Include="Content\App\AppUserRegistration\Index.css" />
+    <Content Include="Content\App\AppUserRegistration\Success.css" />
+    <Content Include="Content\App\AppUser\Create.css" />
+    <Content Include="Content\App\AppUser\Deactivate.css" />
+    <Content Include="Content\App\AppUser\Details.css" />
+    <Content Include="Content\App\AppUser\Index.css" />
+    <Content Include="Content\App\AppUser\Success.css" />
     <Content Include="Content\App\root.css" />
     <Content Include="Content\App\Request\Create.css" />
     <Content Include="Content\App\Request\Details.css" />
@@ -3038,10 +3042,10 @@
     <Content Include="Scripts\App\Notification\LiveReloadNotification.js" />
     <Content Include="Scripts\App\Notification\LiveReloadNotificationBadge.js" />
     <Content Include="Scripts\App\Notification\ViewNotificationDetailModal.js" />
-    <Content Include="Scripts\App\RegistrationRequest\DenyNonLetterKey.js" />
-    <Content Include="Scripts\App\RegistrationRequest\InitializeListingDataTable.js" />
-    <Content Include="Scripts\App\Registration\DenyRegistration.js" />
-    <Content Include="Scripts\App\Registration\InitializeListingDataTable.js" />
+    <Content Include="Scripts\App\AppUserRegistration\DenyNonLetterKey.js" />
+    <Content Include="Scripts\App\AppUserRegistration\InitializeListingDataTable.js" />
+    <Content Include="Scripts\App\AppUser\DenyRegistration.js" />
+    <Content Include="Scripts\App\AppUser\InitializeListingDataTable.js" />
     <Content Include="Scripts\App\Request\CancelRequest.js" />
     <Content Include="Scripts\App\Request\InitializeDateTimePicker.js" />
     <Content Include="Scripts\App\Request\InitializeListingDataTable.js" />
@@ -3435,14 +3439,14 @@
     <Content Include="Views\Account\Login.cshtml" />
     <Content Include="Views\Shared\Lockout.cshtml" />
     <Content Include="Views\Shared\_LoginPartial.cshtml" />
-    <Content Include="Views\RegistrationRequest\Create.cshtml" />
-    <Content Include="Views\RegistrationRequest\Index.cshtml" />
-    <Content Include="Views\RegistrationRequest\Success.cshtml" />
-    <Content Include="Views\Registration\Create.cshtml" />
-    <Content Include="Views\Registration\Deactivate.cshtml" />
-    <Content Include="Views\Registration\Details.cshtml" />
-    <Content Include="Views\Registration\Index.cshtml" />
-    <Content Include="Views\Registration\Success.cshtml" />
+    <Content Include="Views\AppUserRegistration\Create.cshtml" />
+    <Content Include="Views\AppUserRegistration\Index.cshtml" />
+    <Content Include="Views\AppUserRegistration\Success.cshtml" />
+    <Content Include="Views\AppUser\Create.cshtml" />
+    <Content Include="Views\AppUser\Deactivate.cshtml" />
+    <Content Include="Views\AppUser\Details.cshtml" />
+    <Content Include="Views\AppUser\Index.cshtml" />
+    <Content Include="Views\AppUser\Success.cshtml" />
     <Content Include="Views\Request\Create.cshtml" />
     <Content Include="Views\Request\Details.cshtml" />
     <Content Include="Views\Request\Index.cshtml" />
@@ -3460,7 +3464,7 @@
     <Content Include="Views\Request\Partial\_ActionHistoryRow.cshtml" />
     <Content Include="Views\Request\Partial\_AddActionHistoryModal.cshtml" />
     <Content Include="Views\Request\Partial\_UpdateSeverityModal.cshtml" />
-    <Content Include="Views\Registration\Partial\_ManagePrivilegeModal.cshtml" />
+    <Content Include="Views\AppUser\Partial\_ManagePrivilegeModal.cshtml" />
     <Content Include="Views\Request\Partial\_EditDescriptionModal.cshtml" />
     <Content Include="Views\Equipment\Index.cshtml" />
     <Content Include="Views\Equipment\Create.cshtml" />
@@ -3561,6 +3565,9 @@
     </EmbeddedResource>
     <EmbeddedResource Include="Migrations\202605010715315_removeProjectModel.resx">
       <DependentUpon>202605010715315_removeProjectModel.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Migrations\202605031704037_renameRegistrationTables.resx">
+      <DependentUpon>202605031704037_renameRegistrationTables.cs</DependentUpon>
     </EmbeddedResource>
   </ItemGroup>
   <PropertyGroup>

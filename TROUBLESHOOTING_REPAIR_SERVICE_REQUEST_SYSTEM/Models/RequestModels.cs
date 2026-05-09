@@ -26,7 +26,7 @@ namespace TROUBLESHOOTING_REPAIR_SERVICE_REQUEST_SYSTEM.Models
         public string ReferenceCode { get; set; }
 
         public int ClientId { get; set; }
-        public virtual Registration Client{ get; set; }
+        public virtual AppUser Client { get; set; }
 
         // TECHNICAL SERVICE
         [Index]
@@ -54,16 +54,6 @@ namespace TROUBLESHOOTING_REPAIR_SERVICE_REQUEST_SYSTEM.Models
 
         // Histories
         public virtual List<RequestHistory> Histories { get; set; }
-    }
-
-    // Index View Model
-    public class RequestIndexViewModel
-    {
-        public List<Request> Requests { get; set; }
-
-        public List<RequestStatus> RequestStatus { get; set; }
-
-        public List<RequestSeverity> RequestSeverities { get; set; }
     }
 
     // Create View Model
@@ -275,6 +265,8 @@ namespace TROUBLESHOOTING_REPAIR_SERVICE_REQUEST_SYSTEM.Models
             Severities = RequestSeverityEnum.GetSelectListItems();
             EquipmentTypes = EquipmentTypeEnum.GetSelectListItems();
         }
+
+        #endregion
     }
 
     // Detail View Model
@@ -389,5 +381,4 @@ namespace TROUBLESHOOTING_REPAIR_SERVICE_REQUEST_SYSTEM.Models
         public RequestHistory History { get; set; }
     }
 
-    #endregion
 }

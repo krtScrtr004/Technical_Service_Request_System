@@ -12,7 +12,7 @@ namespace TROUBLESHOOTING_REPAIR_SERVICE_REQUEST_SYSTEM.Core
     {
         protected readonly ApplicationDbContext _db = new ApplicationDbContext();
 
-        protected UserSession GetUserSession()
+        protected AppUserSession GetAppUserSession()
         {
             var provider = new UserSessionProvider(_db);
             var loadedSession = provider.GetCurrentUserSession(User.Identity.Name);
@@ -21,20 +21,19 @@ namespace TROUBLESHOOTING_REPAIR_SERVICE_REQUEST_SYSTEM.Core
                 return loadedSession;
             }
 
-            var currentUser = _db.Registrations.FirstOrDefault(r => r.Email == User.Identity.Name);
+            var currentUser = _db.AppUsers.FirstOrDefault(r => r.Email == User.Identity.Name);
             if (currentUser == null)
             {
                 return null;
             }
 
-            return new UserSession
+            return new AppUserSession
             (
                 id: currentUser.Id,
                 firstName: currentUser.FirstName,
                 lastName: currentUser.LastName,
                 middleName: currentUser.MiddleName,
                 extensionName: currentUser.ExtensionName,
-                userName: currentUser.UserName,
                 email: currentUser.Email,
                 contactNumber: currentUser.ContactNumber,
                 office: currentUser.Office,

@@ -6,12 +6,12 @@
 @{
     ViewBag.Title = "Details";
 
-    var currentUser = ViewBag.CurrentUser as UserSession;
+    var currentUser = ViewBag.CurrentUser as AppUserSession;
     var userAccountType = currentUser.RoleId;
 
-    var isStandard = AccountTypeEnum.IsStandard(userAccountType);
-    var isAdmin = AccountTypeEnum.IsAdmin(userAccountType);
-    var isIT = AccountTypeEnum.IsIT(userAccountType);
+    var isStandard = AppUserRoleEnum.IsStandard(userAccountType);
+    var isAdmin = AppUserRoleEnum.IsAdmin(userAccountType);
+    var isIT = AppUserRoleEnum.IsIT(userAccountType);
 
     var currentStatus = Model.StatusId;
 

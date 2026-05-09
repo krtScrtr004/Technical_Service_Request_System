@@ -11,12 +11,12 @@ using TROUBLESHOOTING_REPAIR_SERVICE_REQUEST_SYSTEM.Enumerables;
 namespace TROUBLESHOOTING_REPAIR_SERVICE_REQUEST_SYSTEM.Controllers
 {
     [Authorize2]
-    [AuthenticateUserPrivilege(new int[] { AccountTypeEnum.STANDARD, AccountTypeEnum.IT, AccountTypeEnum.ADMIN })]
+    [AuthenticateUserPrivilege(new int[] { AppUserRoleEnum.STANDARD, AppUserRoleEnum.IT, AppUserRoleEnum.ADMIN })]
     public class DashboardController : BaseController
     {
         public ActionResult Index()
         {
-            var currentUser = GetUserSession();
+            var currentUser = GetAppUserSession();
             if (currentUser == null)
             {
                 return RedirectToAction("Unauthorized", "Error");
@@ -33,7 +33,7 @@ namespace TROUBLESHOOTING_REPAIR_SERVICE_REQUEST_SYSTEM.Controllers
         {
             try
             {
-                var currentUser = GetUserSession();
+                var currentUser = GetAppUserSession();
                 if (currentUser == null)
                 {
                     return Json(new
@@ -134,9 +134,9 @@ namespace TROUBLESHOOTING_REPAIR_SERVICE_REQUEST_SYSTEM.Controllers
                 return Json(new
                 {
                     success = true,
-                    role = AccountTypeEnum.IsAdmin(currentUser.RoleId)
+                    role = AppUserRoleEnum.IsAdmin(currentUser.RoleId)
                         ? "ADMIN"
-                        : AccountTypeEnum.IsIT(currentUser.RoleId)
+                        : AppUserRoleEnum.IsIT(currentUser.RoleId)
                             ? "IT"
                             : "STANDARD",
                     cards = new
@@ -162,7 +162,7 @@ namespace TROUBLESHOOTING_REPAIR_SERVICE_REQUEST_SYSTEM.Controllers
             }
             catch (Exception ex)
             {
-                Log.Error(ex, $"Error while fetching dashboard data for user {GetUserSession()?.Id.ToString() ?? "Unknown"}");
+                Log.Error(ex, $"Error while fetching dashboard data for user {GetAppUserSession()?.Id.ToString() ?? "Unknown"}");
                 return Json(new
                 {
                     success = false,
@@ -175,14 +175,14 @@ namespace TROUBLESHOOTING_REPAIR_SERVICE_REQUEST_SYSTEM.Controllers
 
         #region Helper
 
-        private IQueryable<Models.Request> GetVisibleRequestQuery(UserSession currentUser)
+        private IQueryable<Models.Request> GetVisibleRequestQuery(AppUserSession currentUser)
         {
-            if (AccountTypeEnum.IsAdmin(currentUser.RoleId))
+            if (AppUserRoleEnum.IsAdmin(currentUser.RoleId))
             {
                 return _db.Requests;
             }
 
-            if (AccountTypeEnum.IsIT(currentUser.RoleId))
+            if (AppUserRoleEnum.IsIT(currentUser.RoleId))
             {
                 var nonAssistedServiceIds = RequestTypeEnum.GetNonAssistedServiceIds();
                 return _db.Requests.Where(i =>
@@ -194,38 +194,38 @@ namespace TROUBLESHOOTING_REPAIR_SERVICE_REQUEST_SYSTEM.Controllers
             return _db.Requests.Where(i => i.ClientId == currentUser.Id);
         }
 
-        private int GetUnreadNotificationCount(UserSession currentUser)
+        private int GetUnreadNotificationCount(AppUserSession currentUser)
         {
             var query = _db.Notifications
                 .Where(i => !i.IsRead)
                 .AsQueryable();
 
-            if (AccountTypeEnum.IsAdmin(currentUser.RoleId))
+            if (AppUserRoleEnum.IsAdmin(currentUser.RoleId))
             {
-                query = query.Where(i => i.ForAdmin || i.RecipientRegistrationId == currentUser.Id);
+                query = query.Where(i => i.ForAdmin || i.RecipientId == currentUser.Id);
             }
-            else if (AccountTypeEnum.IsIT(currentUser.RoleId))
+            else if (AppUserRoleEnum.IsIT(currentUser.RoleId))
             {
-                query = query.Where(i => i.ForIT || i.RecipientRegistrationId == currentUser.Id);
+                query = query.Where(i => i.ForIT || i.RecipientId == currentUser.Id);
             }
             else
             {
-                query = query.Where(i => i.RecipientRegistrationId == currentUser.Id);
+                query = query.Where(i => i.RecipientId == currentUser.Id);
             }
 
             return query.Count();
         }
 
-        private object BuildExtraCards(UserSession currentUser, IQueryable<Models.Request> visibleRequests)
+        private object BuildExtraCards(AppUserSession currentUser, IQueryable<Models.Request> visibleRequests)
         {
-            if (AccountTypeEnum.IsAdmin(currentUser.RoleId))
+            if (AppUserRoleEnum.IsAdmin(currentUser.RoleId))
             {
-                var pendingRegistrationRequests = _db.RegistrationRequests
+                var pendingRegistrationRequests = _db.AppUserRegistrations
                     .Count(i => !i.IsApproved && !i.IsDenied);
-                var activeUsers = _db.Registrations.Count(i => i.IsActive);
-                var itUsers = _db.Registrations.Count(i => 
+                var activeUsers = _db.AppUsers.Count(i => i.IsActive);
+                var itUsers = _db.AppUsers.Count(i => 
                     i.IsActive && 
-                    i.RoleId == AccountTypeEnum.IT);
+                    i.RoleId == AppUserRoleEnum.IT);
 
                 return new
                 {
@@ -238,7 +238,7 @@ namespace TROUBLESHOOTING_REPAIR_SERVICE_REQUEST_SYSTEM.Controllers
                 };
             }
 
-            if (AccountTypeEnum.IsIT(currentUser.RoleId))
+            if (AppUserRoleEnum.IsIT(currentUser.RoleId))
             {
                 var activeStatusIds = RequestStatusEnum.GetActiveStatusIds();
                 var myAssignedActive = visibleRequests.Count(i =>
@@ -257,7 +257,7 @@ namespace TROUBLESHOOTING_REPAIR_SERVICE_REQUEST_SYSTEM.Controllers
                 );
 
                 var blockedDays = _db.ITAvailabilities.Count(i => 
-                    i.RegistrationId == currentUser.Id && 
+                    i.UserId == currentUser.Id && 
                     i.BlockDate >= today
                 );
 
@@ -293,11 +293,11 @@ namespace TROUBLESHOOTING_REPAIR_SERVICE_REQUEST_SYSTEM.Controllers
             };
         }
 
-        private IEnumerable<object> BuildTopRepairedEquipment(UserSession currentUser)
+        private IEnumerable<object> BuildTopRepairedEquipment(AppUserSession currentUser)
         {
             IQueryable<Models.Equipment> query;
 
-            if (AccountTypeEnum.IsAdmin(currentUser.RoleId) || AccountTypeEnum.IsIT(currentUser.RoleId))
+            if (AppUserRoleEnum.IsAdmin(currentUser.RoleId) || AppUserRoleEnum.IsIT(currentUser.RoleId))
             {
                 query = _db.Equipments.AsNoTracking();
             }

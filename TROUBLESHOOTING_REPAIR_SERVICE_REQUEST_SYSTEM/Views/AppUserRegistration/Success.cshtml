@@ -1,0 +1,46 @@
+﻿@model TROUBLESHOOTING_REPAIR_SERVICE_REQUEST_SYSTEM.Models.AppUserRegistrationVerifyAccountModel
+
+@{ 
+    ViewBag.Title = "Success";
+    var firstName = Model.Registration.FirstName.Trim();
+}
+
+@section Styles
+{
+    <link rel="stylesheet" href="~/Content/App/AppUserRegistration/Success.css" type="text/css" />
+}
+
+<section class="container registration-success-page center-child">
+    <div class="">
+        <section class="panel panel-success success-panel fade-in">
+            <section class="panel-heading">
+                <h3 class="panel-title">
+                    <i class="glyphicon glyphicon-ok-circle"></i>
+                    Request for Account Registration
+                </h3>
+            </section>
+
+            <section class="panel-body center-text">
+                <div class="success-icon-wrap center-child">
+                    <i class="glyphicon glyphicon-envelope success-icon"></i>
+                </div>
+
+                <h4 class="success-subtitle">
+                    Hello @firstName!
+                </h4>
+
+                <p class="success-message wrap-text">
+                    Your account registration request has been submitted successfully.
+                    Please proceed to ICTMS - System Dev Office to verify your account and claim your username and password.
+                    You may use this account for your transactions in this system.
+                </p>
+            </section>
+
+            <section class="panel-footer center-text">
+                <a href="@Url.Action("Login", "Account")" class="btn btn-primary">
+                    Go to Login Page <i class="fa fa-arrow-circle-o-right"></i>
+                </a>
+            </section>
+        </section>
+    </div>
+</section>

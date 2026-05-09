@@ -1,0 +1,196 @@
+﻿@model TROUBLESHOOTING_REPAIR_SERVICE_REQUEST_SYSTEM.Models.AppUserCreateViewModel
+@using TROUBLESHOOTING_REPAIR_SERVICE_REQUEST_SYSTEM.Enumerables
+
+@{ 
+    ViewBag.Title = "Create";
+
+    var id = Model.Registration.Id.ToString();
+}
+
+@section Styles
+{
+    <link rel="stylesheet" href="~/Content/App/AppUser/Create.css" type="text/css" />
+}
+
+<section class="container center-child user-create-page">
+    <div class="panel panel-default user-panel">
+        <section class="panel-heading">
+            <h3 class="panel-title">
+                Create User Entry
+            </h3>
+        </section>
+
+        @using (Html.BeginForm(
+            "Create",
+            "User",
+            new { id = id },
+            FormMethod.Post,
+            new
+            {                
+                @class = "form-horizontal",
+                role = "form"
+            })
+        )
+        {
+            @Html.AntiForgeryToken()
+
+            <section class="panel-body">
+                <div class="user-stepper center-text">
+                    <div class="row">
+                        <div class="col-xs-6 step-item active-step">
+                            <i class="fa fa-user-plus"></i>
+                            <div>User Information</div>
+                        </div>
+                        <div class="col-xs-6 step-item">
+                            <i class="fa fa-check-circle-o"></i>
+                            <div>Done</div>
+                        </div>
+                    </div>
+                    <div class="progress">
+                        <div class="progress-bar progress-bar-primary" style="width: 50%;"></div>
+                    </div>
+                </div>
+
+                @* User role selection *@
+                <section class="form-section">
+                    <h4 class="form-section-title">User Role</h4>
+                    <div class="well flex-row flex-wrap flex-space-between account-type-well">
+                        <div>
+                            <label>
+                                @Html.RadioButtonFor(i => i.RoleId, AppUserRoleEnum.ADMIN, new { required = "required" })
+                                <strong>Administrator</strong>
+                            </label>
+                        </div>
+                        <div>
+                            <label>
+                                @Html.RadioButtonFor(i => i.RoleId, AppUserRoleEnum.IT, new { required = "required" })
+                                <strong>IT</strong>
+                            </label>
+                        </div>
+                        <div>
+                            <label>
+                                @Html.RadioButtonFor(i => i.RoleId, AppUserRoleEnum.STANDARD, new { required = "required" })
+                                <strong>Standard User</strong>
+                            </label>
+                        </div>
+                        @Html.ValidationMessageFor(model => model.RoleId)
+                    </div>
+                </section>
+
+                <section class="form-section">
+                    <h4 class="form-section-title">User Information</h4>
+
+                    <div class="row">
+                        <div class="col-md-6">
+
+                            @* First Name *@
+                            <div class="form-group">
+                                <label class="control-label col-sm-4">First Name</label>
+                                <div class="col-sm-8">
+                                    @Html.TextBoxFor(model => model.FirstName, new { Value = Model.Registration.FirstName, @class = "form-control text-uppercase", required = "required" })
+                                    @Html.ValidationMessageFor(model => model.FirstName)
+                                </div>
+                            </div>
+
+                            @* Middle Name *@
+                            <div class="form-group">
+                                <label class="control-label col-sm-4">Middle Name</label>
+                                <div class="col-sm-8">
+                                    @Html.TextBoxFor(model => model.MiddleName, new { Value = Model.Registration.MiddleName, @class = "form-control text-uppercase" })
+                                    @Html.ValidationMessageFor(model => model.MiddleName)
+                                </div>
+                            </div>
+
+                            @* Last Name *@
+                            <div class="form-group">
+                                <label class="control-label col-sm-4">Last Name</label>
+                                <div class="col-sm-8">
+                                    @Html.TextBoxFor(model => model.LastName, new { Value = Model.Registration.LastName, @class = "form-control text-uppercase", required = "required" })
+                                    @Html.ValidationMessageFor(model => model.LastName)
+                                </div>
+                            </div>
+
+                            @* Extension Name *@
+                            <div class="form-group">
+                                <label class="control-label col-sm-4">Extension Name</label>
+                                <div class="col-sm-8">
+                                    @Html.TextBoxFor(model => model.ExtensionName, new { Value = Model.Registration.ExtensionName, @class = "form-control text-uppercase" })
+                                    @Html.ValidationMessageFor(model => model.ExtensionName)
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="col-md-6">
+                            @* Email *@
+                            <div class="form-group">
+                                <label class="control-label col-sm-4">Email Address</label>
+                                <div class="col-sm-8">
+                                    @Html.TextBoxFor(model => model.Email, new { Value = Model.Registration.Email, @class = "form-control", required = "required" })
+                                    @Html.ValidationMessageFor(model => model.Email)
+                                </div>
+                            </div>
+
+                            @* Contact Number *@
+                            <div class="form-group">
+                                <label class="control-label col-sm-4">Contact Number</label>
+                                <div class="col-sm-8">
+                                    @Html.TextBoxFor(model => model.ContactNumber, new { Value = Model.Registration.ContactNumber, @class = "form-control", required = "required" })
+                                    @Html.ValidationMessageFor(model => model.ContactNumber)
+                                </div>
+                            </div>
+
+                            @* Office *@
+                            <div class="form-group">
+                                <label class="control-label col-sm-4">Office</label>
+                                <div class="col-sm-8">
+                                    @Html.TextBoxFor(model => model.Office, new { Value = Model.Registration.Office, @class = "form-control text-uppercase" })
+                                    @Html.ValidationMessageFor(model => model.Office)
+                                </div>
+                            </div>
+
+                            @* Position *@
+                            <div class="form-group">
+                                <label class="control-label col-sm-4">Position</label>
+                                <div class="col-sm-8">
+                                    @Html.TextBoxFor(model => model.Position, new { Value = Model.Registration.Position, @class = "form-control text-uppercase" })
+                                    @Html.ValidationMessageFor(model => model.Position)
+                                </div>
+                            </div>
+
+                            @* Expiry Date *@
+                            <div class="form-group">
+                                <label class="control-label col-sm-4">Expiry Date</label>
+                                <div class="col-sm-8">
+                                    @Html.TextBoxFor(model => model.ExpiryDate, new { type = "date", @class = "form-control" })
+                                    @Html.ValidationMessageFor(model => model.ExpiryDate)
+                                </div>
+                            </div>
+
+                        </div>
+                    </div>
+                </section>
+            </section>
+
+            <section class="panel-footer clearfix flex-row-reverse flex-wrap">
+                <button type="submit" class="btn btn-primary">
+                    Next Step <i class="fa fa-arrow-right"></i>
+                </button>
+
+                <button id="deny_user_request_button" type="button" class="btn btn-danger">
+                    Deny <i class="fa fa-arrow-right"></i>
+                </button>
+            </section>
+        }
+    </div>
+</section>
+
+@section Scripts {
+    <script>
+        const registrationRequestId = parseInt("@id", 10);
+
+        const denyUrl = "@Url.Action("DenyRegistration", "User", new { id = id})";
+        const denyRedirectUrl = "@Url.Action("Index", "User")";
+    </script>
+
+    <script src="~/Scripts/App/AppUser/DenyRegistration.js" defer></script>
+}

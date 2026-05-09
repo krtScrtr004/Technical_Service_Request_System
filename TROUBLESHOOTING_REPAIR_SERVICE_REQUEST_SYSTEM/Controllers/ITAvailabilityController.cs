@@ -15,7 +15,7 @@ using TROUBLESHOOTING_REPAIR_SERVICE_REQUEST_SYSTEM.Utilities;
 namespace TROUBLESHOOTING_REPAIR_SERVICE_REQUEST_SYSTEM.Controllers
 {
     [Authorize2]
-    [AuthenticateUserPrivilege(new int[] { AccountTypeEnum.IT, AccountTypeEnum.ADMIN })]
+    [AuthenticateUserPrivilege(new int[] { AppUserRoleEnum.IT, AppUserRoleEnum.ADMIN })]
     public class ITAvailabilityController : BaseController
     {
         // GET: ITAvailability
@@ -26,20 +26,20 @@ namespace TROUBLESHOOTING_REPAIR_SERVICE_REQUEST_SYSTEM.Controllers
                 throw new HttpException(404, "Not Found");
             }
 
-            var currentUser = GetUserSession();
+            var currentUser = GetAppUserSession();
             if (currentUser == null)
             {
                 throw new HttpException(403, "Forbidden");
             }
 
             // Only allow IT users to access their own schedule
-            var isIt = AccountTypeEnum.IsIT(currentUser.RoleId);
+            var isIt = AppUserRoleEnum.IsIT(currentUser.RoleId);
             if (isIt && currentUser.Id != id)
             {
                 throw new HttpException(403, "Forbidden");
             }
 
-            var user = _db.Registrations
+            var user = _db.AppUsers
                 .Where(r => r.Id == id)
                 .Select(r => new
                 {
@@ -49,7 +49,7 @@ namespace TROUBLESHOOTING_REPAIR_SERVICE_REQUEST_SYSTEM.Controllers
                 .FirstOrDefault();
 
             var blockedDates = _db.ITAvailabilities
-               .Where(b => b.RegistrationId == id)
+               .Where(b => b.UserId == id)
                .OrderBy(d => d.BlockDate)
                .Select(d => d.BlockDate)
                .ToList();
@@ -64,7 +64,7 @@ namespace TROUBLESHOOTING_REPAIR_SERVICE_REQUEST_SYSTEM.Controllers
             return View(new ITAvailabilityManageViewModel
             {
                 UserId = user.Id,
-                UserRegistrationDate = user.RegistrationDate ?? DateTime.Now,
+                RegistrationDate = user.RegistrationDate ?? DateTime.Now,
                 SelectedStringDates = joinedStringBlockedDates
             });
         }
@@ -73,7 +73,7 @@ namespace TROUBLESHOOTING_REPAIR_SERVICE_REQUEST_SYSTEM.Controllers
 
         [HttpPost]
         [ValidateAntiForgeryToken]
-        [AuthenticateUserPrivilege(new int[] { AccountTypeEnum.IT })]
+        [AuthenticateUserPrivilege(new int[] { AppUserRoleEnum.IT })]
         public ActionResult Manage(int id, List<string> toAdd, List<string> toRemove)
         {
             DateTime TODAY = DateTime.Now;
@@ -116,13 +116,13 @@ namespace TROUBLESHOOTING_REPAIR_SERVICE_REQUEST_SYSTEM.Controllers
                                 }
 
                                 var existingEntry = _db.ITAvailabilities
-                                    .FirstOrDefault(b => b.RegistrationId == id && b.BlockDate == blockDate);
+                                    .FirstOrDefault(b => b.UserId == id && b.BlockDate == blockDate);
                                 // Only add if it doesn't already exist
                                 if (existingEntry == null)
                                 {
                                     _db.ITAvailabilities.Add(new ITAvailability
                                     {
-                                        RegistrationId = id,
+                                        UserId = id,
                                         BlockDate = blockDate
                                     });
                                 }
@@ -148,7 +148,7 @@ namespace TROUBLESHOOTING_REPAIR_SERVICE_REQUEST_SYSTEM.Controllers
                                 }
 
                                 var existingEntry = _db.ITAvailabilities
-                                    .FirstOrDefault(b => b.RegistrationId == id && b.BlockDate == removeDate);
+                                    .FirstOrDefault(b => b.UserId == id && b.BlockDate == removeDate);
                                 if (existingEntry != null)
                                 {
                                     _db.ITAvailabilities.Remove(existingEntry);
@@ -196,7 +196,7 @@ namespace TROUBLESHOOTING_REPAIR_SERVICE_REQUEST_SYSTEM.Controllers
                     throw new Exception("User not found");
                 }
 
-                var userInfo = _db.Registrations
+                var userInfo = _db.AppUsers
                     .Where(r => r.Id == id)
                     .AsEnumerable()
                     .Select(r => new
@@ -210,7 +210,7 @@ namespace TROUBLESHOOTING_REPAIR_SERVICE_REQUEST_SYSTEM.Controllers
                     throw new Exception("User not found");
                 }
 
-                if (!AccountTypeEnum.IsIT(userInfo.RoleId))
+                if (!AppUserRoleEnum.IsIT(userInfo.RoleId))
                 {
                     throw new Exception("User is not an IT.");
                 }
@@ -229,7 +229,7 @@ namespace TROUBLESHOOTING_REPAIR_SERVICE_REQUEST_SYSTEM.Controllers
 
                 var blockedDates = _db.ITAvailabilities
                     .Where(b => 
-                        b.RegistrationId == id &&
+                        b.UserId == id &&
                         b.BlockDate.Month == month &&
                         b.BlockDate.Year == year
                     )
@@ -245,7 +245,7 @@ namespace TROUBLESHOOTING_REPAIR_SERVICE_REQUEST_SYSTEM.Controllers
             }
             catch (Exception ex)
             {
-                Log.Error(ex, $"An error occurred while getting blocked dates for user ID {GetUserSession()?.Id.ToString() ?? "Unknown"}.");
+                Log.Error(ex, $"An error occurred while getting blocked dates for user ID {GetAppUserSession()?.Id.ToString() ?? "Unknown"}.");
                 return Json(new
                 {
                     success = false,

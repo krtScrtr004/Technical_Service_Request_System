@@ -1,0 +1,74 @@
+﻿.registration-success-page {
+    flex: 1;
+}
+
+.success-panel {
+    border-radius: var(--input-border-radius);
+    overflow: hidden;
+}
+
+.success-panel .panel-heading {
+    background-color: var(--success);
+    border-color: var(--success);
+}
+
+.success-panel .panel-title {
+    font-weight: 700;
+}
+
+.success-panel .panel-title > i {
+    margin-right: 0.75rem;
+}
+
+.success-panel .panel-body {
+    padding: 24px;
+}
+
+.success-icon-wrap {
+    margin-bottom: 1.5rem;
+}
+
+.success-icon {
+    font-size: 4.2rem;
+    color: var(--success);
+}
+
+.success-subtitle {
+    margin: 0 0 1rem;
+    font-weight: 700;
+    color: var(--primary);
+}
+
+.success-message {
+    max-width: 90ch;
+    margin: 0 auto;
+    line-height: 1.7;
+    font-size: 1.55rem;
+}
+
+.success-panel .panel-footer {
+    background-color: #fff;
+}
+
+@media (max-width: 767px) {
+    .registration-success-page {
+        padding-top: 1.5rem;
+        padding-bottom: 1.5rem;
+        padding-left: 0;
+        padding-right: 0;
+    }
+
+    .success-panel .panel-body,
+    .success-panel .panel-footer {
+        padding-left: 12px;
+        padding-right: 12px;
+    }
+
+    .success-message {
+        font-size: 1.4rem;
+    }
+
+    .success-panel .btn {
+        width: 100%;
+    }
+}

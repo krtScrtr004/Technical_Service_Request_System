@@ -30,10 +30,10 @@ namespace TROUBLESHOOTING_REPAIR_SERVICE_REQUEST_SYSTEM.Models
             return new ApplicationDbContext();
         }
 
-        public DbSet<RegistrationRole> RegistrationRole { get; set; }
+        public DbSet<AppUserRole> AppUserRole { get; set; }
 
-        public DbSet<Registration> Registrations { get; set; }
-        public DbSet<RegistrationRequest> RegistrationRequests { get; set; }
+        public DbSet<AppUser> AppUsers { get; set; }
+        public DbSet<AppUserRegistration> AppUserRegistrations { get; set; }
 
         public DbSet<Equipment> Equipments { get; set; }
         public DbSet<EquipmentType> EquipmentTypes { get; set; }

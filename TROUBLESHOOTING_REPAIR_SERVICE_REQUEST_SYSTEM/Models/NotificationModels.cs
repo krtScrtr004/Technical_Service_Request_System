@@ -12,8 +12,8 @@ namespace TROUBLESHOOTING_REPAIR_SERVICE_REQUEST_SYSTEM.Models
         public int Id { get; set; }
 
         [Index]
-        public int? RecipientRegistrationId { get; set; }
-        public virtual Registration RecipientRegistration { get; set; }
+        public int? RecipientId { get; set; }
+        public virtual AppUser Recipient { get; set; }
 
         public string Title { get; set; }
         public string Message { get; set; }
@@ -34,13 +34,9 @@ namespace TROUBLESHOOTING_REPAIR_SERVICE_REQUEST_SYSTEM.Models
     public class NotificationDetailViewModels
     {
         public int Id { get; set; }
-
-        public string TechnicalServiceRequestReferenceCode { get; set; }
-
         public string Title { get; set; }
         public string Message { get; set; }
         public bool IsRead { get; set; }
-
         public DateTime CreatedAt { get; set; }
     }
 
@@ -62,7 +58,6 @@ namespace TROUBLESHOOTING_REPAIR_SERVICE_REQUEST_SYSTEM.Models
                 Message = notification.Message,
                 IsRead = notification.IsRead,
                 CreatedAt = notification.CreatedAt,
-                TechnicalServiceRequestReferenceCode = null
             };
         }
     }

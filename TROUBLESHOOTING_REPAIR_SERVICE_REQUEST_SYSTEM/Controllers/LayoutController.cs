@@ -11,13 +11,13 @@ using TROUBLESHOOTING_REPAIR_SERVICE_REQUEST_SYSTEM.Models;
 namespace TROUBLESHOOTING_REPAIR_SERVICE_REQUEST_SYSTEM.Controllers
 {
     [Authorize2]
-    [AuthenticateUserPrivilege(new int[] { AccountTypeEnum.STANDARD, AccountTypeEnum.IT, AccountTypeEnum.ADMIN })]
+    [AuthenticateUserPrivilege(new int[] { AppUserRoleEnum.STANDARD, AppUserRoleEnum.IT, AppUserRoleEnum.ADMIN })]
     public class LayoutController : BaseController
     {
         [ChildActionOnly]
         public ActionResult Header()
         {
-            var currentUser = GetUserSession();
+            var currentUser = GetAppUserSession();
             if (currentUser == null)
             {
                 throw new Exception("User not found.");

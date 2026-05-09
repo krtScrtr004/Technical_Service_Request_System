@@ -5,11 +5,11 @@
 @{
     ViewBag.Title = "Dashboard";
 
-    var currentUser = ViewBag.CurrentUser as UserSession;
+    var currentUser = ViewBag.CurrentUser as AppUserSession;
 
-    var isAdmin = AccountTypeEnum.IsAdmin(currentUser.RoleId);
-    var isIT = AccountTypeEnum.IsIT(currentUser.RoleId);
-    var isStandard = AccountTypeEnum.IsStandard(currentUser.RoleId);
+    var isAdmin = AppUserRoleEnum.IsAdmin(currentUser.RoleId);
+    var isIT = AppUserRoleEnum.IsIT(currentUser.RoleId);
+    var isStandard = AppUserRoleEnum.IsStandard(currentUser.RoleId);
     var roleName = isAdmin
         ? "Administrator"
         : isIT ? "IT" : "Standard User";
@@ -209,11 +209,11 @@
                 }
                 else
                 {
-                    <a href="@Url.Action("Index", "RegistrationRequest")" class="btn btn-primary dashboard-action-btn">
+                    <a href="@Url.Action("Index", "Registration")" class="btn btn-primary dashboard-action-btn">
                         <i class="glyphicon glyphicon-user"></i>
-                        Registration Requests
+                        Registrations
                     </a>
-                    <a href="@Url.Action("Index", "Registration")" class="btn btn-default dashboard-action-btn">
+                    <a href="@Url.Action("Index", "User")" class="btn btn-default dashboard-action-btn">
                         <i class="glyphicon glyphicon-th-list"></i>
                         Manage Accounts
                     </a>

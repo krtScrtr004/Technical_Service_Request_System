@@ -1,0 +1,124 @@
+.registration-create-page {
+    margin-top: 20px;
+    margin-bottom: 20px;
+}
+
+.registration-create-panel {
+    width: 70rem;
+    max-width: 100%;
+    padding: 30px;
+    border-radius: 8px;
+    min-height: 750px;
+}
+
+.registration-create-logo {
+    width: 10em;
+}
+
+.registration-create-title {
+    font-size: 2.2rem;
+    font-weight: 600;
+    margin-top: 20px;
+    margin-bottom: 16px;
+}
+
+.registration-create-description {
+    font-weight: 500;
+    margin-bottom: 24px;
+}
+
+.registration-create-form-body {
+    margin-top: 30px;
+}
+
+.registration-create-row {
+    margin-bottom: 18px;
+}
+
+.control-label {
+    text-align: right;
+    padding-top: 7px;
+    font-weight: 500;
+}
+
+.registration-create-input-wrap {
+    min-width: 0;
+}
+
+.registration-create-input {
+    width: 100%;
+}
+
+.registration-create-submit {
+    height: 40px;
+    font-size: 14px;
+    margin: 18px 0;
+}
+
+@media (max-width: 991px) {
+    .registration-create-page {
+        margin-top: 12px;
+        margin-bottom: 12px;
+    }
+
+    .registration-create-panel {
+        width: 100%;
+        min-height: 0;
+        padding: 16px;
+    }
+
+    .registration-create-input {
+        width: 100%;
+        margin-left: 0;
+    }
+
+    .control-label {
+        text-align: left;
+        padding-top: 0;
+    }
+}
+
+@media (max-width: 767px) {
+    .registration-create-panel {
+        padding: 12px;
+    }
+
+    .registration-create-title {
+        font-size: 2rem;
+        margin-top: 12px;
+    }
+
+    .registration-create-form-body,
+    .registration-create-actions {
+        padding-left: 15px;
+        padding-right: 15px;
+    }
+
+    .registration-create-form-body {
+        margin-top: 18px;
+    }
+
+    .registration-create-row {
+        display: block;
+        margin-bottom: 12px;
+    }
+
+    .registration-create-row .control-label {
+        display: block;
+        width: 100%;
+        margin-bottom: 4px;
+    }
+
+    .registration-create-row .registration-create-input-wrap {
+        width: 100%;
+    }
+
+    .registration-create-actions .col-md-12 {
+        padding-left: 0;
+        padding-right: 0;
+    }
+
+    .registration-create-submit {
+        width: 100%;
+    }
+}

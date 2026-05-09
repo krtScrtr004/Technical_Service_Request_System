@@ -35,7 +35,7 @@ namespace TROUBLESHOOTING_REPAIR_SERVICE_REQUEST_SYSTEM.Services
             {
                 db.Notifications.Add(new Notification()
                 {
-                    RecipientRegistrationId = technicianId,
+                    RecipientId = technicianId,
                     Title = "New Request Assignment",
                     Message = "You have been assigned to a new request (" + referenceCode + "). " + 
                         "Please check your assigned requests for details.",
@@ -58,7 +58,7 @@ namespace TROUBLESHOOTING_REPAIR_SERVICE_REQUEST_SYSTEM.Services
             {
                 db.Notifications.Add(new Notification()
                 {
-                    RecipientRegistrationId = null,
+                    RecipientId = null,
                     Title = "Non-Assisted Service Request",
                     Message = "A new non-assisted service request (" + referenceCode + ") has been submitted. " + 
                         "Please check requests list for details.",
@@ -82,7 +82,7 @@ namespace TROUBLESHOOTING_REPAIR_SERVICE_REQUEST_SYSTEM.Services
 
                 db.Notifications.Add(new Notification()
                 {
-                    RecipientRegistrationId = technicianId,
+                    RecipientId = technicianId,
                     Title = "Request Description Update",
                     Message = "The description for request (" + referenceCode + ") has been updated. " +
                         "Please check requests list for details.",
@@ -111,7 +111,7 @@ namespace TROUBLESHOOTING_REPAIR_SERVICE_REQUEST_SYSTEM.Services
             {
                 db.Notifications.Add(new Notification()
                 {
-                    RecipientRegistrationId = technicianId,
+                    RecipientId = technicianId,
                     Title = "Upcoming Scheduled Service",
                     Message = "You have an upcoming scheduled service for request (" + referenceCode + ") starting at "
                         + DateTime.Today.Add(scheduledStartTime).ToString("hh:mm tt")
@@ -143,9 +143,9 @@ namespace TROUBLESHOOTING_REPAIR_SERVICE_REQUEST_SYSTEM.Services
             {
                 db.Notifications.Add(new Notification()
                 {
-                    RecipientRegistrationId = null,
+                    RecipientId = null,
                     Title = "New Registration Request",
-                    Message = "A new registration request has been submitted. Please review and approve or reject the request.",
+                    Message = "A new user registration has been submitted. Please review and approve or reject the request.",
                     ForAdmin = true,
                     ForIT = false,
                     IsActive = true,
@@ -155,7 +155,7 @@ namespace TROUBLESHOOTING_REPAIR_SERVICE_REQUEST_SYSTEM.Services
                 db.SaveChanges();
 
                 RefreshAllAdminsUi();
-                RegistrationRequestHub.RefreshRegistrationRequestList();
+                AppUserRegistrationHub.RefreshAppUserRequestList();
             }
         }
 
@@ -169,7 +169,7 @@ namespace TROUBLESHOOTING_REPAIR_SERVICE_REQUEST_SYSTEM.Services
             {
                 db.Notifications.Add(new Notification()
                 {
-                    RecipientRegistrationId = clientId,
+                    RecipientId = clientId,
                     Title = "Queued Request Status Update",
                     Message = "Your queued (" + refenceCode + ") request is now on processed." + 
                         (string.IsNullOrEmpty(technicianFirstName) ? (" Assigned technician: " + technicianFirstName + ".") : ""),
@@ -195,7 +195,7 @@ namespace TROUBLESHOOTING_REPAIR_SERVICE_REQUEST_SYSTEM.Services
             {
                 db.Notifications.Add(new Notification()
                 {
-                    RecipientRegistrationId = null,
+                    RecipientId = null,
                     Title = "New Equipment Entry",
                     Message = "A new equipment entry has been added by " + creatorFirstName + ". Equipment Asset Tag: " + equipmentAssetTag + ".",
                     ForAdmin = true,

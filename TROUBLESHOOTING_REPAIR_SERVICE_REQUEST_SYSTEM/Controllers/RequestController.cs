@@ -23,10 +23,10 @@ namespace TROUBLESHOOTING_REPAIR_SERVICE_REQUEST_SYSTEM.Controllers
     {
         // GET: TechnicalServiceRequests
         [Authorize2]
-        [AuthenticateUserPrivilege(new int[] { AccountTypeEnum.STANDARD, AccountTypeEnum.IT, AccountTypeEnum.ADMIN })]
+        [AuthenticateUserPrivilege(new int[] { AppUserRoleEnum.STANDARD, AppUserRoleEnum.IT, AppUserRoleEnum.ADMIN })]
         public ActionResult Index()
         {
-            var currentUser = GetUserSession();
+            var currentUser = GetAppUserSession();
             if (currentUser == null)
             {
                 throw new HttpException(403, "Forbidden");
@@ -37,7 +37,7 @@ namespace TROUBLESHOOTING_REPAIR_SERVICE_REQUEST_SYSTEM.Controllers
         }
 
         // GET: TechnicalServiceRequests/Details/5
-        [AuthenticateUserPrivilege(new int[] { AccountTypeEnum.STANDARD, AccountTypeEnum.IT, AccountTypeEnum.ADMIN })]
+        [AuthenticateUserPrivilege(new int[] { AppUserRoleEnum.STANDARD, AppUserRoleEnum.IT, AppUserRoleEnum.ADMIN })]
         public ActionResult Details(int id)
         {
             if (id < 1)
@@ -45,7 +45,7 @@ namespace TROUBLESHOOTING_REPAIR_SERVICE_REQUEST_SYSTEM.Controllers
                 throw new HttpException(403, "Forbidden");
             }
 
-            var currentUser = GetUserSession();
+            var currentUser = GetAppUserSession();
             if (currentUser == null)
             {
                 throw new HttpException(403, "Forbidden");
@@ -75,7 +75,7 @@ namespace TROUBLESHOOTING_REPAIR_SERVICE_REQUEST_SYSTEM.Controllers
                     .Any(q => q.RequestId == id && !q.IsProcessed);
             }
 
-            if (!AccountTypeEnum.IsAdmin(currentUser.RoleId))
+            if (!AppUserRoleEnum.IsAdmin(currentUser.RoleId))
             {
                 var involvedTechnicianIds = technicalServiceRequest.Histories
                     .Select(t => t.ActionTakenById)
@@ -84,11 +84,11 @@ namespace TROUBLESHOOTING_REPAIR_SERVICE_REQUEST_SYSTEM.Controllers
                 var isAssistedRequest = technicalServiceRequest.TypeId.HasValue &&
                     !RequestTypeEnum.IsNonAssistedRequest(technicalServiceRequest.TypeId.Value);
 
-                var isRequestClient = AccountTypeEnum.IsStandard(currentUser.RoleId) &&
+                var isRequestClient = AppUserRoleEnum.IsStandard(currentUser.RoleId) &&
                     currentUser.Id == technicalServiceRequest.ClientId;
 
                 // IT can view if: (non-assisted) OR (assisted AND involved)
-                var isIT = AccountTypeEnum.IsIT(currentUser.RoleId);
+                var isIT = AppUserRoleEnum.IsIT(currentUser.RoleId);
                 var isInvolvedTechnician = isAssistedRequest && isIT && involvedTechnicianIds.Contains(currentUser.Id);
                 var isNonAssistedAndIT = !isAssistedRequest && isIT;
 
@@ -123,7 +123,7 @@ namespace TROUBLESHOOTING_REPAIR_SERVICE_REQUEST_SYSTEM.Controllers
             return View(casted);
         }
 
-        [AuthenticateUserPrivilege(new int[] { AccountTypeEnum.STANDARD, AccountTypeEnum.IT, AccountTypeEnum.ADMIN })]
+        [AuthenticateUserPrivilege(new int[] { AppUserRoleEnum.STANDARD, AppUserRoleEnum.IT, AppUserRoleEnum.ADMIN })]
         public ActionResult Form(int id) // <- The Id here is the TechnicalServiceRequestHistory Id
         {
             if (id < 1)
@@ -131,7 +131,7 @@ namespace TROUBLESHOOTING_REPAIR_SERVICE_REQUEST_SYSTEM.Controllers
                 throw new HttpException(403, "Forbidden");
             }
 
-            var currentUser = GetUserSession();
+            var currentUser = GetAppUserSession();
             if (currentUser == null)
             {
                 throw new HttpException(403, "Forbidden");
@@ -148,16 +148,16 @@ namespace TROUBLESHOOTING_REPAIR_SERVICE_REQUEST_SYSTEM.Controllers
                 throw new HttpException(404, "Not found");
             }
 
-            if (!AccountTypeEnum.IsAdmin(currentUser.RoleId))
+            if (!AppUserRoleEnum.IsAdmin(currentUser.RoleId))
             {
                 var isAssistedRequest = technicalServiceRequest.TypeId.HasValue &&
                   !RequestTypeEnum.IsNonAssistedRequest(technicalServiceRequest.TypeId.Value);
 
-                var isRequestClient = AccountTypeEnum.IsStandard(currentUser.RoleId) &&
+                var isRequestClient = AppUserRoleEnum.IsStandard(currentUser.RoleId) &&
                     currentUser.Id == technicalServiceRequest.ClientId;
 
                 // IT can view if: (non-assisted) OR (assisted AND involved)
-                var isIT = AccountTypeEnum.IsIT(currentUser.RoleId);
+                var isIT = AppUserRoleEnum.IsIT(currentUser.RoleId);
                 var isInvolvedTechnician = isAssistedRequest && isIT && technicalServiceRequestHistory.ActionTakenById == currentUser.Id;
                 var isNonAssistedAndIT = !isAssistedRequest && isIT;
 
@@ -176,10 +176,10 @@ namespace TROUBLESHOOTING_REPAIR_SERVICE_REQUEST_SYSTEM.Controllers
 
         // GET: TechnicalServiceRequests/Create
         [Authorize2]
-        [AuthenticateUserPrivilege(new int[] { AccountTypeEnum.STANDARD })]
+        [AuthenticateUserPrivilege(new int[] { AppUserRoleEnum.STANDARD })]
         public ActionResult Create()
         {
-            var currentUser = GetUserSession();
+            var currentUser = GetAppUserSession();
             if (currentUser == null)
             {
                 throw new HttpException(404, "Not found");
@@ -204,10 +204,10 @@ namespace TROUBLESHOOTING_REPAIR_SERVICE_REQUEST_SYSTEM.Controllers
         [Authorize2]
         [HttpPost]
         [ValidateAntiForgeryToken]
-        [AuthenticateUserPrivilege(new int[] { AccountTypeEnum.STANDARD })]
+        [AuthenticateUserPrivilege(new int[] { AppUserRoleEnum.STANDARD })]
         public ActionResult Create(RequestCreateViewModel technicalServiceRequestCreateViewModel)
         {
-            var currentUser = GetUserSession();
+            var currentUser = GetAppUserSession();
             if (currentUser == null)
             {
                 throw new HttpException(404, "Not found");
@@ -229,7 +229,7 @@ namespace TROUBLESHOOTING_REPAIR_SERVICE_REQUEST_SYSTEM.Controllers
                     var isQueued = false;
                     Equipment updatedEquipment = null;
 
-                    var clientInfo = _db.Registrations
+                    var clientInfo = _db.AppUsers
                         .Where(r => r.Id == technicalServiceRequestCreateViewModel.ClientId)
                         .FirstOrDefault();
                     if (clientInfo == null)
@@ -422,14 +422,14 @@ namespace TROUBLESHOOTING_REPAIR_SERVICE_REQUEST_SYSTEM.Controllers
         // GET
         [Authorize2]
         [HttpGet]
-        [AuthenticateUserPrivilege(new int[] { AccountTypeEnum.STANDARD, AccountTypeEnum.IT, AccountTypeEnum.ADMIN })]
+        [AuthenticateUserPrivilege(new int[] { AppUserRoleEnum.STANDARD, AppUserRoleEnum.IT, AppUserRoleEnum.ADMIN })]
         public JsonResult GetTechnicalRequest()
         {
             try
             {
                 // Authenticate user
                 int.TryParse(Request["userId"], out int Id);
-                var associatedUser = _db.Registrations
+                var associatedUser = _db.AppUsers
                     .Where(i => i.Id == Id)
                     .FirstOrDefault();
                 if (associatedUser == null)
@@ -458,14 +458,14 @@ namespace TROUBLESHOOTING_REPAIR_SERVICE_REQUEST_SYSTEM.Controllers
                 IQueryable<Request> query = _db.Requests
                     .Include(r => r.Client)
                     .AsQueryable();
-                if (associatedUser.RoleId == AccountTypeEnum.ADMIN)
+                if (associatedUser.RoleId == AppUserRoleEnum.ADMIN)
                 {
                     // Admin can see all requests
                     query = _db.Requests
                         .Include(t => t.Type)
                         .Include(t => t.Status);
                 }
-                else if (associatedUser.RoleId == AccountTypeEnum.IT)
+                else if (associatedUser.RoleId == AppUserRoleEnum.IT)
                 {
                     var nonAssistedServiceIds = RequestTypeEnum.GetNonAssistedServiceIds();
 
@@ -483,7 +483,7 @@ namespace TROUBLESHOOTING_REPAIR_SERVICE_REQUEST_SYSTEM.Controllers
                             nonAssistedServiceIds.Contains(t.TypeId.Value)
                         ));
                 }
-                else if (associatedUser.RoleId == AccountTypeEnum.STANDARD)
+                else if (associatedUser.RoleId == AppUserRoleEnum.STANDARD)
                 {
                     // Standard users can only see their own requests
                     query = _db.Requests
@@ -703,14 +703,14 @@ namespace TROUBLESHOOTING_REPAIR_SERVICE_REQUEST_SYSTEM.Controllers
             }
             catch (Exception ex)
             {
-                Log.Error(ex, $"An error occurred while user was fetching technical service requests with ID {GetUserSession()?.Id.ToString() ?? "Unknown"}.");
+                Log.Error(ex, $"An error occurred while user was fetching technical service requests with ID {GetAppUserSession()?.Id.ToString() ?? "Unknown"}.");
                 return Json(new { error = ex.Message }, JsonRequestBehavior.AllowGet);
             }
         }
 
         [Authorize2]
         [HttpGet]
-        [AuthenticateUserPrivilege(new int[] { AccountTypeEnum.STANDARD, AccountTypeEnum.IT, AccountTypeEnum.ADMIN })]
+        [AuthenticateUserPrivilege(new int[] { AppUserRoleEnum.STANDARD, AppUserRoleEnum.IT, AppUserRoleEnum.ADMIN })]
         public JsonResult GetFormGenerationState(int id)
         {
             try
@@ -720,7 +720,7 @@ namespace TROUBLESHOOTING_REPAIR_SERVICE_REQUEST_SYSTEM.Controllers
                     throw new HttpException(404, "Not found");
                 }
 
-                var currentUser = GetUserSession();
+                var currentUser = GetAppUserSession();
                 if (currentUser == null)
                 {
                     throw new HttpException(403, "Forbidden");
@@ -734,7 +734,7 @@ namespace TROUBLESHOOTING_REPAIR_SERVICE_REQUEST_SYSTEM.Controllers
                     throw new HttpException(404, "Not found");
                 }
 
-                if (!AccountTypeEnum.IsAdmin(currentUser.RoleId))
+                if (!AppUserRoleEnum.IsAdmin(currentUser.RoleId))
                 {
                     var involvedTechnicianIds = technicalServiceRequest.Histories
                         .Where(h => h.ActionTakenById.HasValue)
@@ -744,10 +744,10 @@ namespace TROUBLESHOOTING_REPAIR_SERVICE_REQUEST_SYSTEM.Controllers
                     var isAssistedRequest = technicalServiceRequest.TypeId.HasValue &&
                         !RequestTypeEnum.IsNonAssistedRequest(technicalServiceRequest.TypeId.Value);
 
-                    var isRequestClient = AccountTypeEnum.IsStandard(currentUser.RoleId) &&
+                    var isRequestClient = AppUserRoleEnum.IsStandard(currentUser.RoleId) &&
                         currentUser.Id == technicalServiceRequest.ClientId;
 
-                    var isIT = AccountTypeEnum.IsIT(currentUser.RoleId);
+                    var isIT = AppUserRoleEnum.IsIT(currentUser.RoleId);
                     var isInvolvedTechnician = isAssistedRequest && isIT && involvedTechnicianIds.Contains(currentUser.Id);
                     var isNonAssistedAndIT = !isAssistedRequest && isIT;
 
@@ -790,7 +790,7 @@ namespace TROUBLESHOOTING_REPAIR_SERVICE_REQUEST_SYSTEM.Controllers
 
         [Authorize2]
         [HttpGet]
-        [AuthenticateUserPrivilege(new int[] { AccountTypeEnum.STANDARD, AccountTypeEnum.IT, AccountTypeEnum.ADMIN })]
+        [AuthenticateUserPrivilege(new int[] { AppUserRoleEnum.STANDARD, AppUserRoleEnum.IT, AppUserRoleEnum.ADMIN })]
         public JsonResult GetEquipmentDetailByAssetTag(string assetTag)
         {
             try
@@ -841,7 +841,7 @@ namespace TROUBLESHOOTING_REPAIR_SERVICE_REQUEST_SYSTEM.Controllers
         [Authorize2]
         [HttpPost]
         [ValidateAntiForgeryToken]
-        [AuthenticateUserPrivilege(new int[] { AccountTypeEnum.STANDARD })]
+        [AuthenticateUserPrivilege(new int[] { AppUserRoleEnum.STANDARD })]
         public ActionResult EditDescription(Request technicalServiceRequestParam, int id)
         {
             try
@@ -858,7 +858,7 @@ namespace TROUBLESHOOTING_REPAIR_SERVICE_REQUEST_SYSTEM.Controllers
                     throw new Exception("An error occured.");
                 }
 
-                var currentUser = GetUserSession();
+                var currentUser = GetAppUserSession();
                 if (currentUser == null)
                 {
                     throw new Exception("User not found.");
@@ -918,7 +918,7 @@ namespace TROUBLESHOOTING_REPAIR_SERVICE_REQUEST_SYSTEM.Controllers
             }
             catch (Exception ex)
             {
-                Log.Error(ex, $"An error occurred while user with ID {GetUserSession()?.Id.ToString() ?? "Unknown"} was editing description of request with ID {id}.");
+                Log.Error(ex, $"An error occurred while user with ID {GetAppUserSession()?.Id.ToString() ?? "Unknown"} was editing description of request with ID {id}.");
                 ModelState.AddModelError("", "An error occurred while making a request: " + ex.Message);
                 TempData["alertModal"] = new AlertModalUtility()
                 {
@@ -934,7 +934,7 @@ namespace TROUBLESHOOTING_REPAIR_SERVICE_REQUEST_SYSTEM.Controllers
         [Authorize2]
         [HttpPost]
         [ValidateAntiForgeryToken]
-        [AuthenticateUserPrivilege(new int[] { AccountTypeEnum.STANDARD })]
+        [AuthenticateUserPrivilege(new int[] { AppUserRoleEnum.STANDARD })]
         public ActionResult CancelRequest(int id)
         {
             try
@@ -957,7 +957,7 @@ namespace TROUBLESHOOTING_REPAIR_SERVICE_REQUEST_SYSTEM.Controllers
                     throw new Exception("Technical Service Request not found.");
                 }
 
-                var client = _db.Registrations
+                var client = _db.AppUsers
                     .Where(i => i.Id == technicalServiceRequest.ClientId)
                     .Select(i => new { i.Id, i.Email })
                     .FirstOrDefault();
@@ -1003,7 +1003,7 @@ namespace TROUBLESHOOTING_REPAIR_SERVICE_REQUEST_SYSTEM.Controllers
                     var technicianId = history.ActionTakenById;
                     _db.Notifications.Add(new Notification()
                     {
-                        RecipientRegistrationId = technicianId.Value,
+                        RecipientId = technicianId.Value,
                         Title = "Request Cancelled: " + technicalServiceRequest.ReferenceCode,
                         Message = "The request with reference code " + technicalServiceRequest.ReferenceCode + " has been cancelled by the client. Please check the request details for more information.",
                         IsRead = false,
@@ -1047,7 +1047,7 @@ namespace TROUBLESHOOTING_REPAIR_SERVICE_REQUEST_SYSTEM.Controllers
             }
             catch (Exception ex)
             {
-                Log.Error(ex, $"An error occurred while user with ID {GetUserSession()?.Id.ToString() ?? "Unknown"} was cancelling request with ID {id}.");
+                Log.Error(ex, $"An error occurred while user with ID {GetAppUserSession()?.Id.ToString() ?? "Unknown"} was cancelling request with ID {id}.");
                 ModelState.AddModelError("", "An error occurred while making a request: " + ex.Message);
                 return Json(new
                 {
@@ -1060,7 +1060,7 @@ namespace TROUBLESHOOTING_REPAIR_SERVICE_REQUEST_SYSTEM.Controllers
         [Authorize2]
         [HttpPost]
         [ValidateAntiForgeryToken]
-        [AuthenticateUserPrivilege(new int[] { AccountTypeEnum.IT })]
+        [AuthenticateUserPrivilege(new int[] { AppUserRoleEnum.IT })]
         public ActionResult UpdateSeverity(int id, int severityId)
         {
             try
@@ -1071,7 +1071,7 @@ namespace TROUBLESHOOTING_REPAIR_SERVICE_REQUEST_SYSTEM.Controllers
                     throw new Exception("Invalid severity level.");
                 }
 
-                var currentUser = GetUserSession();
+                var currentUser = GetAppUserSession();
                 if (currentUser == null)
                 {
                     throw new Exception("User not found.");
@@ -1120,7 +1120,7 @@ namespace TROUBLESHOOTING_REPAIR_SERVICE_REQUEST_SYSTEM.Controllers
                     var notificationService = new NotificationService();
                     _db.Notifications.Add(new Notification()
                     {
-                        RecipientRegistrationId = technicalServiceRequest.ClientId,
+                        RecipientId = technicalServiceRequest.ClientId,
                         Title = "Severity Updated: " + technicalServiceRequest.ReferenceCode,
                         Message = notificationService.BuildRecipientMessageFromRequestSeverity(
                                 severityId, technicalServiceRequest.ReferenceCode, currentSeverityId
@@ -1147,7 +1147,7 @@ namespace TROUBLESHOOTING_REPAIR_SERVICE_REQUEST_SYSTEM.Controllers
             }
             catch (Exception ex)
             {
-                Log.Error(ex, $"An error occurred while user with ID {GetUserSession()?.Id.ToString() ?? "Unknown"} was updating severity of request with ID {id}.");
+                Log.Error(ex, $"An error occurred while user with ID {GetAppUserSession()?.Id.ToString() ?? "Unknown"} was updating severity of request with ID {id}.");
                 ModelState.AddModelError("", "An error occurred while making a request: " + ex.Message);
 
                 return Json(new
@@ -1160,7 +1160,7 @@ namespace TROUBLESHOOTING_REPAIR_SERVICE_REQUEST_SYSTEM.Controllers
 
         [Authorize2]
         [HttpGet]
-        [AuthenticateUserPrivilege(new int[] { AccountTypeEnum.STANDARD })]
+        [AuthenticateUserPrivilege(new int[] { AppUserRoleEnum.STANDARD })]
         public ActionResult GetFullyBookedDayByLimit(int scheduleServiceTypeId)
         {
             try
@@ -1229,7 +1229,7 @@ namespace TROUBLESHOOTING_REPAIR_SERVICE_REQUEST_SYSTEM.Controllers
             }
             catch (Exception ex)
             {
-                Log.Error(ex, $"An error occurred while user with ID {GetUserSession()?.Id.ToString() ?? "Unknown"} was fetching fully booked days by limit for service type ID {scheduleServiceTypeId}.");
+                Log.Error(ex, $"An error occurred while user with ID {GetAppUserSession()?.Id.ToString() ?? "Unknown"} was fetching fully booked days by limit for service type ID {scheduleServiceTypeId}.");
                 return Json(new
                 {
                     success = false,
@@ -1240,7 +1240,7 @@ namespace TROUBLESHOOTING_REPAIR_SERVICE_REQUEST_SYSTEM.Controllers
 
         [Authorize2]
         [HttpGet]
-        [AuthenticateUserPrivilege(new int[] { AccountTypeEnum.STANDARD })]
+        [AuthenticateUserPrivilege(new int[] { AppUserRoleEnum.STANDARD })]
         public ActionResult GetFullyBookedDayBySchedule()
         {
             try
@@ -1322,7 +1322,7 @@ namespace TROUBLESHOOTING_REPAIR_SERVICE_REQUEST_SYSTEM.Controllers
             }
             catch (Exception ex)
             {
-                Log.Error(ex, $"An error occurred while user with ID {GetUserSession()?.Id.ToString() ?? "Unknown"} was fetching fully booked days by schedule.");
+                Log.Error(ex, $"An error occurred while user with ID {GetAppUserSession()?.Id.ToString() ?? "Unknown"} was fetching fully booked days by schedule.");
                 return Json(new
                 {
                     success = false,
@@ -1400,10 +1400,10 @@ namespace TROUBLESHOOTING_REPAIR_SERVICE_REQUEST_SYSTEM.Controllers
                 .ToList();
 
             // Pick the least recently assigned, then by Id.
-            var availableTechnicianId = _db.Registrations
+            var availableTechnicianId = _db.AppUsers
                .Where(r =>
                    r.IsActive &&
-                   r.RoleId == AccountTypeEnum.IT)
+                   r.RoleId == AppUserRoleEnum.IT)
                .Where(r => !r.ITAvailabilities.Any(a =>
                    DbFunctions.TruncateTime(a.BlockDate) == today))
                .Where(r => !busyTechnicianIds.Contains(r.Id))
@@ -1430,7 +1430,7 @@ namespace TROUBLESHOOTING_REPAIR_SERVICE_REQUEST_SYSTEM.Controllers
                 throw new Exception("Schedule Date, Start Time, and End Time must be provided.");
             }
 
-            var itAccountTypeName = AccountTypeEnum.DisplayName(AccountTypeEnum.IT);
+            var itAccountTypeName = AppUserRoleEnum.DisplayName(AppUserRoleEnum.IT);
 
             // Requests in these statuses are still actively consuming a technician
             var activeStatusIds = RequestStatusEnum.GetActiveStatusIds();
@@ -1475,10 +1475,10 @@ namespace TROUBLESHOOTING_REPAIR_SERVICE_REQUEST_SYSTEM.Controllers
 
 
             // Pick the least recently assigned (fairness), then by Id.
-            var availableTechnicianId = _db.Registrations
+            var availableTechnicianId = _db.AppUsers
                 .Where(r =>
                     r.IsActive &&
-                    r.RoleId == AccountTypeEnum.IT
+                    r.RoleId == AppUserRoleEnum.IT
                 )
                 .Where(r => !r.ITAvailabilities.Any(a =>
                     DbFunctions.TruncateTime(a.BlockDate) == DbFunctions.TruncateTime(scheduleDate)))
@@ -1584,7 +1584,7 @@ namespace TROUBLESHOOTING_REPAIR_SERVICE_REQUEST_SYSTEM.Controllers
                         equipmentDetails.LocationId = null;
                         equipmentDetails.StatusId = (int)EquipmentStatusEnum.UNDER_REPAIR;
                         equipmentDetails.RepairCount = 1;
-                        equipmentDetails.CreatedById = GetUserSession()?.Id;
+                        equipmentDetails.CreatedById = GetAppUserSession()?.Id;
                         equipmentDetails.CreatedAt = DateTime.UtcNow;
                         equipmentDetails.UpdatedAt = DateTime.UtcNow;
 

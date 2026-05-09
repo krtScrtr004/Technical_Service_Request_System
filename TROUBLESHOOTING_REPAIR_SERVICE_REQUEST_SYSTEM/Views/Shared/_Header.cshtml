@@ -2,11 +2,11 @@
 @using TROUBLESHOOTING_REPAIR_SERVICE_REQUEST_SYSTEM.Core
 
 @{
-    var currentUser = ViewBag.CurrentUser as UserSession;
+    var currentUser = ViewBag.CurrentUser as AppUserSession;
 
-    var isAdmin = AccountTypeEnum.IsAdmin(currentUser.RoleId);
-    var isIT = AccountTypeEnum.IsIT(currentUser.RoleId);
-    var isStandard = AccountTypeEnum.IsStandard(currentUser.RoleId);
+    var isAdmin = AppUserRoleEnum.IsAdmin(currentUser.RoleId);
+    var isIT = AppUserRoleEnum.IsIT(currentUser.RoleId);
+    var isStandard = AppUserRoleEnum.IsStandard(currentUser.RoleId);
 }
 
 <header>
@@ -47,12 +47,12 @@
                             <ul class="dropdown-menu" role="menu">
                                 @* Registration List *@
                                 <li>
-                                    <a href="@Url.Action("Index", "Registration")">ACCOUNTS</a>
+                                    <a href="@Url.Action("Index", "User")">ACCOUNTS</a>
                                 </li>
 
                                 @* Request List *@
                                 <li>
-                                    <a href="@Url.Action("Index", "RegistrationRequest")">REQUESTS</a>
+                                    <a href="@Url.Action("Index", "Registration")">REQUESTS</a>
                                 </li>
                             </ul>
                         </li>

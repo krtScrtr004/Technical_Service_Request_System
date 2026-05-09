@@ -30,15 +30,15 @@ namespace TROUBLESHOOTING_REPAIR_SERVICE_REQUEST_SYSTEM.Core
 
             using (var _db = new ApplicationDbContext())
             {
-                // Look up the registration ID associated with the email.
-                var recipientRegistrationId = _db.Registrations
+                // Look up the AppUser ID associated with the email.
+                var recipientAppUserId = _db.AppUsers
                     .Where(r => r.Email == email)
                     .Select(r => r.Id)
                     .FirstOrDefault();
-                if (recipientRegistrationId > 0)
+                if (recipientAppUserId > 0)
                 {
-                    // Add the connection to a group named "recipient:{recipientRegistrationId}" so that we can target notifications to this recipient.
-                    await Groups.Add(Context.ConnectionId, RecipientGroupName(recipientRegistrationId));
+                    // Add the connection to a group named "recipient:{recipientAppUserId}" so that we can target notifications to this recipient.
+                    await Groups.Add(Context.ConnectionId, RecipientGroupName(recipientAppUserId));
                 }
             }
         }

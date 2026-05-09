@@ -96,12 +96,11 @@ namespace TROUBLESHOOTING_REPAIR_SERVICE_REQUEST_SYSTEM
             scheduler.ScheduleJob(deleteOldNotificationJob, deleteOldNotificationTrigger);
 
             // Once daily at 3:30 AM
-            var deactivateExpiredRegistrationsJob = JobBuilder.Create<DeactivateExpiredRegistrationsJob>().Build();
-            var deactivateExpiredRegistrationsTrigger = TriggerBuilder.Create()
+            var deactivateExpiredAppUsersJob = JobBuilder.Create<DeactivateExpiredAppUsersJob>().Build();
+            var deactivateExpiredAppUsersTrigger = TriggerBuilder.Create()
                 .WithCronSchedule("0 30 3 * * ?")
                 .Build();
-            scheduler.ScheduleJob(deactivateExpiredRegistrationsJob, deactivateExpiredRegistrationsTrigger);
-
+            scheduler.ScheduleJob(deactivateExpiredAppUsersJob, deactivateExpiredAppUsersTrigger);
             Log.Information("Scheduler started successfully.");
         }
 

@@ -31,7 +31,7 @@ namespace TROUBLESHOOTING_REPAIR_SERVICE_REQUEST_SYSTEM.Models
         public virtual EquipmentStatus Status { get; set; }
 
         public int? CreatedById { get; set; }
-        public virtual Registration CreatedBy{ get; set; }
+        public virtual AppUser CreatedBy{ get; set; }
 
         public int RepairCount { get; set; }
 

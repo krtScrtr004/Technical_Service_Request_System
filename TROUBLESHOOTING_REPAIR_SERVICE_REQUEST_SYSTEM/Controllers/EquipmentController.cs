@@ -21,7 +21,7 @@ namespace TROUBLESHOOTING_REPAIR_SERVICE_REQUEST_SYSTEM.Controllers
         // GET: Equipment
         public ActionResult Index()
         {
-            var currentUser = GetUserSession();
+            var currentUser = GetAppUserSession();
             if (currentUser == null)
             {
                 throw new HttpException(403, "Forbidden");
@@ -31,10 +31,10 @@ namespace TROUBLESHOOTING_REPAIR_SERVICE_REQUEST_SYSTEM.Controllers
             return View();
         }
 
-        [AuthenticateUserPrivilege(new int[] { AccountTypeEnum.IT, AccountTypeEnum.ADMIN })]
+        [AuthenticateUserPrivilege(new int[] { AppUserRoleEnum.IT, AppUserRoleEnum.ADMIN })]
         public ActionResult Create()
         {
-            var currentUser = GetUserSession();
+            var currentUser = GetAppUserSession();
             if (currentUser == null)
             {
                 throw new HttpException(403, "Forbidden");
@@ -46,7 +46,7 @@ namespace TROUBLESHOOTING_REPAIR_SERVICE_REQUEST_SYSTEM.Controllers
 
         [HttpPost]
         [ValidateAntiForgeryToken]
-        [AuthenticateUserPrivilege(new int[] { AccountTypeEnum.IT, AccountTypeEnum.ADMIN })]
+        [AuthenticateUserPrivilege(new int[] { AppUserRoleEnum.IT, AppUserRoleEnum.ADMIN })]
         public ActionResult Create(EquipmentFormViewModel equipmentFormViewModel)
         {
             using (var transaction = _db.Database.BeginTransaction())
@@ -60,7 +60,7 @@ namespace TROUBLESHOOTING_REPAIR_SERVICE_REQUEST_SYSTEM.Controllers
 
                 try
                 {
-                    var currentUser = GetUserSession();
+                    var currentUser = GetAppUserSession();
                     if (currentUser == null)
                     {
                         throw new HttpException(403, "Forbidden");
@@ -164,7 +164,7 @@ namespace TROUBLESHOOTING_REPAIR_SERVICE_REQUEST_SYSTEM.Controllers
                         Status = AlertModalStatus.Error
                     };
 
-                    Log.Error(ex, $"Error creating equipment entry for user ID {GetUserSession()?.Id}");
+                    Log.Error(ex, $"Error creating equipment entry for user ID {GetAppUserSession()?.Id}");
                     ModelState.AddModelError("", "An error occurred while making a request: " + ex.Message);
 
                     return View(equipmentFormViewModel);
@@ -172,7 +172,7 @@ namespace TROUBLESHOOTING_REPAIR_SERVICE_REQUEST_SYSTEM.Controllers
             }
         }
 
-        [AuthenticateUserPrivilege(new int[] { AccountTypeEnum.IT, AccountTypeEnum.ADMIN })]
+        [AuthenticateUserPrivilege(new int[] { AppUserRoleEnum.IT, AppUserRoleEnum.ADMIN })]
         public ActionResult Edit(int id)
         {
             if (id < 0)
@@ -180,7 +180,7 @@ namespace TROUBLESHOOTING_REPAIR_SERVICE_REQUEST_SYSTEM.Controllers
                 throw new HttpException(404, "Not Found");
             }
 
-            var currentUser = GetUserSession();
+            var currentUser = GetAppUserSession();
             if (currentUser == null)
             {
                 throw new HttpException(403, "Forbidden");
@@ -229,7 +229,7 @@ namespace TROUBLESHOOTING_REPAIR_SERVICE_REQUEST_SYSTEM.Controllers
 
         [HttpPost]
         [ValidateAntiForgeryToken]
-        [AuthenticateUserPrivilege(new int[] { AccountTypeEnum.IT, AccountTypeEnum.ADMIN })]
+        [AuthenticateUserPrivilege(new int[] { AppUserRoleEnum.IT, AppUserRoleEnum.ADMIN })]
         public ActionResult Edit(EquipmentFormViewModel equipmentFormViewModel, int id)
         {
 
@@ -240,7 +240,7 @@ namespace TROUBLESHOOTING_REPAIR_SERVICE_REQUEST_SYSTEM.Controllers
                     throw new HttpException(404, "Not Found");
                 }
 
-                var currentUser = GetUserSession();
+                var currentUser = GetAppUserSession();
                 if (currentUser == null)
                 {
                     throw new HttpException(403, "Forbidden");
@@ -454,7 +454,7 @@ namespace TROUBLESHOOTING_REPAIR_SERVICE_REQUEST_SYSTEM.Controllers
                         Status = AlertModalStatus.Error
                     };
 
-                    Log.Error(ex, $"An error occurred while editing equipment entry for user ID {GetUserSession()?.Id}");
+                    Log.Error(ex, $"An error occurred while editing equipment entry for user ID {GetAppUserSession()?.Id}");
                     ModelState.AddModelError("", "An error occurred while making a request: " + ex.Message);
 
                     return View(equipmentFormViewModel);
@@ -464,7 +464,7 @@ namespace TROUBLESHOOTING_REPAIR_SERVICE_REQUEST_SYSTEM.Controllers
 
 
         [Authorize2]
-        [AuthenticateUserPrivilege(new int[] { AccountTypeEnum.STANDARD, AccountTypeEnum.IT, AccountTypeEnum.ADMIN })]
+        [AuthenticateUserPrivilege(new int[] { AppUserRoleEnum.STANDARD, AppUserRoleEnum.IT, AppUserRoleEnum.ADMIN })]
         public ActionResult Details(int id)
         {
             if (id < 1)
@@ -472,7 +472,7 @@ namespace TROUBLESHOOTING_REPAIR_SERVICE_REQUEST_SYSTEM.Controllers
                 throw new HttpException(404, "Not Found");
             }
 
-            var currentUser = GetUserSession();
+            var currentUser = GetAppUserSession();
             if (currentUser == null)
             {
                 throw new HttpException(403, "Forbidden");
@@ -511,14 +511,14 @@ namespace TROUBLESHOOTING_REPAIR_SERVICE_REQUEST_SYSTEM.Controllers
         #region API
 
         [HttpGet]
-        [AuthenticateUserPrivilege(new int[] { AccountTypeEnum.STANDARD, AccountTypeEnum.IT, AccountTypeEnum.ADMIN })]
+        [AuthenticateUserPrivilege(new int[] { AppUserRoleEnum.STANDARD, AppUserRoleEnum.IT, AppUserRoleEnum.ADMIN })]
         public JsonResult GetEquipment()
         {
             try
             {
                 // Authenticate user
                 int.TryParse(Request["userId"], out int Id);
-                var associatedUser = _db.Registrations
+                var associatedUser = _db.AppUsers
                     .Where(i => i.Id == Id)
                     .FirstOrDefault();
                 if (associatedUser == null)
@@ -545,7 +545,7 @@ namespace TROUBLESHOOTING_REPAIR_SERVICE_REQUEST_SYSTEM.Controllers
 
                 IQueryable<Equipment> query = null;
 
-                var isStandardUser = AccountTypeEnum.IsStandard(associatedUser.RoleId);
+                var isStandardUser = AppUserRoleEnum.IsStandard(associatedUser.RoleId);
                 if (isStandardUser)
                 {
                     // Fetch only equipments associated with user requests

@@ -21,7 +21,7 @@ namespace TROUBLESHOOTING_REPAIR_SERVICE_REQUEST_SYSTEM.Controllers
     {
         [HttpPost]
         [ValidateAntiForgeryToken]
-        [AuthenticateUserPrivilege(new int[] { AccountTypeEnum.IT })]
+        [AuthenticateUserPrivilege(new int[] { AppUserRoleEnum.IT })]
         public ActionResult Create(int id, RequestHistory technicalServiceRequestHistory)
         {
             if (!ModelState.IsValid)
@@ -50,7 +50,7 @@ namespace TROUBLESHOOTING_REPAIR_SERVICE_REQUEST_SYSTEM.Controllers
             {
                 try
                 {
-                    var technician = GetUserSession();
+                    var technician = GetAppUserSession();
                     if (technician == null)
                     {
                         throw new Exception("An error occured.");
@@ -100,7 +100,7 @@ namespace TROUBLESHOOTING_REPAIR_SERVICE_REQUEST_SYSTEM.Controllers
 
                     _db.Notifications.Add(new Notification()
                     {
-                        RecipientRegistrationId = technicalServiceRequest.ClientId,
+                        RecipientId = technicalServiceRequest.ClientId,
                         Title = "Technical Service Request Update",
                         Message = notificationMessage,
                         ForAdmin = false,
@@ -268,7 +268,7 @@ namespace TROUBLESHOOTING_REPAIR_SERVICE_REQUEST_SYSTEM.Controllers
         }
 
 
-        [AuthenticateUserPrivilege(new int[] { AccountTypeEnum.IT })]
+        [AuthenticateUserPrivilege(new int[] { AppUserRoleEnum.IT })]
         private Request AssignTechnicianToPendingRequest(int technicianId)
         {
             var queue = new RequestQueueService();
@@ -311,7 +311,7 @@ namespace TROUBLESHOOTING_REPAIR_SERVICE_REQUEST_SYSTEM.Controllers
             return null;
         }
 
-        [AuthenticateUserPrivilege(new int[] { AccountTypeEnum.STANDARD, AccountTypeEnum.IT, AccountTypeEnum.ADMIN })]
+        [AuthenticateUserPrivilege(new int[] { AppUserRoleEnum.STANDARD, AppUserRoleEnum.IT, AppUserRoleEnum.ADMIN })]
         public ActionResult GetTechnicalServiceRequestActionHistory(int id)
         {
             var technicalServiceRequestHistory = _db.RequestHistories

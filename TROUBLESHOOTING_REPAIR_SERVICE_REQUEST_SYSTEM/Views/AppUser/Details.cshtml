@@ -1,0 +1,235 @@
+﻿@model TROUBLESHOOTING_REPAIR_SERVICE_REQUEST_SYSTEM.Models.AppUserDetailsViewModel
+@using TROUBLESHOOTING_REPAIR_SERVICE_REQUEST_SYSTEM.Enumerables
+@using TROUBLESHOOTING_REPAIR_SERVICE_REQUEST_SYSTEM.Core
+@using TROUBLESHOOTING_REPAIR_SERVICE_REQUEST_SYSTEM.Utilities
+
+@{
+    ViewBag.Title = "Details";
+
+    var currentUser = ViewBag.CurrentUser as AppUserSession;
+    var isCurrentUser = currentUser.Id == Model.User.Id ? true : false;
+
+    var isAdmin = AppUserRoleEnum.IsAdmin(currentUser.RoleId);
+    var isIT = AppUserRoleEnum.IsIT(currentUser.RoleId);
+
+    // User (Target) Information
+    var id = Model.User.Id.ToString();
+    var firstName = Model.User.FirstName.Trim();
+    var lastName = Model.User.LastName.Trim();
+    var middleName = !string.IsNullOrEmpty(Model.User.MiddleName)
+        ? Model.User.MiddleName.Trim()
+        : "N/A";
+    var extensionName = !string.IsNullOrEmpty(Model.User.ExtensionName)
+        ? Model.User.ExtensionName.Trim()
+        : "N/A";
+    var email = Model.User.Email.Trim();
+    var contactNumber = Model.User.ContactNumber.Trim();
+    var office = !string.IsNullOrWhiteSpace(Model.User.Office)
+        ? Model.User.Office
+        : "N/A";
+    var position = !string.IsNullOrWhiteSpace(Model.User.Position) 
+        ? Model.User.Position 
+        : "N/A";
+    var registrationDate = Model.Registration.RequestDate.HasValue
+        ? Model.Registration.RequestDate.Value.ToString("MMMM dd, yyyy hh:mm tt")
+        : "N/A";
+    var expiryDate = Model.User.ExpiryDate.HasValue
+        ? Model.User.ExpiryDate.Value.ToString("MMMM dd, yyyy hh:mm tt")
+        : "N/A";
+    var isUserIT = AppUserRoleEnum.IsIT(Model.User.RoleId);
+    var userRoleName = Model.User.Role.Name;
+
+    var fullName = GeneralUtilities.CreateFullName(
+        firstName,
+        lastName,
+        middleName != "N/A" ? middleName : null,
+        extensionName != "N/A" ? middleName : null
+    );
+
+    var initials = string.Join("", new[]
+    {
+        Model.User.FirstName,
+        Model.User.LastName
+    }
+    .Where(part => !string.IsNullOrWhiteSpace(part))
+    .Select(part => part.Trim().Substring(0, 1).ToUpperInvariant()));
+    if (string.IsNullOrWhiteSpace(initials))
+    {
+        initials = "NA";
+    }
+
+    var statusName = "N/A";
+    if (Model.User.IsActive)
+    {
+        statusName = "ACTIVE";
+    }
+    else if (Model.Registration.IsDenied)
+    {
+        statusName = "DENIED";
+    }
+    else if (Model.User.DeactivatedById != null ||
+        Model.User.DeactivatedById == 0)
+    {
+        statusName = "DEACTIVATED";
+    }
+    var statusNameClass = statusName == "ACTIVE"
+        ? "status-chip-active"
+        : statusName == "DENIED"
+            ? "status-chip-danger"
+            : "status-chip-muted";
+}
+
+@section Styles {
+    <link rel="stylesheet" href="~/Content/App/AppUser/Details.css" type="text/css" />
+}
+
+<section class="center-child user-details-page">
+    <div class="panel panel-default content-panel bg-light">
+
+        @* Heading *@
+        <section class="panel-heading profile-header flex-row flex-space-between flex-child-center-h">
+            <div class="profile-main flex-row flex-child-center-h">
+                <div class="profile-avatar bold-text">@initials</div>
+
+                <div>
+                    <div class="profile-title-row flex-row flex-child-center-h flex-wrap">
+                        <h4 class="profile-name">@fullName</h4>
+                        <span class="user-id-chip light-text">ID: @id</span>
+                    </div>
+
+                    <span class="status-chip @statusNameClass">
+                        <span class="status-dot"></span>
+                        @statusName
+                    </span>
+                </div>
+            </div>
+        </section>
+
+        <section class="panel-body">
+
+            @* General Information *@
+            <section class="details-section">
+                <div class="section-header">
+                    <h4 class="text-primary">
+                        <i class="glyphicon glyphicon-user"></i>
+                        GENERAL INFORMATION
+                    </h4>
+                </div>
+
+                <div class="detail-grid detail-grid-3">
+                    <div class="detail-item">
+                        <p class="detail-label">FIRST NAME</p>
+                        <p class="detail-value">@firstName</p>
+                    </div>
+
+                    <div class="detail-item">
+                        <p class="detail-label">MIDDLE NAME</p>
+                        <p class="detail-value">@middleName</p>
+                    </div>
+
+                    <div class="detail-item">
+                        <p class="detail-label">LAST NAME</p>
+                        <p class="detail-value">@lastName</p>
+                    </div>
+
+                    <div class="detail-item">
+                        <p class="detail-label"><i class="glyphicon glyphicon-envelope"></i> EMAIL ADDRESS</p>
+                        <p class="detail-value">@email</p>
+                    </div>
+
+                    <div class="detail-item">
+                        <p class="detail-label"><i class="glyphicon glyphicon-earphone"></i> CONTACT NUMBER</p>
+                        <p class="detail-value">@contactNumber</p>
+                    </div>
+
+                    <div class="detail-item">
+                        <p class="detail-label">EXTENSION NAME</p>
+                        <p class="detail-value">@extensionName</p>
+                    </div>
+
+                    <div class="detail-item">
+                        <p class="detail-label">OFFICE</p>
+                        <p class="detail-value">@office</p>
+                    </div>
+
+                    <div class="detail-item">
+                        <p class="detail-label">POSITION</p>
+                        <p class="detail-value">@position</p>
+                    </div>
+                </div>
+            </section>
+
+            @* Privileges *@
+            <section class="details-section">
+                <div class="section-header">
+                    <h4 class="text-primary">
+                        <i class="glyphicon glyphicon-lock"></i>
+                        PRIVILEGES
+                    </h4>
+                </div>
+
+                <div class="privileges-wrap flex-row flex-wrap">
+                    <span class="privilege-pill bold-text">@userRoleName</span>
+                </div>
+            </section>
+
+            @* Registraiton Detail *@
+            <section class="details-section">
+                <div class="section-header">
+                    <h4 class="section-heading-title text-primary">
+                        <i class="glyphicon glyphicon-file"></i>
+                        REGISTRATION DETAILS
+                    </h4>
+                </div>
+
+                <div class="detail-grid detail-grid-2">
+                    <div class="detail-item">
+                        <p class="detail-label"><i class="glyphicon glyphicon-calendar"></i> REGISTRATION DATE</p>
+                        <p class="detail-value">
+                            @registrationDate
+                        </p>
+                    </div>
+
+                    <div class="detail-item">
+                        <p class="detail-label"><i class="glyphicon glyphicon-time"></i> EXPIRY DATE</p>
+                        <p class="detail-value">
+                            @expiryDate
+                        </p>
+                    </div>
+                </div>
+            </section>
+        </section>
+
+        @if (isAdmin || isIT)
+        {
+            <section class="panel-footer management-buttons-container">
+                <p class="text-primary options-label light-text text-right bold-text">More Options</p>
+
+                <div class="buttons-container flex-row flex-child-end-v">
+                    @if (isUserIT)
+                    {
+                        <a id="block_dates_button" href="@Url.Action("Manage", "ITAvailability", new { id = id })" class="btn btn-warning">
+                            <i class="glyphicon glyphicon-calendar"></i>
+                            @(isIT ? "MANAGE" : "") AVAILABILITY
+                        </a>
+                    }
+
+                    @if (isAdmin)
+                    {
+                        Html.RenderPartial("~/Views/AppUser/Partial/_ManagePrivilegeModal.cshtml", Model.User);
+
+                        <button id="manage_privilege_button" type="button" class="btn btn-info" data-toggle="modal" data-target="#manage_privilege_modal">
+                            <i class="glyphicon glyphicon-lock"></i>
+                            MANAGE PRIVILEGES
+                        </button>
+
+                        <a id="deactivate_user_button" href="@Url.Action("Deactivate", "AppUser", new { id = id })" class="btn btn-danger">
+                            <i class="glyphicon glyphicon-ban-circle"></i>
+                            DEACTIVATE USER
+                        </a>
+                    }
+                </div>
+            </section>
+        }
+    </div>
+</section>

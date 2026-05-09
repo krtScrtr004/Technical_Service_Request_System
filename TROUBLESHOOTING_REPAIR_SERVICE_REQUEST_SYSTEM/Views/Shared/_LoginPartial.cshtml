@@ -2,7 +2,7 @@
 @using TROUBLESHOOTING_REPAIR_SERVICE_REQUEST_SYSTEM.Models
 @using TROUBLESHOOTING_REPAIR_SERVICE_REQUEST_SYSTEM.Core
 
-@{ var currentUser = ViewBag.CurrentUser as UserSession; }
+@{ var currentUser = ViewBag.CurrentUser as AppUserSession; }
 
 
 @using (Html.BeginForm(
@@ -27,7 +27,7 @@
             @Html.ActionLink(
                 "Hello, " + currentUser.FirstName,
                 "Details",
-                "Registration",
+                "User",
                 routeValues: new { id = currentUser.Id },
                 htmlAttributes: new { title = "Manage" }
             )

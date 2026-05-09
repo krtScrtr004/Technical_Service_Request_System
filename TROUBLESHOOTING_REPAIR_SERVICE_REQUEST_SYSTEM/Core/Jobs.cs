@@ -317,7 +317,7 @@ namespace TROUBLESHOOTING_REPAIR_SERVICE_REQUEST_SYSTEM.Job
             {
                 db.Notifications.Add(new Notification()
                 {
-                    RecipientRegistrationId = clientId,
+                    RecipientId = clientId,
                     Title = "Technical Service Request Update",
                     Message = notificationMessage,
                     ForAdmin = false,
@@ -341,7 +341,7 @@ namespace TROUBLESHOOTING_REPAIR_SERVICE_REQUEST_SYSTEM.Job
             {
                 db.Notifications.Add(new Notification()
                 {
-                    RecipientRegistrationId = technicianId,
+                    RecipientId = technicianId,
                     Title = "Technical Service Request Update",
                     Message = notificationMessage,
                     ForAdmin = false,
@@ -391,12 +391,12 @@ namespace TROUBLESHOOTING_REPAIR_SERVICE_REQUEST_SYSTEM.Job
         }
     }
 
-    public class DeactivateExpiredRegistrationsJob : IJob
+    public class DeactivateExpiredAppUsersJob : IJob
     {
         // Deactivate registrations that have expired
         public Task Execute(IJobExecutionContext context)
         {
-            Log.Information($"DeactivateExpiredRegistrationsJob started at {DateTime.Now}.");
+            Log.Information($"DeactivateExpiredAppUsersJob started at {DateTime.Now}.");
 
             using (var db = new ApplicationDbContext())
             {
@@ -405,10 +405,10 @@ namespace TROUBLESHOOTING_REPAIR_SERVICE_REQUEST_SYSTEM.Job
                     try
                     {
 
-                        var adminId = db.Registrations
+                        var adminId = db.AppUsers
                             .Where(r =>
                                 r.IsActive &&
-                                r.RoleId == AccountTypeEnum.ADMIN
+                                r.RoleId == AppUserRoleEnum.ADMIN
                             )
                             .Select(r => r.Id)
                             .FirstOrDefault();
@@ -419,30 +419,30 @@ namespace TROUBLESHOOTING_REPAIR_SERVICE_REQUEST_SYSTEM.Job
                         }
                         Log.Information($"Active admin found with ID: {adminId}");
 
-                        var expiredRegistrations = db.Registrations
+                        var expiredAppUsers = db.AppUsers
                             .Where(r =>
                                 r.IsActive &&
                                 r.ExpiryDate.HasValue &&
                                 DbFunctions.TruncateTime(r.ExpiryDate.Value) <= DbFunctions.TruncateTime(DateTime.Now)
                             )
                             .ToList();
-                        foreach (var registration in expiredRegistrations)
+                        foreach (var registration in expiredAppUsers)
                         {
                             registration.IsActive = false;
-                            registration.DeactivatedByRegistrationId = adminId;
-                            registration.DeactivatedRemarks = "Registration has expired";
+                            registration.DeactivatedById = adminId;
+                            registration.DeactivatedRemarks = "AppUser has expired";
                             db.Entry(registration).State = EntityState.Modified;
                         }
 
                         db.SaveChanges();
                         transaction.Commit();
 
-                        Log.Information($"DeactivateExpiredRegistrationsJob executed successfully at {DateTime.Now}. Deactivated {expiredRegistrations.Count} expired registrations.");
+                        Log.Information($"DeactivateExpiredAppUsersJob executed successfully at {DateTime.Now}. Deactivated {expiredAppUsers.Count} expired registrations.");
                     }
                     catch (Exception ex)
                     {
                         transaction.Rollback();
-                        Log.Error(ex, $"An error occurred while executing DeactivateExpiredRegistrationsJob at {DateTime.Now}.");
+                        Log.Error(ex, $"An error occurred while executing DeactivateExpiredAppUsersJob at {DateTime.Now}.");
                     }
                 }
             }

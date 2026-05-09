@@ -1,15 +1,14 @@
-﻿@model TROUBLESHOOTING_REPAIR_SERVICE_REQUEST_SYSTEM.Models.RequestIndexViewModel
-@using TROUBLESHOOTING_REPAIR_SERVICE_REQUEST_SYSTEM.Utilities;
+﻿@using TROUBLESHOOTING_REPAIR_SERVICE_REQUEST_SYSTEM.Utilities;
 @using TROUBLESHOOTING_REPAIR_SERVICE_REQUEST_SYSTEM.Enumerables;
 @using TROUBLESHOOTING_REPAIR_SERVICE_REQUEST_SYSTEM.Core;
 
 @{
     ViewBag.Title = "List";
 
-    var currentUser = ViewBag.CurrentUser as UserSession;
+    var currentUser = ViewBag.CurrentUser as AppUserSession;
 
-    var isAdmin = AccountTypeEnum.IsAdmin(currentUser.RoleId);
-    var isIT = AccountTypeEnum.IsIT(currentUser.RoleId);
+    var isAdmin = AppUserRoleEnum.IsAdmin(currentUser.RoleId);
+    var isIT = AppUserRoleEnum.IsIT(currentUser.RoleId);
 }
 
 

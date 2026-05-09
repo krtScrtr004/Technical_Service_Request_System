@@ -93,7 +93,7 @@ namespace TROUBLESHOOTING_REPAIR_SERVICE_REQUEST_SYSTEM.Controllers
                      *  - active 
                      *  - not expired
                      */
-                    var currentUser = db.Registrations
+                    var currentUser = db.AppUsers
                         .Include(r => r.Role)
                         .Where(r => r.IsActive && r.Email == model.Email)
                         .FirstOrDefault();
@@ -121,13 +121,12 @@ namespace TROUBLESHOOTING_REPAIR_SERVICE_REQUEST_SYSTEM.Controllers
                     {
                         case SignInStatus.Success:
                             {
-                                new UserSession(
+                                new AppUserSession(
                                     id: currentUser.Id,
                                     firstName: currentUser.FirstName,
                                     lastName: currentUser.LastName,
                                     middleName: currentUser.MiddleName,
                                     extensionName: currentUser.ExtensionName,
-                                    userName: currentUser.UserName,
                                     email: currentUser.Email,
                                     contactNumber: currentUser.ContactNumber,
                                     office: currentUser.Office,

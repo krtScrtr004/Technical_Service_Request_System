@@ -16,13 +16,13 @@ using TROUBLESHOOTING_REPAIR_SERVICE_REQUEST_SYSTEM.Services;
 namespace TROUBLESHOOTING_REPAIR_SERVICE_REQUEST_SYSTEM.Controllers
 {
     [Authorize2]
-    [AuthenticateUserPrivilege(new int[] { AccountTypeEnum.STANDARD, AccountTypeEnum.IT, AccountTypeEnum.ADMIN })]
+    [AuthenticateUserPrivilege(new int[] { AppUserRoleEnum.STANDARD, AppUserRoleEnum.IT, AppUserRoleEnum.ADMIN })]
     public class NotificationController : BaseController
     {
         // GET: Notification
         public ActionResult Index(int page = 1, int pageSize = 5)
         {
-            var currentUser = GetUserSession();
+            var currentUser = GetAppUserSession();
             if (currentUser == null)
             {
                 throw new HttpException(403, "Forbidden");
@@ -33,22 +33,22 @@ namespace TROUBLESHOOTING_REPAIR_SERVICE_REQUEST_SYSTEM.Controllers
                  .ThenByDescending(r => r.Id)
                  .AsQueryable();
 
-            if (AccountTypeEnum.IsAdmin(currentUser.RoleId))
+            if (AppUserRoleEnum.IsAdmin(currentUser.RoleId))
             {
                 notificationsQuery = notificationsQuery.Where(r =>
                     r.ForAdmin == true ||
-                    r.RecipientRegistrationId == currentUser.Id);
+                    r.RecipientId == currentUser.Id);
             }
-            else if (AccountTypeEnum.IsIT(currentUser.RoleId))
+            else if (AppUserRoleEnum.IsIT(currentUser.RoleId))
             {
                 notificationsQuery = notificationsQuery.Where(r =>
                     r.ForIT == true ||
-                    r.RecipientRegistrationId == currentUser.Id);
+                    r.RecipientId == currentUser.Id);
             }
             else
             {
                 notificationsQuery = notificationsQuery.Where(r =>
-                    r.RecipientRegistrationId == currentUser.Id);
+                    r.RecipientId == currentUser.Id);
             }
 
             var pagedNotifications = notificationsQuery.ToPagedList(page, pageSize);
@@ -63,7 +63,7 @@ namespace TROUBLESHOOTING_REPAIR_SERVICE_REQUEST_SYSTEM.Controllers
 
         public ActionResult ListPartial(int pageSize = 10)
         {
-            var currentUser = GetUserSession();
+            var currentUser = GetAppUserSession();
             if (currentUser == null)
             {
                 throw new HttpException(403, "Forbidden");
@@ -74,23 +74,23 @@ namespace TROUBLESHOOTING_REPAIR_SERVICE_REQUEST_SYSTEM.Controllers
                 .ThenByDescending(r => r.Id)
                 .Take(pageSize);
 
-            if (AccountTypeEnum.IsAdmin(currentUser.RoleId))
+            if (AppUserRoleEnum.IsAdmin(currentUser.RoleId))
             {
                 notifications = notifications.Where(i =>
                     i.ForAdmin == true ||
-                    i.RecipientRegistrationId == currentUser.Id
+                    i.RecipientId == currentUser.Id
                 );
             }
-            else if (AccountTypeEnum.IsIT(currentUser.RoleId))
+            else if (AppUserRoleEnum.IsIT(currentUser.RoleId))
             {
                 notifications = notifications.Where(i =>
                     i.ForIT == true ||
-                    i.RecipientRegistrationId == currentUser.Id
+                    i.RecipientId == currentUser.Id
                 );
             }
             else
             {
-                notifications = notifications.Where(i => i.RecipientRegistrationId == currentUser.Id);
+                notifications = notifications.Where(i => i.RecipientId == currentUser.Id);
             }
 
             var notificationDetails = notifications
@@ -102,33 +102,33 @@ namespace TROUBLESHOOTING_REPAIR_SERVICE_REQUEST_SYSTEM.Controllers
 
         public ActionResult HeaderNotificationBadge()
         {
-            var currentUser = GetUserSession();
+            var currentUser = GetAppUserSession();
             if (currentUser == null)
             {
                 throw new HttpException(403, "Forbidden");
             }
 
-            var isAdmin = AccountTypeEnum.IsAdmin(currentUser.RoleId);
+            var isAdmin = AppUserRoleEnum.IsAdmin(currentUser.RoleId);
             var query = _db.Notifications
                 .Where(i => i.IsRead == false)
                 .AsQueryable();
-            if (AccountTypeEnum.IsAdmin(currentUser.RoleId))
+            if (AppUserRoleEnum.IsAdmin(currentUser.RoleId))
             {
                 query = query.Where(i =>
                     i.ForAdmin == true ||
-                    i.RecipientRegistrationId == currentUser.Id
+                    i.RecipientId == currentUser.Id
                 );
             }
-            else if (AccountTypeEnum.IsIT(currentUser.RoleId))
+            else if (AppUserRoleEnum.IsIT(currentUser.RoleId))
             {
                 query = query.Where(i =>
                     i.ForIT == true ||
-                    i.RecipientRegistrationId == currentUser.Id
+                    i.RecipientId == currentUser.Id
                 );
             }
             else
             {
-                query = query.Where(i => i.RecipientRegistrationId == currentUser.Id);
+                query = query.Where(i => i.RecipientId == currentUser.Id);
             }
 
             var model = new NotificationBadgeViewModels()
@@ -147,7 +147,7 @@ namespace TROUBLESHOOTING_REPAIR_SERVICE_REQUEST_SYSTEM.Controllers
         {
             try
             {
-                var currentUser = GetUserSession();
+                var currentUser = GetAppUserSession();
                 if (currentUser == null)
                 {
                     throw new Exception("User not found.");
@@ -159,9 +159,9 @@ namespace TROUBLESHOOTING_REPAIR_SERVICE_REQUEST_SYSTEM.Controllers
                     throw new Exception("Notification not found.");
                 }
 
-                if ((AccountTypeEnum.IsAdmin(currentUser.RoleId) && notification.ForAdmin) ||
-                    (AccountTypeEnum.IsIT(currentUser.RoleId) && notification.ForIT) ||
-                    (notification.RecipientRegistrationId == currentUser.Id))
+                if ((AppUserRoleEnum.IsAdmin(currentUser.RoleId) && notification.ForAdmin) ||
+                    (AppUserRoleEnum.IsIT(currentUser.RoleId) && notification.ForIT) ||
+                    (notification.RecipientId == currentUser.Id))
                 {
                     notification.IsRead = true;
                     _db.Entry(notification).State = System.Data.Entity.EntityState.Modified;
@@ -178,9 +178,9 @@ namespace TROUBLESHOOTING_REPAIR_SERVICE_REQUEST_SYSTEM.Controllers
                         NotificationHub.RefreshITNotificationBadge();
                         NotificationHub.RefreshITNotificationList();
                     }
-                    else if (notification.RecipientRegistrationId.HasValue)
+                    else if (notification.RecipientId.HasValue)
                     {
-                        NotificationHub.RefreshNotificationBadge(notification.RecipientRegistrationId.Value);
+                        NotificationHub.RefreshNotificationBadge(notification.RecipientId.Value);
                     }
 
                     Log.Information($"User {currentUser.Id} marked notification {notification.Id} as read.");
@@ -198,7 +198,7 @@ namespace TROUBLESHOOTING_REPAIR_SERVICE_REQUEST_SYSTEM.Controllers
             }
             catch (Exception ex)
             {
-                Log.Error(ex, $"Error occurred while marking notification as read for user ID {GetUserSession()?.Id.ToString() ?? "Unknown"}.");
+                Log.Error(ex, $"Error occurred while marking notification as read for user ID {GetAppUserSession()?.Id.ToString() ?? "Unknown"}.");
                 return Json(new
                 {
                     success = false,

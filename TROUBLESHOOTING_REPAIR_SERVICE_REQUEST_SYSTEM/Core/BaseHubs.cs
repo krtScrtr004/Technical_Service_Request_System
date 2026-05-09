@@ -25,18 +25,18 @@ namespace TROUBLESHOOTING_REPAIR_SERVICE_REQUEST_SYSTEM.Core
             using (var _db = new ApplicationDbContext())
             {
                 // Look up the registration ID associated with the email.
-                var userPermission = _db.Registrations
+                var userPermission = _db.AppUsers
                     .Where(r => r.Email == email)
                     .Select(r => r.Role.Name)
                     .FirstOrDefault();
                 if (!string.IsNullOrEmpty(userPermission))
                 {
-                    if (AccountTypeEnum.IsAdmin(userPermission))
+                    if (AppUserRoleEnum.IsAdmin(userPermission))
                     {
                         // Add the connection to a group named "ADMIN" so that we can target notifications to admins
                         await Groups.Add(Context.ConnectionId, AdminGroupName);
                     }
-                    else if (AccountTypeEnum.IsIT(userPermission))
+                    else if (AppUserRoleEnum.IsIT(userPermission))
                     {
                         // Add the connection to a group named "IT" so that we can target notifications to IT staff
                         await Groups.Add(Context.ConnectionId, ITGroupName);

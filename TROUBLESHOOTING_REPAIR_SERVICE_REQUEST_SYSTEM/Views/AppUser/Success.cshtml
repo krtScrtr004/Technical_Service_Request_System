@@ -1,0 +1,118 @@
+﻿@model TROUBLESHOOTING_REPAIR_SERVICE_REQUEST_SYSTEM.Models.AppUserCreateViewModel
+
+@{ 
+    ViewBag.Title = "User Creation Success";
+
+    var id = Model.User.Id;
+    var fullName = Model.User.FirstName.Trim() + " " +
+        Model.User.MiddleName?.Trim() + " " +
+        Model.User.LastName.Trim() + " " +
+        Model.User.ExtensionName?.Trim();
+    var email = Model.User.Email.Trim();
+    var roleName = Model.User.Role.Name.Trim();
+    var office = Model.User.Office.Trim().ToUpperInvariant();
+    var position = Model.User.Position.Trim().ToUpperInvariant();
+    var registrationDate = Model.User.RegistrationDate.HasValue
+        ? Model.User.RegistrationDate.Value.ToString("MMMM dd, yyyy")
+        : "N/A";
+    var expiryDate = Model.User.ExpiryDate.HasValue
+        ? Model.User.ExpiryDate.Value.ToString("MMMM dd, yyyy")
+        : "N/A";
+    var code = Model.User.Code.Trim();
+}
+
+@section Styles
+{
+    <link rel="stylesheet" href="~/Content/App/AppUser/Success.css" type="text/css" />
+}
+
+<section class="container center-child user-success-page">
+    <div class="panel panel-primary success-panel">
+
+        @* Heading *@
+        <section class="panel-heading">
+            <h3 class="panel-title">
+                <i class="glyphicon glyphicon-ok-sign"></i>
+                Account Registration Successful
+            </h3>
+        </section>
+
+        @* Body *@
+        <section class="panel-body">
+            <div class="alert alert-success" role="alert">
+                The account was created successfully.
+            </div>
+
+            <h4 class="center-text success-subtitle">
+                ACCOUNT INFORMATION
+            </h4>
+
+            <div class="table-responsive">
+                <table class="table table-bordered table-striped success-table stack-on-mobile">
+                    <tbody>
+
+                        @* Full Name *@
+                        <tr>
+                            <th>Full Name</th>
+                            <td colspan="3">@fullName</td>
+                        </tr>
+
+                        <tr>
+                            @* Email Address *@
+                            <th>Email Address</th>
+                            <td>@email</td>
+
+                            @* User Type *@
+                            <th>User Type</th>
+                            <td>@roleName</td>
+                        </tr>
+
+                        <tr>
+                            @* Office *@
+                            <th>Office</th>
+                            <td>@office</td>
+
+                            @* Position *@
+                            <th>Position</th>
+                            <td>@position</td>
+                        </tr>
+
+                        <tr>
+                            @* Registration Date *@
+                            <th>Registration Date</th>
+                            <td>
+                                @registrationDate
+                            </td>
+
+                            @* Expiry Date *@
+                            <th>Expiry Date</th>
+                            <td>
+                                @expiryDate
+                            </td>
+                        </tr>
+
+                        <tr>
+                            @* Default Password *@
+                            <th>Default Password</th>
+                            <td colspan="3">
+                                <span class="label label-danger credential-chip">@code</span>
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
+
+            </div>
+        </section>
+
+        @* Footer *@
+        <section class="panel-footer success-footer-actions">
+            <div class="text-right">
+                <a href="@Url.Action("Details", "AppUser", new { id = id })" class="btn btn-primary">
+                    Done
+                </a>
+            </div>
+        </section>
+
+    </div>
+</section>
+

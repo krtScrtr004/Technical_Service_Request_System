@@ -28,7 +28,7 @@ namespace TROUBLESHOOTING_REPAIR_SERVICE_REQUEST_SYSTEM.Models
         [Index]
         public int? ActionTakenById { get; set; }
         [ForeignKey("ActionTakenById")]
-        public virtual Registration ActionTakenBy{ get; set; }
+        public virtual AppUser ActionTakenBy { get; set; }
 
         public DateTime UpdatedAt { get; set; }
     }

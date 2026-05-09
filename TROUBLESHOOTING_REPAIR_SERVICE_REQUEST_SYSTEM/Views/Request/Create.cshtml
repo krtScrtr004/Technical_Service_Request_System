@@ -7,9 +7,9 @@
 
     ViewBag.Title = "Create";
 
-    var currentUser = ViewBag.CurrentUser as UserSession;
+    var currentUser = ViewBag.CurrentUser as AppUserSession;
     var isMySubmission = Model.ClientEmailAddress == currentUser.Email ? true : false;
-    var isStandardUser = AccountTypeEnum.IsStandard(currentUser.RoleId);
+    var isStandardUser = AppUserRoleEnum.IsStandard(currentUser.RoleId);
 }
 
 @section Styles {
@@ -253,7 +253,7 @@
                         Request
                     </button>
 
-                    <a class="btn btn-danger bold-text" href="@Url.Action("Index", "TechnicalServiceRequests")">
+                    <a class="btn btn-danger bold-text" href="@Url.Action("Index", "Request")">
                         <i class="glyphicon glyphicon-remove-circle"></i>
                         Cancel
                     </a>

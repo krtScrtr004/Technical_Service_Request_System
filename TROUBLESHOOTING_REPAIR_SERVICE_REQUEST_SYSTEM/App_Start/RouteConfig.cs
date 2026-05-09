@@ -13,14 +13,14 @@ namespace TROUBLESHOOTING_REPAIR_SERVICE_REQUEST_SYSTEM
         {
             routes.IgnoreRoute("{resource}.axd/{*pathInfo}");
 
+            // Enable attribute routing
+            routes.MapMvcAttributeRoutes();
+
             routes.MapRoute(
                 name: "Default",
                 url: "{controller}/{action}/{id}",
                 defaults: new { controller = "Account", action = "Login", id = UrlParameter.Optional }
             );
-
-            // Enable attribute routing
-            routes.MapMvcAttributeRoutes();
         }
     }
 }
