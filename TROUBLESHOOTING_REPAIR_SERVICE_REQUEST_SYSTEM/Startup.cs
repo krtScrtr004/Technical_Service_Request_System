@@ -6,6 +6,7 @@ using Serilog;
 using System;
 using System.Web.Hosting;
 using TROUBLESHOOTING_REPAIR_SERVICE_REQUEST_SYSTEM.Job;
+using System.Configuration;
 
 [assembly: OwinStartupAttribute(typeof(TROUBLESHOOTING_REPAIR_SERVICE_REQUEST_SYSTEM.Startup))]
 namespace TROUBLESHOOTING_REPAIR_SERVICE_REQUEST_SYSTEM
