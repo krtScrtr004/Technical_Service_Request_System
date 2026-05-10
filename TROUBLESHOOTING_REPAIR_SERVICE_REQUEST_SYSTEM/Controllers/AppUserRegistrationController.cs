@@ -20,7 +20,7 @@ namespace TROUBLESHOOTING_REPAIR_SERVICE_REQUEST_SYSTEM.Controllers
     [RoutePrefix("Registration")]
     public class AppUserRegistrationController : BaseController
     {
-        [Route("Index/")]
+        [Route("Index")]
         [Authorize2]
         [AuthenticateUserPrivilege(new int[] { AppUserRoleEnum.ADMIN })]
         public ActionResult Index()
@@ -31,18 +31,35 @@ namespace TROUBLESHOOTING_REPAIR_SERVICE_REQUEST_SYSTEM.Controllers
                 throw new HttpException(403, "Forbidden");
             }
 
-            ViewBag.CurrentUser = currentUser;
-            return View();
+            try
+            {
+                ViewBag.CurrentUser = currentUser;
+                return View();
+            }
+            catch (Exception ex)
+            {
+                Log.Error(ex, $"An error occured while loading account registrations list page: {ex.Message}");
+                return RedirectToAction("Error", "Home");
+            }
+
         }
 
-        [Route("Create/")]
+        [Route("Create")]
         [AllowAnonymous]
         public ActionResult Create()
         {
-            return View(new AppUserRegistrationCreateViewModel());
+            try
+            {
+                return View(new AppUserRegistrationCreateViewModel());
+            }
+            catch (Exception ex)
+            {
+                Log.Error(ex, $"An error occured while loading account registration create page: {ex.Message}");
+                return RedirectToAction("Error", "Home");
+            }
         }
 
-        [Route("Create/")]
+        [Route("Create")]
         [HttpPost]
         [ValidateAntiForgeryToken]
         [AllowAnonymous]
@@ -120,7 +137,7 @@ namespace TROUBLESHOOTING_REPAIR_SERVICE_REQUEST_SYSTEM.Controllers
             }
         }
 
-        [Route("Success/")]
+        [Route("Success")]
         [AllowAnonymous]
         public ActionResult Success(string userId)
         {
@@ -149,6 +166,7 @@ namespace TROUBLESHOOTING_REPAIR_SERVICE_REQUEST_SYSTEM.Controllers
             }
             catch (Exception ex)
             {
+                Log.Error(ex, $"An error occured while loading account creation success page: {ex.Message}");
                 return RedirectToAction("NotFound", "Error");
             }
         }

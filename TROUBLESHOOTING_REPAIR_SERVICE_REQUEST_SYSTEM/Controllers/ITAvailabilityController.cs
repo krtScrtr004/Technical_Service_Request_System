@@ -47,26 +47,38 @@ namespace TROUBLESHOOTING_REPAIR_SERVICE_REQUEST_SYSTEM.Controllers
                     r.RegistrationDate
                 })
                 .FirstOrDefault();
-
-            var blockedDates = _db.ITAvailabilities
-               .Where(b => b.UserId == id)
-               .OrderBy(d => d.BlockDate)
-               .Select(d => d.BlockDate)
-               .ToList();
-
-            var stringBlockedDates = blockedDates
-                .Select(d => d.ToString("yyyy-MM-dd"))
-                .ToList();
-
-            var joinedStringBlockedDates = string.Join(",", stringBlockedDates);
-
-            ViewBag.CurrentUser = currentUser;
-            return View(new ITAvailabilityManageViewModel
+            if (user == null)
             {
-                UserId = user.Id,
-                RegistrationDate = user.RegistrationDate ?? DateTime.Now,
-                SelectedStringDates = joinedStringBlockedDates
-            });
+                throw new HttpException(404, "Not Found");
+            }
+
+            try
+            {
+                var blockedDates = _db.ITAvailabilities
+                   .Where(b => b.UserId == id)
+                   .OrderBy(d => d.BlockDate)
+                   .Select(d => d.BlockDate)
+                   .ToList();
+
+                var stringBlockedDates = blockedDates
+                    .Select(d => d.ToString("yyyy-MM-dd"))
+                    .ToList();
+
+                var joinedStringBlockedDates = string.Join(",", stringBlockedDates);
+
+                ViewBag.CurrentUser = currentUser;
+                return View(new ITAvailabilityManageViewModel
+                {
+                    UserId = user.Id,
+                    RegistrationDate = user.RegistrationDate ?? DateTime.Now,
+                    SelectedStringDates = joinedStringBlockedDates
+                });
+            }
+            catch (Exception ex)
+            {
+                Log.Error(ex, $"An error occured while loading technician availability management page: {ex.Message}");
+                return View("Error", "Error");
+            }
         }
 
         #region API

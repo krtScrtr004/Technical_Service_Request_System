@@ -22,8 +22,16 @@ namespace TROUBLESHOOTING_REPAIR_SERVICE_REQUEST_SYSTEM.Controllers
                 return RedirectToAction("Unauthorized", "Error");
             }
 
-            ViewBag.CurrentUser = currentUser;
-            return View();
+            try
+            {
+                ViewBag.CurrentUser = currentUser;
+                return View();
+            }
+            catch (Exception ex)
+            {
+                Log.Error(ex, $"An error occured while loading dashboard page: {ex.Message}");
+                return RedirectToAction("Error", "Home");
+            }
         }
 
         #region API
@@ -223,8 +231,8 @@ namespace TROUBLESHOOTING_REPAIR_SERVICE_REQUEST_SYSTEM.Controllers
                 var pendingRegistrationRequests = _db.AppUserRegistrations
                     .Count(i => !i.IsApproved && !i.IsDenied);
                 var activeUsers = _db.AppUsers.Count(i => i.IsActive);
-                var itUsers = _db.AppUsers.Count(i => 
-                    i.IsActive && 
+                var itUsers = _db.AppUsers.Count(i =>
+                    i.IsActive &&
                     i.RoleId == AppUserRoleEnum.IT);
 
                 return new
@@ -256,8 +264,8 @@ namespace TROUBLESHOOTING_REPAIR_SERVICE_REQUEST_SYSTEM.Controllers
                      i.DateAction.HasValue && DbFunctions.TruncateTime(i.DateAction.Value) == DbFunctions.TruncateTime(today)
                 );
 
-                var blockedDays = _db.ITAvailabilities.Count(i => 
-                    i.UserId == currentUser.Id && 
+                var blockedDays = _db.ITAvailabilities.Count(i =>
+                    i.UserId == currentUser.Id &&
                     i.BlockDate >= today
                 );
 
@@ -272,13 +280,13 @@ namespace TROUBLESHOOTING_REPAIR_SERVICE_REQUEST_SYSTEM.Controllers
                 };
             }
 
-            var pendingCount = visibleRequests.Count(i => 
+            var pendingCount = visibleRequests.Count(i =>
                 i.StatusId == RequestStatusEnum.PENDING);
-            var cancelledCount = visibleRequests.Count(i => 
+            var cancelledCount = visibleRequests.Count(i =>
                 i.StatusId == RequestStatusEnum.CANCELLED);
             var monthStartDate = new DateTime(DateTime.Now.Year, DateTime.Now.Month, 1);
-            var submittedThisMonth = visibleRequests.Count(i => 
-                i.DateRequest.HasValue && 
+            var submittedThisMonth = visibleRequests.Count(i =>
+                i.DateRequest.HasValue &&
                 i.DateRequest.Value >= monthStartDate
             );
 

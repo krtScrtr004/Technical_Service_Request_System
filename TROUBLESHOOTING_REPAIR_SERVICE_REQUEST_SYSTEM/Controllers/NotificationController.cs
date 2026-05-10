@@ -28,37 +28,45 @@ namespace TROUBLESHOOTING_REPAIR_SERVICE_REQUEST_SYSTEM.Controllers
                 throw new HttpException(403, "Forbidden");
             }
 
-            var notificationsQuery = _db.Notifications
-                 .OrderByDescending(r => r.CreatedAt)
-                 .ThenByDescending(r => r.Id)
-                 .AsQueryable();
-
-            if (AppUserRoleEnum.IsAdmin(currentUser.RoleId))
+            try
             {
-                notificationsQuery = notificationsQuery.Where(r =>
-                    r.ForAdmin == true ||
-                    r.RecipientId == currentUser.Id);
-            }
-            else if (AppUserRoleEnum.IsIT(currentUser.RoleId))
-            {
-                notificationsQuery = notificationsQuery.Where(r =>
-                    r.ForIT == true ||
-                    r.RecipientId == currentUser.Id);
-            }
-            else
-            {
-                notificationsQuery = notificationsQuery.Where(r =>
-                    r.RecipientId == currentUser.Id);
-            }
+                var notificationsQuery = _db.Notifications
+                     .OrderByDescending(r => r.CreatedAt)
+                     .ThenByDescending(r => r.Id)
+                     .AsQueryable();
 
-            var pagedNotifications = notificationsQuery.ToPagedList(page, pageSize);
-            var notificationDetails = new StaticPagedList<NotificationDetailViewModels>(
-                pagedNotifications.Select(NotificationTypeCaster.ToNotificationDetailViewModels),
-                pagedNotifications.GetMetaData()
-            );
+                if (AppUserRoleEnum.IsAdmin(currentUser.RoleId))
+                {
+                    notificationsQuery = notificationsQuery.Where(r =>
+                        r.ForAdmin == true ||
+                        r.RecipientId == currentUser.Id);
+                }
+                else if (AppUserRoleEnum.IsIT(currentUser.RoleId))
+                {
+                    notificationsQuery = notificationsQuery.Where(r =>
+                        r.ForIT == true ||
+                        r.RecipientId == currentUser.Id);
+                }
+                else
+                {
+                    notificationsQuery = notificationsQuery.Where(r =>
+                        r.RecipientId == currentUser.Id);
+                }
 
-            ViewBag.CurrentUser = currentUser;
-            return View(new NotificationIndexViewModels() { Notifications = notificationDetails });
+                var pagedNotifications = notificationsQuery.ToPagedList(page, pageSize);
+                var notificationDetails = new StaticPagedList<NotificationDetailViewModels>(
+                    pagedNotifications.Select(NotificationTypeCaster.ToNotificationDetailViewModels),
+                    pagedNotifications.GetMetaData()
+                );
+
+                ViewBag.CurrentUser = currentUser;
+                return View(new NotificationIndexViewModels() { Notifications = notificationDetails });
+            }
+            catch (Exception ex)
+            {
+                Log.Error(ex, $"An error occured while loading notifications list page: {ex.Message}");
+                return View("Error", "Error");
+            }
         }
 
         public ActionResult ListPartial(int pageSize = 10)

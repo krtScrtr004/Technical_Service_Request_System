@@ -58,10 +58,9 @@ namespace TROUBLESHOOTING_REPAIR_SERVICE_REQUEST_SYSTEM.Controllers
             }
             catch (Exception ex)
             {
-                Log.Error($"An error occured while rendering Accounts page: {ex.Message}");
+                Log.Error(ex, $"An error occured while loading accounts list page: {ex.Message}");
+                return View("Error", "Error");
             }
-
-            return View("Error", "Error");
         }
 
         [Route("Details/{id}")]
@@ -108,7 +107,7 @@ namespace TROUBLESHOOTING_REPAIR_SERVICE_REQUEST_SYSTEM.Controllers
             }
             catch (Exception ex)
             {
-                Log.Error($"An error occured while rendering Accounts page: {ex.Message}");
+                Log.Error(ex, $"An error occured while loading account details page: {ex.Message}");
                 return View("Error", "Error");
             }
         }
@@ -125,10 +124,19 @@ namespace TROUBLESHOOTING_REPAIR_SERVICE_REQUEST_SYSTEM.Controllers
                 throw new HttpException(404, "Not found");
             }
 
-            return View(new AppUserCreateViewModel
+            try
             {
-                Registration = registration
-            });
+                return View(new AppUserCreateViewModel
+                {
+                    Registration = registration
+                });
+            }
+            catch (Exception ex)
+            {
+                Log.Error(ex, $"An error occured while loading account create page: {ex.Message}");
+                return View("Error", "Error");
+            }
+            
         }
 
         [Route("Create/{id}")]
@@ -311,6 +319,7 @@ namespace TROUBLESHOOTING_REPAIR_SERVICE_REQUEST_SYSTEM.Controllers
             }
             catch (Exception ex)
             {
+                Log.Error(ex, $"An error occurred while loading account creation success page: {ex.Message}");
                 return RedirectToAction("NotFound", "Error");
             }
         }
@@ -431,10 +440,18 @@ namespace TROUBLESHOOTING_REPAIR_SERVICE_REQUEST_SYSTEM.Controllers
                 throw new HttpException(404, "Not found");
             }
 
-            return View(new AppUserDeactivationViewModel
+            try
             {
-                User = user
-            });
+                return View(new AppUserDeactivationViewModel
+                {
+                    User = user
+                });
+            }
+            catch (Exception ex)
+            {
+                Log.Error(ex, $"An error occured while loading account deactivation page: {ex.Message}");
+                return View("Error", "Error");
+            }
         }
 
         [Route("Deactivate/{id}")]

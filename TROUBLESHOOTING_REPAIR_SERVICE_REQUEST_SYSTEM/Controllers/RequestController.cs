@@ -32,8 +32,16 @@ namespace TROUBLESHOOTING_REPAIR_SERVICE_REQUEST_SYSTEM.Controllers
                 throw new HttpException(403, "Forbidden");
             }
 
-            ViewBag.CurrentUser = currentUser;
-            return View();
+            try
+            {
+                ViewBag.CurrentUser = currentUser;
+                return View();
+            }
+            catch (Exception ex)
+            {
+                Log.Error(ex, $"An error occured while loading service requests list page: {ex.Message}");
+                return View("Error", "Error");
+            }
         }
 
         // GET: TechnicalServiceRequests/Details/5
@@ -68,59 +76,67 @@ namespace TROUBLESHOOTING_REPAIR_SERVICE_REQUEST_SYSTEM.Controllers
                 throw new HttpException(404, "Not found");
             }
 
-            var isQueued = false;
-            if (technicalServiceRequest.StatusId == (int)RequestStatusEnum.PENDING)
+            try
             {
-                isQueued = _db.RequestQueues
-                    .Any(q => q.RequestId == id && !q.IsProcessed);
-            }
-
-            if (!AppUserRoleEnum.IsAdmin(currentUser.RoleId))
-            {
-                var involvedTechnicianIds = technicalServiceRequest.Histories
-                    .Select(t => t.ActionTakenById)
-                    .ToList();
-
-                var isAssistedRequest = technicalServiceRequest.TypeId.HasValue &&
-                    !RequestTypeEnum.IsNonAssistedRequest(technicalServiceRequest.TypeId.Value);
-
-                var isRequestClient = AppUserRoleEnum.IsStandard(currentUser.RoleId) &&
-                    currentUser.Id == technicalServiceRequest.ClientId;
-
-                // IT can view if: (non-assisted) OR (assisted AND involved)
-                var isIT = AppUserRoleEnum.IsIT(currentUser.RoleId);
-                var isInvolvedTechnician = isAssistedRequest && isIT && involvedTechnicianIds.Contains(currentUser.Id);
-                var isNonAssistedAndIT = !isAssistedRequest && isIT;
-
-                if (!isRequestClient && !isInvolvedTechnician && !isNonAssistedAndIT)
+                var isQueued = false;
+                if (technicalServiceRequest.StatusId == (int)RequestStatusEnum.PENDING)
                 {
-                    return RedirectToAction("Index");
+                    isQueued = _db.RequestQueues
+                        .Any(q => q.RequestId == id && !q.IsProcessed);
                 }
-            }
 
-            // Cast technical service request to details view model 
-            var casted = (new RequestService())
-                .ToRequestDetailsViewModel(technicalServiceRequest);
-
-            // Get the latest history with a completed status to determine if the form can be generated
-            var completedStatusIds = RequestStatusEnum.GetCompletedStatusIds();
-            if (technicalServiceRequest.StatusId.HasValue &&
-                completedStatusIds.Contains(technicalServiceRequest.StatusId.Value))
-            {
-                var lastFormGeneratableHistory = technicalServiceRequest.Histories
-                    .LastOrDefault(h =>
-                        h.StatusId.HasValue &&
-                        completedStatusIds.Contains(h.StatusId.Value)
-                    );
-                if (lastFormGeneratableHistory != null)
+                if (!AppUserRoleEnum.IsAdmin(currentUser.RoleId))
                 {
-                    casted.FormGeneratableHistoryId = lastFormGeneratableHistory.Id;
-                }
-            }
+                    var involvedTechnicianIds = technicalServiceRequest.Histories
+                        .Select(t => t.ActionTakenById)
+                        .ToList();
 
-            ViewBag.CurrentUser = currentUser;
-            ViewBag.IsQueued = isQueued;
-            return View(casted);
+                    var isAssistedRequest = technicalServiceRequest.TypeId.HasValue &&
+                        !RequestTypeEnum.IsNonAssistedRequest(technicalServiceRequest.TypeId.Value);
+
+                    var isRequestClient = AppUserRoleEnum.IsStandard(currentUser.RoleId) &&
+                        currentUser.Id == technicalServiceRequest.ClientId;
+
+                    // IT can view if: (non-assisted) OR (assisted AND involved)
+                    var isIT = AppUserRoleEnum.IsIT(currentUser.RoleId);
+                    var isInvolvedTechnician = isAssistedRequest && isIT && involvedTechnicianIds.Contains(currentUser.Id);
+                    var isNonAssistedAndIT = !isAssistedRequest && isIT;
+
+                    if (!isRequestClient && !isInvolvedTechnician && !isNonAssistedAndIT)
+                    {
+                        return RedirectToAction("Index");
+                    }
+                }
+
+                // Cast technical service request to details view model 
+                var casted = (new RequestService())
+                    .ToRequestDetailsViewModel(technicalServiceRequest);
+
+                // Get the latest history with a completed status to determine if the form can be generated
+                var completedStatusIds = RequestStatusEnum.GetCompletedStatusIds();
+                if (technicalServiceRequest.StatusId.HasValue &&
+                    completedStatusIds.Contains(technicalServiceRequest.StatusId.Value))
+                {
+                    var lastFormGeneratableHistory = technicalServiceRequest.Histories
+                        .LastOrDefault(h =>
+                            h.StatusId.HasValue &&
+                            completedStatusIds.Contains(h.StatusId.Value)
+                        );
+                    if (lastFormGeneratableHistory != null)
+                    {
+                        casted.FormGeneratableHistoryId = lastFormGeneratableHistory.Id;
+                    }
+                }
+
+                ViewBag.CurrentUser = currentUser;
+                ViewBag.IsQueued = isQueued;
+                return View(casted);
+            }
+            catch (Exception ex)
+            {
+                Log.Error(ex, $"An error occured while loading service request details page: {ex.Message}");
+                return View("Error", "Error");
+            }
         }
 
         [AuthenticateUserPrivilege(new int[] { AppUserRoleEnum.STANDARD, AppUserRoleEnum.IT, AppUserRoleEnum.ADMIN })]
@@ -148,30 +164,38 @@ namespace TROUBLESHOOTING_REPAIR_SERVICE_REQUEST_SYSTEM.Controllers
                 throw new HttpException(404, "Not found");
             }
 
-            if (!AppUserRoleEnum.IsAdmin(currentUser.RoleId))
+            try
             {
-                var isAssistedRequest = technicalServiceRequest.TypeId.HasValue &&
-                  !RequestTypeEnum.IsNonAssistedRequest(technicalServiceRequest.TypeId.Value);
-
-                var isRequestClient = AppUserRoleEnum.IsStandard(currentUser.RoleId) &&
-                    currentUser.Id == technicalServiceRequest.ClientId;
-
-                // IT can view if: (non-assisted) OR (assisted AND involved)
-                var isIT = AppUserRoleEnum.IsIT(currentUser.RoleId);
-                var isInvolvedTechnician = isAssistedRequest && isIT && technicalServiceRequestHistory.ActionTakenById == currentUser.Id;
-                var isNonAssistedAndIT = !isAssistedRequest && isIT;
-
-                if (!isRequestClient && !isInvolvedTechnician && !isNonAssistedAndIT)
+                if (!AppUserRoleEnum.IsAdmin(currentUser.RoleId))
                 {
-                    return RedirectToAction("Index");
-                }
-            }
+                    var isAssistedRequest = technicalServiceRequest.TypeId.HasValue &&
+                      !RequestTypeEnum.IsNonAssistedRequest(technicalServiceRequest.TypeId.Value);
 
-            return View(new RequestFormViewModel
+                    var isRequestClient = AppUserRoleEnum.IsStandard(currentUser.RoleId) &&
+                        currentUser.Id == technicalServiceRequest.ClientId;
+
+                    // IT can view if: (non-assisted) OR (assisted AND involved)
+                    var isIT = AppUserRoleEnum.IsIT(currentUser.RoleId);
+                    var isInvolvedTechnician = isAssistedRequest && isIT && technicalServiceRequestHistory.ActionTakenById == currentUser.Id;
+                    var isNonAssistedAndIT = !isAssistedRequest && isIT;
+
+                    if (!isRequestClient && !isInvolvedTechnician && !isNonAssistedAndIT)
+                    {
+                        return RedirectToAction("Index");
+                    }
+                }
+
+                return View(new RequestFormViewModel
+                {
+                    Request = technicalServiceRequest,
+                    History = technicalServiceRequestHistory
+                });
+            }
+            catch (Exception ex)
             {
-                Request = technicalServiceRequest,
-                History = technicalServiceRequestHistory
-            });
+                Log.Error(ex, $"An error occured while loading service request form page: {ex.Message}");
+                return View("Error", "Error");
+            }
         }
 
         // GET: TechnicalServiceRequests/Create
@@ -184,20 +208,27 @@ namespace TROUBLESHOOTING_REPAIR_SERVICE_REQUEST_SYSTEM.Controllers
             {
                 throw new HttpException(404, "Not found");
             }
-
-            ViewBag.CurrentUser = currentUser;
-            return View(new RequestCreateViewModel()
+            try
             {
-                ClientId = currentUser.Id,
-                ClientFirstName = currentUser.FirstName,
-                ClientLastName = currentUser.LastName,
-                ClientMiddleName = currentUser.MiddleName,
-                ClientExtensionName = currentUser.ExtensionName,
-                ClientEmailAddress = currentUser.Email,
-                ClientContactNumber = currentUser.ContactNumber,
-                ClientOffice = currentUser.Office,
-                ClientPosition = currentUser.Position
-            });
+                ViewBag.CurrentUser = currentUser;
+                return View(new RequestCreateViewModel()
+                {
+                    ClientId = currentUser.Id,
+                    ClientFirstName = currentUser.FirstName,
+                    ClientLastName = currentUser.LastName,
+                    ClientMiddleName = currentUser.MiddleName,
+                    ClientExtensionName = currentUser.ExtensionName,
+                    ClientEmailAddress = currentUser.Email,
+                    ClientContactNumber = currentUser.ContactNumber,
+                    ClientOffice = currentUser.Office,
+                    ClientPosition = currentUser.Position
+                });
+            }
+            catch (Exception ex)
+            {
+                Log.Error(ex, $"An error occured while loading service request creation page: {ex.Message}");
+                return View("Error", "Error");
+            }
         }
 
         // POST: TechnicalServiceRequests/Create

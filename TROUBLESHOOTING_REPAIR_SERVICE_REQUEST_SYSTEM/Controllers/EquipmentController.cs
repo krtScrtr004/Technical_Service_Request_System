@@ -27,8 +27,16 @@ namespace TROUBLESHOOTING_REPAIR_SERVICE_REQUEST_SYSTEM.Controllers
                 throw new HttpException(403, "Forbidden");
             }
 
-            ViewBag.CurrentUser = currentUser;
-            return View();
+            try
+            {
+                ViewBag.CurrentUser = currentUser;
+                return View();
+            }
+            catch (Exception ex)
+            {
+                Log.Error(ex, $"An error occured while loading equipments list page: {ex.Message}");
+                return View("Error", "Error");
+            }
         }
 
         [AuthenticateUserPrivilege(new int[] { AppUserRoleEnum.IT, AppUserRoleEnum.ADMIN })]
@@ -40,8 +48,16 @@ namespace TROUBLESHOOTING_REPAIR_SERVICE_REQUEST_SYSTEM.Controllers
                 throw new HttpException(403, "Forbidden");
             }
 
-            ViewBag.CurrentUser = currentUser;
-            return View(new EquipmentFormViewModel());
+            try
+            {
+                ViewBag.CurrentUser = currentUser;
+                return View(new EquipmentFormViewModel());
+            }
+            catch (Exception ex)
+            {
+                Log.Error(ex, $"An error occured while loading equipment creation page: {ex.Message}");
+                return View("Error", "Error");
+            }
         }
 
         [HttpPost]
@@ -207,24 +223,32 @@ namespace TROUBLESHOOTING_REPAIR_SERVICE_REQUEST_SYSTEM.Controllers
                 throw new HttpException(404, "Not Found");
             }
 
-            ViewBag.CurrentUser = currentUser;
-            return View(new EquipmentFormViewModel
+            try
             {
-                Id = equipment.Id,
-                AssetTag = equipment.AssetTag,
-                Model = equipment.Model,
-                TypeId = (int)equipment.TypeId,
-                StatusId = (int)equipment.StatusId,
+                ViewBag.CurrentUser = currentUser;
+                return View(new EquipmentFormViewModel
+                {
+                    Id = equipment.Id,
+                    AssetTag = equipment.AssetTag,
+                    Model = equipment.Model,
+                    TypeId = (int)equipment.TypeId,
+                    StatusId = (int)equipment.StatusId,
 
-                LocationId = equipment.LocationId,
-                BuildingNumber = equipment.BuildingNumber.HasValue
-                    ? equipment.BuildingNumber.Value
-                    : (int?)null,
-                FloorNumber = equipment.FloorNumber.HasValue
-                    ? equipment.FloorNumber.Value
-                    : (int?)null,
-                Office = equipment.Office
-            });
+                    LocationId = equipment.LocationId,
+                    BuildingNumber = equipment.BuildingNumber.HasValue
+                        ? equipment.BuildingNumber.Value
+                        : (int?)null,
+                    FloorNumber = equipment.FloorNumber.HasValue
+                        ? equipment.FloorNumber.Value
+                        : (int?)null,
+                    Office = equipment.Office
+                });
+            }
+            catch (Exception ex)
+            {
+                Log.Error(ex, $"An error occured while loading equipment edit page: {ex.Message}");
+                return View("Error", "Error");
+            }
         }
 
         [HttpPost]
@@ -232,7 +256,6 @@ namespace TROUBLESHOOTING_REPAIR_SERVICE_REQUEST_SYSTEM.Controllers
         [AuthenticateUserPrivilege(new int[] { AppUserRoleEnum.IT, AppUserRoleEnum.ADMIN })]
         public ActionResult Edit(EquipmentFormViewModel equipmentFormViewModel, int id)
         {
-
             using (var transaction = _db.Database.BeginTransaction())
             {
                 if (id < 0)
@@ -488,24 +511,31 @@ namespace TROUBLESHOOTING_REPAIR_SERVICE_REQUEST_SYSTEM.Controllers
                 throw new HttpException(404, "Not Found");
             }
 
-            ViewBag.CurrentUser = currentUser;
-
-            return View(new EquipmentDetailsViewModel
+            try
             {
-                Id = equipment.Id,
-                AssetTag = equipment.AssetTag,
-                Model = equipment.Model,
-                TypeId = equipment.TypeId ?? 0,
-                BuildingNumber = equipment.Location?.BuildingNumber,
-                FloorNumber = equipment.Location?.FloorNumber,
-                Office = equipment.Location?.Office,
-                StatusId = equipment.StatusId ?? 0,
-                RepairCount = equipment.RepairCount,
-                CreatedByFirstName = equipment.CreatedBy?.FirstName,
-                CreatedByMiddleName = equipment.CreatedBy?.MiddleName,
-                CreatedByLastName = equipment.CreatedBy?.LastName,
-                CreatedByExtensionName = equipment.CreatedBy?.ExtensionName
-            });
+                ViewBag.CurrentUser = currentUser;
+                return View(new EquipmentDetailsViewModel
+                {
+                    Id = equipment.Id,
+                    AssetTag = equipment.AssetTag,
+                    Model = equipment.Model,
+                    TypeId = equipment.TypeId ?? 0,
+                    BuildingNumber = equipment.Location?.BuildingNumber,
+                    FloorNumber = equipment.Location?.FloorNumber,
+                    Office = equipment.Location?.Office,
+                    StatusId = equipment.StatusId ?? 0,
+                    RepairCount = equipment.RepairCount,
+                    CreatedByFirstName = equipment.CreatedBy?.FirstName,
+                    CreatedByMiddleName = equipment.CreatedBy?.MiddleName,
+                    CreatedByLastName = equipment.CreatedBy?.LastName,
+                    CreatedByExtensionName = equipment.CreatedBy?.ExtensionName
+                });
+            }
+            catch (Exception ex)
+            {
+                Log.Error(ex, $"An error occured while loading equipment details page: {ex.Message}");
+                return View("Error", "Error");
+            }
         }
 
         #region API
