@@ -28,7 +28,7 @@ namespace TECHNICAL_SERVICE_REQUEST
                       "~/Content/App/root.css",
                       "~/Content/App/utility.css",
                       "~/Content/App/Dashboard/Index.css",
-                      "~/Content/App/component.css"));
+                      "~/Content/App/override.css"));
 
         }
     }

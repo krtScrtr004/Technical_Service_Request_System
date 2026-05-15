@@ -1,4 +1,29 @@
-﻿.unset-button {
+﻿.filter-selection-container {
+    display: flex;
+    justify-content: end;
+    gap: var(--space);
+    border-bottom: 1px solid var(--default);
+    padding-bottom: 15px;
+}
+
+.filter-selection {
+    display: flex;
+    gap: var(--space);
+}
+
+    .filter-selection > label {
+        width: fit-content;
+        display: flex;
+        align-items: center;
+    }
+
+    .filter-selection > select {
+        width: 25ch !important;
+        padding: 8px !important;
+        font-weight: 800 !important;
+    }
+
+.unset-button {
     all: unset; /* removes all default styles */
     font: inherit;
     color: inherit;

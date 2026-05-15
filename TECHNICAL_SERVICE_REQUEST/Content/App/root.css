@@ -1,10 +1,11 @@
 ﻿:root {
-    --default: #95A5A6;
-    --primary: #2C3E50;
-    --success: #18BC9C;
-    --info: #3498DB;
-    --warning: #F39C12;
-    --danger: #E74C3C;
+    --default: #ddd;
+    --primary: #1e1e1e;
+    --success: #30b649;
+    --info: #007bff;
+    --warning: #ffb61e;
+    --danger: #c42838;
+
     --input-border-radius: 8px;
     --space: 1.5rem;
     --border-color: #3d3d3d;
@@ -54,6 +55,32 @@ header .navbar {
     border-radius: 0;
     margin-bottom: 0;
 }
+
+    header li,
+    header .navbar li {
+        background: var(--primary);
+    }
+
+    header a,
+    header .navbar a {
+        color: var(--default);
+    }
+
+    header .nav a:hover,
+    header .nav a:active,
+    header .nav a:focus,
+    header .nav a:focus-visible,
+    header .nav a:focus-within,
+    header .nav .open > a,
+    header .nav .open > a:hover,
+    header .nav .open > a:focus {
+        background: rgba(0, 0, 0, 0.3) !important;
+        color: #f3f3f3 !important;
+    }
+
+    header .nav .dropdown-menu {
+        background: var(--primary);
+    }
 
     header .glyphicon {
         height: 16px !important;

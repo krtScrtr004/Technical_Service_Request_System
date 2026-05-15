@@ -399,13 +399,14 @@
   </ItemGroup>
   <ItemGroup>
     <Content Include="Content\App\Account\Login.css" />
-    <Content Include="Content\App\component.css" />
+    <Content Include="Content\App\override.css" />
     <Content Include="Content\App\Dashboard\Index.css" />
     <Content Include="Content\App\Equipment\CreateEditForm.css" />
     <Content Include="Content\App\Equipment\Details.css" />
     <Content Include="Content\App\Equipment\Index.css" />
     <Content Include="Content\bootstrap-theme.css" />
     <Content Include="Content\bootstrap-theme.min.css" />
+    <Content Include="Content\bootstrap.css" />
     <Content Include="Content\DataTables\css\autoFill.bootstrap.css" />
     <Content Include="Content\DataTables\css\autoFill.bootstrap.min.css" />
     <Content Include="Content\DataTables\css\autoFill.bootstrap4.css" />
@@ -582,7 +583,6 @@
     <Content Include="Content\App\Request\Form.css" />
     <Content Include="Content\App\Request\Index.css" />
     <Content Include="Content\App\utility.css" />
-    <Content Include="Content\bootstrap.css" />
     <Content Include="Content\bootstrap.min.css" />
     <Content Include="Content\Glyphicons\glyphicons-halflings-regular.svg" />
     <Content Include="Content\Highcharts-11.4.5\code\css\annotations\popup.css" />
@@ -3331,6 +3331,9 @@
     <Content Include="Content\Glyphicons\glyphicons-halflings-regular.ttf" />
     <Content Include="Content\Glyphicons\glyphicons-halflings-regular.woff" />
     <Content Include="Content\Glyphicons\glyphicons-halflings-regular.woff2" />
+    <Content Include="Content\DataTables\css\semanticui.scss" />
+    <Content Include="Content\DataTables\css\mixins.scss" />
+    <Content Include="Content\DataTables\css\common.scss" />
     <Content Include="fonts\glyphicons-halflings-regular.woff2" />
     <Content Include="fonts\glyphicons-halflings-regular.woff" />
     <Content Include="fonts\glyphicons-halflings-regular.ttf" />
@@ -3339,9 +3342,6 @@
     <Content Include="Content\bootstrap.css.map" />
     <Content Include="Content\bootstrap-theme.min.css.map" />
     <Content Include="Content\bootstrap-theme.css.map" />
-    <Content Include="Content\DataTables\css\semanticui.scss" />
-    <Content Include="Content\DataTables\css\mixins.scss" />
-    <Content Include="Content\DataTables\css\common.scss" />
     <None Include="packages.config" />
     <None Include="Scripts\jquery-3.3.1.intellisense.js" />
     <None Include="Scripts\jquery-3.3.1-vsdoc.js" />
