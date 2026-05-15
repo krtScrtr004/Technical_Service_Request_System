@@ -1,0 +1,67 @@
+﻿@model TECHNICAL_SERVICE_REQUEST.Models.NotificationIndexViewModels
+@using TECHNICAL_SERVICE_REQUEST.Utilities
+@using PagedList.Mvc
+
+@{ ViewBag.Title = "Notifications"; }
+
+@section Styles {
+    <link rel="stylesheet" href="~/Content/App/Notification/Index.css" type="text/css" />
+}
+
+<section class="container flex-rwo flex-child-center-v notification-index-page">
+
+    <div class="panel panel-default notification-page-panel flex-col">
+        @* Heading *@
+        <section class="content-panel-heading panel-heading">
+            <div>
+                <h4 class="panel-title flex-row flex-child-center-h bold-text">
+                    <i class="glyphicon glyphicon glyphicon-bell"></i>
+                    NOTIFICATIONS
+                </h4>
+                <p class="light-text">
+                    Notifications older than 30 days are removed automatically.
+                </p>
+            </div>
+        </section>
+
+        @* Body *@
+        <section id="notification_list" class="panel-body flex-col flex-1 notification-list-body">
+            @Html.Partial("~/Views/Notification/Partial/_NotificationList.cshtml", Model.Notifications)
+        </section>
+
+        @* Pagination *@
+        <section class="content-panel-footer panel-footer flex-row-reverse notification-pagination-wrap">
+            @Html.PagedListPager(Model.Notifications, page => Url.Action("Index", new { page }),
+                new PagedListRenderOptions
+                {
+                    LiElementClasses = new[] { "" },
+                    UlElementClasses = new[] { "pagination" },
+                    LinkToPreviousPageFormat = "Previous",
+                    LinkToNextPageFormat = "Next",
+                    LinkToFirstPageFormat = "First",
+                    LinkToLastPageFormat = "Last",
+                    MaximumPageNumbersToDisplay = 5,
+                    DisplayEllipsesWhenNotShowingAllPageNumbers = true,
+                    DisplayLinkToPreviousPage = PagedListDisplayMode.IfNeeded,
+                    DisplayLinkToNextPage = PagedListDisplayMode.IfNeeded,
+                    DisplayLinkToFirstPage = PagedListDisplayMode.IfNeeded,
+                    DisplayLinkToLastPage = PagedListDisplayMode.IfNeeded,
+                    EllipsesFormat = "..."
+                })
+        </section>
+    </div>
+
+</section>
+
+@section Scripts {
+    <script>
+        const pageSize = parseInt("@Model.Notifications.PageSize", 10);
+        const currentPage = parseInt("@Model.Notifications.PageNumber", 10);
+
+        const getNotificationUrl = "@Url.Action("ListPartial", "Notification")";
+        const markAsReadUrl = "@Url.Action("MarkAsRead", "Notification")";
+    </script>
+
+    <script src="~/Scripts/App/Notification/LiveReloadNotification.js" defer></script>
+    <script src="~/Scripts/App/Notification/ViewNotificationDetailModal.js" defer></script>
+}

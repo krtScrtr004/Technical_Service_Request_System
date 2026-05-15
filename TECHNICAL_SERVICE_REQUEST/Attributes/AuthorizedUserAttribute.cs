@@ -1,0 +1,79 @@
+﻿using TECHNICAL_SERVICE_REQUEST.Models;
+using System;
+using System.Collections.Generic;
+using System.Data.Entity;
+using System.Linq;
+using System.Web;
+using System.Web.Mvc;
+using System.Web.Routing;
+using TECHNICAL_SERVICE_REQUEST.Core;
+
+namespace TECHNICAL_SERVICE_REQUEST.Attributes
+{
+    public class Authorize2 : AuthorizeAttribute
+    {
+        public override void OnAuthorization(AuthorizationContext filterContext)
+        {
+            // If they are authorized, handle accordingly
+            if (this.AuthorizeCore(filterContext.HttpContext))
+            {
+                base.OnAuthorization(filterContext);
+            }
+            else
+            {
+                filterContext.HttpContext.Session.Abandon();
+                // Otherwise redirect to your specific authorized area
+                filterContext.Result = new RedirectToRouteResult(
+                   new RouteValueDictionary(
+                       new
+                       {
+                           controller = "Error",
+                           action = "Unauthorized"
+                       })
+                   );
+            }
+        }
+    }
+
+    public class AuthenticateUserPrivilege : AuthorizeAttribute
+    {
+        private int[] AllowedPrivileges { get; set; }
+
+        public AuthenticateUserPrivilege(int[] allowedPrivileges)
+        {
+            this.AllowedPrivileges = allowedPrivileges;
+        }
+
+        protected override bool AuthorizeCore(HttpContextBase httpContext)
+        {
+            if (!httpContext.User.Identity.IsAuthenticated)
+            {
+                return false;
+            }
+
+            using (var db = new ApplicationDbContext())
+            {
+                var currentUser = new UserSessionProvider(db).GetCurrentUserSession(httpContext.User.Identity.Name);
+                if (currentUser == null || !AllowedPrivileges.Contains(currentUser.RoleId))
+                {
+                    return false;
+                }
+            }
+
+            return true;
+        }
+
+        protected override void HandleUnauthorizedRequest(AuthorizationContext filterContext)
+        {
+            filterContext.Result = new RedirectToRouteResult(
+                new RouteValueDictionary(
+                    new
+                    {
+                        controller = "Error",
+                        action = "Unauthorized"
+                    })
+                );
+        }
+
+    }
+}

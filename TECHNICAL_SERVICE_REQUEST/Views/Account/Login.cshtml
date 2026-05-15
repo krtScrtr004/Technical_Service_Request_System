@@ -1,0 +1,85 @@
+﻿@model TECHNICAL_SERVICE_REQUEST.Models.LoginViewModel
+
+@{
+    ViewBag.Title = "Log In";
+    Layout = null;
+}
+
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>@ViewBag.Title - TSR SYSTEM</title>
+
+    <link rel="icon" type="image/x-icon" href="~/Content/Images/logo.png" />
+
+    @Styles.Render("~/Content/css")
+    @Scripts.Render("~/bundles/modernizr")
+
+    <link rel="stylesheet" href="~/Content/App/Account/Login.css" type="text/css" />
+</head>
+
+<body class="login-page center-child">
+    <div id="particles_js"></div>
+
+    <!-- Login Card -->
+    <div class="login-card">
+        <div class="logo-row">
+            <img class="logo-glow" src="@Url.Content("~/Content/Images/logo.png")" />
+        </div>
+
+        <h5 class="doh-tag light-text">
+            <span class="block light-text">
+                DEPARTMENT OF HEALTH
+            </span>
+            <span class="">
+                METRO MANILA CENTER FOR HEALTH DEVELOPMENT
+            </span>
+        </h5>
+
+        <h3>
+            <span class="system-title">
+                TECHNICAL SERVICE REQUEST SYSTEM
+            </span>
+        </h3>
+
+        <!-- Login Form -->
+        <section id="loginForm">
+            @using (Html.BeginForm("Login", "Account", new { ReturnUrl = ViewBag.ReturnUrl }, FormMethod.Post))
+            {
+                @Html.AntiForgeryToken()
+
+                <div class="form-group-sm">
+                    @Html.ValidationMessageFor(m => m.Email, "", new { @class = "text-danger" })
+                    @Html.TextBoxFor(m => m.Email, new { @class = "form-control", placeholder = "Email" })
+                </div>
+
+                <div class="form-group-sm">
+                    @Html.ValidationMessageFor(m => m.Password, "", new { @class = "text-danger" })
+                    @Html.PasswordFor(m => m.Password, new { @class = "form-control", placeholder = "Password" })
+                </div>
+
+                <button id="login_button" type="submit" class="btn btn-primary">Log In</button>
+
+                <div class="links">
+                    <a href="@Url.Action("Create", "Registration")">Sign Up</a>
+                </div>
+            }
+        </section>
+    </div>
+
+    @* jQuery and Bootstrap JS *@
+    @Scripts.Render("~/bundles/jquery")
+    @Scripts.Render("~/bundles/bootstrap")
+
+    @* SweetAlert2 *@
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+    @Html.Partial("~/Views/Shared/_AlertModal.cshtml")
+
+    <!-- Load particles.js -->
+    <script src="https://cdn.jsdelivr.net/npm/particles.js@2.0.0/particles.min.js" defer></script>
+    <script src="~/Scripts/App/Account/LoadParticleJs.js" defer></script>
+</body>
+</html>
