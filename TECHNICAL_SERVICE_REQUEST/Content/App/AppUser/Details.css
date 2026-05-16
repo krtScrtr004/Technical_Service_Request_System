@@ -175,8 +175,8 @@
     display: inline-flex;
     align-items: center;
     border-radius: 999px;
-    background: #16243f;
-    color: #ffffff;
+    background: var(--primary);
+    color: var(--default);
     font-size: 1.3rem;
     letter-spacing: 0.6px;
     padding: 0.35rem 1.15rem;

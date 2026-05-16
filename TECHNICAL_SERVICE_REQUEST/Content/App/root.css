@@ -1,16 +1,15 @@
 ﻿:root {
     --default: #ddd;
-    --primary: #1e1e1e;
+    --primary: #0e355a;
     --success: #30b649;
     --info: #007bff;
     --warning: #ffb61e;
     --danger: #c42838;
-
     --input-border-radius: 8px;
     --space: 1.5rem;
     --border-color: #3d3d3d;
     --border-radius: 15px;
-    --box-shadow: 0 25px 50px -12px rgb(0 0 0 / 0.25);
+    `r --box-shadow: 0 25px 50px -12px rgb(0 0 0 / 0.25);
     --box-shadow-hover: 0 4px 8px rgba(0, 0, 0, 0.3);
     --transition-dur: 0.2s;
     --max-width-std: 1280px;
@@ -48,6 +47,11 @@ body {
     width: 100%;
     min-height: 100vh;
     height: fit-content;
+}
+
+header .container-fluid {
+    padding-left: 30px;
+    padding-right: 30px;
 }
 
 header,
@@ -95,7 +99,10 @@ header .navbar {
 
     header .navbar-brand .brand-text {
         margin: 0;
-        font-size: 1.8rem;
+        font-size: 2.5rem;
+        letter-spacing: 0.3rem;
+        font-family: Courier New, Courier, monospace;
+        font-weight: 900;
     }
 
     header .notification {
@@ -201,9 +208,9 @@ hr {
             display: none !important;
         }
 
-        header .navbar-collapse.collapse.in {
-            display: block !important;
-        }
+            header .navbar-collapse.collapse.in {
+                display: block !important;
+            }
 
     header .navbar-nav {
         float: none !important;
