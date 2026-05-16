@@ -348,12 +348,16 @@
     <Compile Include="Core\Hubs\DashboardHub.cs" />
     <Compile Include="Core\Hubs\EquipmentHub.cs" />
     <Compile Include="Core\Hubs\ITAvailabilityHub.cs" />
-    <Compile Include="Core\Jobs.cs" />
     <Compile Include="Core\Hubs\NotificationHub.cs" />
     <Compile Include="Core\Hubs\AppUserHub.cs" />
     <Compile Include="Core\Hubs\AppUserRegistrationHub.cs" />
     <Compile Include="Core\Hubs\RequestHub.cs" />
     <Compile Include="Core\AppUserSession.cs" />
+    <Compile Include="Core\Jobs\AssignQueuedRequestJob.cs" />
+    <Compile Include="Core\Jobs\DeleteExpiredAppUsersJob.cs" />
+    <Compile Include="Core\Jobs\DeleteOldNotificationsJob.cs" />
+    <Compile Include="Core\Jobs\NotifyTechnicianUpcomingServiceJob.cs" />
+    <Compile Include="Core\Jobs\UpdateScheduledControlProcessStatusJob.cs" />
     <Compile Include="Enumerables\AppUserRoleEnum.cs" />
     <Compile Include="Enumerables\EquipmentEnum.cs" />
     <Compile Include="Enumerables\GlobalEnumerable.cs" />

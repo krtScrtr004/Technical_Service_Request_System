@@ -5,7 +5,7 @@ using Quartz.Impl;
 using Serilog;
 using System;
 using System.Web.Hosting;
-using TECHNICAL_SERVICE_REQUEST.Job;
+using TECHNICAL_SERVICE_REQUEST.Jobs;
 using System.Configuration;
 
 [assembly: OwinStartupAttribute(typeof(TECHNICAL_SERVICE_REQUEST.Startup))]
