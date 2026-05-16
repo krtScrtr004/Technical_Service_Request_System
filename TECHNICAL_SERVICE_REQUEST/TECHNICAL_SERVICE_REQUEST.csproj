@@ -3478,11 +3478,11 @@
     <Content Include="Views\Request\Partial\_EditDescriptionModal.cshtml" />
     <Content Include="Views\Equipment\Index.cshtml" />
     <Content Include="Views\Equipment\Partial\_CreateEditForm.cshtml" />
-    <Content Include="Views\Equipment\Edit.cshtml" />
     <Content Include="Views\Equipment\Details.cshtml" />
     <Content Include="Scripts\jquery-3.3.1.slim.min.map" />
     <Content Include="Scripts\jquery-3.3.1.min.map" />
     <Content Include="secrets.config" />
+    <Content Include="Views\Equipment\Partial\_EditEntryModal.cshtml" />
     <Content Include="Views\Equipment\Partial\_CreateEntryModal.cshtml" />
   </ItemGroup>
   <ItemGroup>

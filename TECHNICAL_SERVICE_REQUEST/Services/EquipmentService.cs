@@ -52,5 +52,27 @@ namespace TECHNICAL_SERVICE_REQUEST.Services
             }
         }
 
+        public EquipmentFormViewModel ToEquipmentFormViewModel(EquipmentDetailsViewModel equipment)
+        {
+            if (equipment == null)
+            {
+                return null;
+            }
+
+            return new EquipmentFormViewModel
+            {
+                Id = equipment.Id,
+                Model = equipment.Model,
+                AssetTag = equipment.AssetTag,
+
+                TypeId = equipment.TypeId,
+                StatusId = equipment.StatusId,
+
+                BuildingNumber = equipment.BuildingNumber,
+                FloorNumber = equipment.FloorNumber,
+                Office = equipment.Office
+            };
+        }
+
     }
 }

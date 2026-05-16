@@ -167,69 +167,6 @@ namespace TECHNICAL_SERVICE_REQUEST.Controllers
             }
         }
 
-        [AuthenticateUserPrivilege(new int[] { AppUserRoleEnum.IT, AppUserRoleEnum.ADMIN })]
-        public ActionResult Edit(int id)
-        {
-            if (id < 0)
-            {
-                throw new HttpException(404, "Not Found");
-            }
-
-            var currentUser = GetAppUserSession();
-            if (currentUser == null)
-            {
-                throw new HttpException(403, "Forbidden");
-            }
-
-            var equipment = _db.Equipments
-                .Include(e => e.Location)
-                .Where(e => e.Id == id)
-                .Select(e => new
-                {
-                    e.Id,
-                    e.AssetTag,
-                    e.Model,
-                    e.TypeId,
-                    e.LocationId,
-                    e.StatusId,
-                    BuildingNumber = (int?)e.Location.BuildingNumber,
-                    FloorNumber = (int?)e.Location.FloorNumber,
-                    e.Location.Office
-                })
-                .FirstOrDefault();
-            if (equipment == null)
-            {
-                throw new HttpException(404, "Not Found");
-            }
-
-            try
-            {
-                ViewBag.CurrentUser = currentUser;
-                return View(new EquipmentFormViewModel
-                {
-                    Id = equipment.Id,
-                    AssetTag = equipment.AssetTag,
-                    Model = equipment.Model,
-                    TypeId = (int)equipment.TypeId,
-                    StatusId = (int)equipment.StatusId,
-
-                    LocationId = equipment.LocationId,
-                    BuildingNumber = equipment.BuildingNumber.HasValue
-                        ? equipment.BuildingNumber.Value
-                        : (int?)null,
-                    FloorNumber = equipment.FloorNumber.HasValue
-                        ? equipment.FloorNumber.Value
-                        : (int?)null,
-                    Office = equipment.Office
-                });
-            }
-            catch (Exception ex)
-            {
-                Log.Error(ex, $"An error occured while loading equipment edit page: {ex.Message}");
-                return View("Error", "Error");
-            }
-        }
-
         [HttpPost]
         [ValidateAntiForgeryToken]
         [AuthenticateUserPrivilege(new int[] { AppUserRoleEnum.IT, AppUserRoleEnum.ADMIN })]

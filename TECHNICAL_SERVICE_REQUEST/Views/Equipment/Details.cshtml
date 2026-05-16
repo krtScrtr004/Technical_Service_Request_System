@@ -42,10 +42,13 @@
     {
         createdBy = "N/A";
     }
+
+    var castedModel = (new EquipmentService()).ToEquipmentFormViewModel(Model);
 }
 
 @section Styles {
     <link rel="stylesheet" href="~/Content/App/Equipment/Details.css" type="text/css" />
+    <link rel="stylesheet" href="~/Content/App/Equipment/CreateEditForm.css" type="text/css" />
 }
 
 <section class="center-child equipment-details-page">
@@ -160,16 +163,23 @@
 
         @if (isAdmin || isIT)
         {
-            // Editor Button
-            <section class="panel-footer management-buttons-container">
-                <p class="text-primary options-label light-text text-right bold-text">More Options</p>
+            // Edito Button
+            <section class="panel-footer management-buttons-container flex-row-reverse flex-col">
+                <p class="text-primary options-label light-text bold-text">More Options</p>
 
-                <div class="buttons-container flex-row flex-child-end-v">
-                    <a class="btn btn-warning" href="@Url.Action("Edit", "Equipment", new { id = id })">
-                        <i class="glyphicon glyphicon-pencil"></i>
-                        EDIT EQUIPMENT
-                    </a>
-                </div>
+                @Html.Partial(
+                    "~/Views/Equipment/Partial/_EditEntryModal.cshtml",
+                    castedModel
+                )
+
+                <button id="edit_equipment_entry_button"
+                        class="btn btn-info"
+                        type="button"
+                        data-toggle="modal"
+                        data-target="#edit_equipment_entry_modal">
+                    <i class="glyphicon glyphicon-pencil"></i>
+                    Edit Entry
+                </button>
             </section>
         }
     </div>

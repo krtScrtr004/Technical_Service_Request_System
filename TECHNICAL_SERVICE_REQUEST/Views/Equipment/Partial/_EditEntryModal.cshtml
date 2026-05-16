@@ -1,9 +1,15 @@
 ﻿@model TECHNICAL_SERVICE_REQUEST.Models.EquipmentFormViewModel
 @using TECHNICAL_SERVICE_REQUEST.Core
 
-@{ ViewBag.Title = "Create"; }
+@{
+    ViewBag.Title = "Edit";
 
-<section id="create_equipment_entry_modal" class="modal fade" role="dialog">
+    var id = Model.Id.ToString();
+    var assetTag = Model.AssetTag.Trim();
+    var model = Model.Model.Trim();
+}
+
+<section id="edit_equipment_entry_modal" class="modal fade" role="dialog">
     <section class="modal-dialog">
 
         @* Modal content *@
@@ -15,13 +21,14 @@
 
                 <h4 class="modal-title text-light">
                     <i class="glyphicon glyphicon-list-alt text-light"></i>
-                    Create New Equipment Entry
+                    @(model) - (@(assetTag))
                 </h4>
             </section>
 
             @using (Html.BeginForm(
-                "Create",
-                null,
+                "Edit",
+                "Equipment",
+                new { id = id },
                 FormMethod.Post,
                 new { @class = "flex-col flex-1" }
             ))
@@ -30,8 +37,8 @@
 
                 <section class="equipment-form-actions text-right flex-row-reverse flex-child-center-h">
                     <button type="submit" class="btn btn-m btn-primary bold-text">
-                        <i class="glyphicon glyphicon-plus"></i>
-                        Create
+                        <i class="glyphicon glyphicon-floppy-disk"></i>
+                        Save
                     </button>
                 </section>
             }
