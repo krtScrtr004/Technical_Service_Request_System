@@ -458,7 +458,7 @@ namespace TECHNICAL_SERVICE_REQUEST.Controllers
 
         [HttpGet]
         [AuthenticateUserPrivilege(new int[] { AppUserRoleEnum.STANDARD, AppUserRoleEnum.IT, AppUserRoleEnum.ADMIN })]
-        public JsonResult GetEquipment()
+        public JsonResult GetEquipments()
         {
             try
             {
