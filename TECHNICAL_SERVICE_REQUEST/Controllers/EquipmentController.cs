@@ -39,27 +39,6 @@ namespace TECHNICAL_SERVICE_REQUEST.Controllers
             }
         }
 
-        [AuthenticateUserPrivilege(new int[] { AppUserRoleEnum.IT, AppUserRoleEnum.ADMIN })]
-        public ActionResult Create()
-        {
-            var currentUser = GetAppUserSession();
-            if (currentUser == null)
-            {
-                throw new HttpException(403, "Forbidden");
-            }
-
-            try
-            {
-                ViewBag.CurrentUser = currentUser;
-                return View(new EquipmentFormViewModel());
-            }
-            catch (Exception ex)
-            {
-                Log.Error(ex, $"An error occured while loading equipment creation page: {ex.Message}");
-                return View("Error", "Error");
-            }
-        }
-
         [HttpPost]
         [ValidateAntiForgeryToken]
         [AuthenticateUserPrivilege(new int[] { AppUserRoleEnum.IT, AppUserRoleEnum.ADMIN })]

@@ -11,13 +11,13 @@
     gap: var(--space);
 }
 
-    .filter-selection > label {
+    .filter-selection label {
         width: fit-content;
         display: flex;
         align-items: center;
     }
 
-    .filter-selection > select {
+    .filter-selection select {
         width: 25ch !important;
         padding: 8px !important;
         font-weight: 800 !important;

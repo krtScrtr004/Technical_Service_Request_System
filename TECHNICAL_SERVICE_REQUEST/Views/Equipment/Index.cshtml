@@ -1,5 +1,6 @@
 ﻿@using TECHNICAL_SERVICE_REQUEST.Enumerables
 @using TECHNICAL_SERVICE_REQUEST.Core
+@using TECHNICAL_SERVICE_REQUEST.Models
 
 @{
     ViewBag.Title = "List";
@@ -9,6 +10,7 @@
 @section Styles
 {
     <link rel="stylesheet" href="~/Content/App/Equipment/Index.css" type="text/css" />
+    <link rel="stylesheet" href="~/Content/App/Equipment/CreateEditForm.css" type="text/css" />
 }
 
 <section class="container equipment-index-page flex-row flex-child-center-v">
@@ -21,26 +23,44 @@
         </section>
 
         <section class="panel-body">
-            <section class="filter-selection-container">
-                @* Status Filter *@
-                <div class="filter-selection">
-                    <label for="status_filter">Status:</label>
-                    @Html.DropDownList(
-                        "status_filter",
-                        EquipmentStatusEnum.GetSelectListItems(),
-                        "All"
-                    );
-                </div>
+            <section class="flex-row flex-space-between">
+                <section>
+                    @Html.Partial(
+                        "~/Views/Equipment/Partial/_CreateEntryModal.cshtml",
+                        new EquipmentFormViewModel()
+                    )
 
-                @* Type Filter *@
-                <div class="filter-selection">
-                    <label for="type_filter">Type:</label>
-                    @Html.DropDownList(
-                        "type_filter",
-                        EquipmentTypeEnum.GetSelectListItems(),
-                        "All"
-                   )
-                </div>
+                    <button id="create_equipment_entry_button"
+                            class="btn btn-info"
+                            type="button"
+                            data-toggle="modal"
+                            data-target="#create_equipment_entry_modal">
+                        <i class="glyphicon glyphicon-plus"></i>
+                        Create New Entry
+                    </button>
+                </section>
+
+                <section class="filter-selection-container">
+                    @* Status Filter *@
+                    <div class="filter-selection">
+                        <label for="status_filter">Status:</label>
+                        @Html.DropDownList(
+                            "status_filter",
+                            EquipmentStatusEnum.GetSelectListItems(),
+                            "All"
+                        )
+                    </div>
+
+                    @* Type Filter *@
+                    <div class="filter-selection">
+                        <label for="type_filter">Type:</label>
+                        @Html.DropDownList(
+                            "type_filter",
+                            EquipmentTypeEnum.GetSelectListItems(),
+                            "All"
+                       )
+                    </div>
+                </section>
             </section>
 
             <div class="table-responsive">

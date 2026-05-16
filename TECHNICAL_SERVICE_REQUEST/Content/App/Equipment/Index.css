@@ -9,6 +9,10 @@
         max-width: var(--max-width-wide);
     }
 
+        .equipment-index-page > .panel > .panel-body > .flex-row.flex-space-between:first-child {
+            border-bottom: 1px solid var(--default);
+        }
+
 #equipment_table {
     width: 100% !important;
 }
