@@ -136,7 +136,7 @@ namespace TECHNICAL_SERVICE_REQUEST.Controllers
                 Log.Error(ex, $"An error occured while loading account create page: {ex.Message}");
                 return View("Error", "Error");
             }
-            
+
         }
 
         [Route("Create/{id}")]
@@ -194,7 +194,7 @@ namespace TECHNICAL_SERVICE_REQUEST.Controllers
                 {
                     Registration = registrationFiller
                 });
-            }            
+            }
             appUserCreateViewModel.Registration = registration;
 
             if (!ModelState.IsValid)
@@ -724,38 +724,106 @@ namespace TECHNICAL_SERVICE_REQUEST.Controllers
 
         private void CreateApplicationUser(ref AppUserCreateViewModel model, AppUser appUser, string code)
         {
+            var previousValidator = UserManager.UserValidator;
+            bool roleCreatedByThisCall = false;
+            string roleName = AppUserRoleEnum.DisplayName(appUser.RoleId);
 
-            // Generate username using email
-            var username = model.Email;
-            var pass = code; // Default password is the generated code, which will be sent to the user via email
-
-            // Create a new user in the ASP.NET Identity system with the generated username and password
-            var user = new ApplicationUser() { UserName = username, Email = model.Email };
-
-            // Allow special characters in Username
-            UserManager.UserValidator = new UserValidator<ApplicationUser>(UserManager)
+            try
             {
-                AllowOnlyAlphanumericUserNames = false,
-                RequireUniqueEmail = true
-            };
-            var result = UserManager.Create(user, pass);
-            if (!result.Succeeded)
+                using (var userStore = new UserStore<ApplicationUser>(_db))
+                using (var localUserManager = new UserManager<ApplicationUser>(userStore))
+                {
+                    // Permit special chars for this operation only
+                    localUserManager.UserValidator = new UserValidator<ApplicationUser>(localUserManager)
+                    {
+                        AllowOnlyAlphanumericUserNames = false,
+                        RequireUniqueEmail = true
+                    };
+
+                    var username = model.Email;
+                    var pass = code;
+                    var user = new ApplicationUser() { UserName = username, Email = model.Email };
+
+                    var result = localUserManager.Create(user, pass);
+                    if (!result.Succeeded)
+                    {
+                        throw new InvalidOperationException("Create user failed: " + string.Join(", ", result.Errors));
+                    }
+
+                    var roleManager = new RoleManager<IdentityRole>(new RoleStore<IdentityRole>(_db));
+                    if (!roleManager.RoleExists(roleName))
+                    {
+                        var createRoleResult = roleManager.Create(new IdentityRole(roleName));
+                        if (!createRoleResult.Succeeded)
+                            throw new InvalidOperationException("Create role failed: " + string.Join(", ", createRoleResult.Errors));
+                        roleCreatedByThisCall = true;
+                    }
+
+                    var createdUser = localUserManager.FindByEmail(user.Email);
+                    if (createdUser == null)
+                    {
+                        throw new InvalidOperationException("Created user not found in DB.");
+                    }
+
+                    var addRoleResult = localUserManager.AddToRole(createdUser.Id, roleName);
+                    if (!addRoleResult.Succeeded)
+                    {
+                        throw new InvalidOperationException("AddToRole failed: " + string.Join(", ", addRoleResult.Errors));
+                    }
+                }
+            }
+            catch
             {
-                throw new Exception("Failed to create user: " + string.Join(", ", result.Errors));
+                // Attempt to rollback partial changes
+                try
+                {
+                    RollbackCreatedUser(model.Email, roleName, roleCreatedByThisCall);
+                }
+                catch
+                {
+                    Log.Error("An error occured while attempting to rollback created asp user. Email: " + model.Email);
+                }
+
+                throw; // rethrow to caller so they know operation failed
+            }
+            finally
+            {
+                // restore the original validator
+                UserManager.UserValidator = previousValidator;
+            }
+        }
+
+        private void RollbackCreatedUser(string userName, string roleName, bool roleCreatedByThisCall)
+        {
+            // find user
+            var user = UserManager.FindByName(userName);
+            if (user != null)
+            {
+                // remove role assignment(s)
+                if (UserManager.IsInRole(user.Id, roleName))
+                {
+                    UserManager.RemoveFromRole(user.Id, roleName);
+                }
+
+                // delete user (removes AspNetUser*, claims/logins)
+                UserManager.Delete(user);
             }
 
-            var roleName = AppUserRoleEnum.DisplayName(appUser.RoleId);
-            var RoleManager = new RoleManager<IdentityRole>(new RoleStore<IdentityRole>(_db));
-            // Check if the role for the officer's account type exists, and if not, create it
-            if (!RoleManager.RoleExists(roleName))
+            // remove role if we created it here and it's unused
+            if (roleCreatedByThisCall)
             {
-                var role = new IdentityRole(roleName);
-                RoleManager.Create(role);
+                var rm = new RoleManager<IdentityRole>(new RoleStore<IdentityRole>(_db));
+                var role = rm.FindByName(roleName);
+                if (role != null)
+                {
+                    // only delete if no users assigned
+                    var usersInRole = _db.Set<IdentityUserRole>().Any(ur => ur.RoleId == role.Id);
+                    if (!usersInRole)
+                    {
+                        rm.Delete(role);
+                    }
+                }
             }
-
-            // Assign the officer to the appropriate role based on their account type
-            var temp = _db.Users.Single(i => i.UserName == user.UserName);
-            UserManager.AddToRole(temp.Id, roleName);
         }
 
         private void UpdateUserRoles(AppUser appUser, string privilegeName)

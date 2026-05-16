@@ -144,15 +144,15 @@ namespace TECHNICAL_SERVICE_REQUEST.Controllers
                         default:
                             {
                                 model.Alert = new Dictionary<string, AlertBaseUtility>()
-                        {
-                            { "invalidLogin", new AlertBoxUtility()
                                 {
-                                    Status = "danger",
-                                    Message = "Invalid login attempt.",
-                                    Dismissible = true
-                                }
-                            }
-                        };
+                                    { "invalidLogin", new AlertBoxUtility()
+                                        {
+                                            Status = "danger",
+                                            Message = "Invalid login attempt.",
+                                            Dismissible = true
+                                        }
+                                    }
+                                };
                                 ModelState.AddModelError("", "Invalid login attempt.");
 
                                 return View(model);
