@@ -10,7 +10,7 @@ namespace TECHNICAL_SERVICE_REQUEST.Enumerables
     {
         public const int EQUIPMENT_REPAIR_TROUBLESHOOTING = 1;
         public const int ZOOM_WEBEX_LINK = 2;
-        public const int GOVERNMENT_EMAIL_ACCOUNT = 3;
+        public const int COMPANY_EMAIL_ACCOUNT = 3;
         public const int AUDIO_VISUAL_SETUP = 4;
         public const int INTERNET_CONNECTIVITY = 5;
         public const int LIVESTREAM_SETUP = 6;
@@ -30,7 +30,7 @@ namespace TECHNICAL_SERVICE_REQUEST.Enumerables
                 case 2:
                     return "Zoom / Webex Link";
                 case 3:
-                    return "Government Email Account";
+                    return "Company Email Account";
                 case 4:
                     return "Audio Visual Setup";
                 case 5:
@@ -68,7 +68,7 @@ namespace TECHNICAL_SERVICE_REQUEST.Enumerables
         {
             return new List<int>
             {
-                GOVERNMENT_EMAIL_ACCOUNT,
+                COMPANY_EMAIL_ACCOUNT,
                 ACCOUNT_CREATION,
                 PASSWORD_ACCESS_ISSUE,
                 SYSTEM_SUPPORT,
@@ -101,7 +101,7 @@ namespace TECHNICAL_SERVICE_REQUEST.Enumerables
 
         public static bool IsNonAssistedRequest(this int id)
         {
-            if (id == GOVERNMENT_EMAIL_ACCOUNT ||
+            if (id == COMPANY_EMAIL_ACCOUNT ||
                 id == ACCOUNT_CREATION ||
                 id == PASSWORD_ACCESS_ISSUE ||
                 id == SYSTEM_SUPPORT ||
@@ -168,8 +168,8 @@ namespace TECHNICAL_SERVICE_REQUEST.Enumerables
                 },
                 new SelectListItem
                 {
-                    Value = RequestTypeEnum.GOVERNMENT_EMAIL_ACCOUNT.ToString(),
-                    Text = RequestTypeEnum.DisplayName(RequestTypeEnum.GOVERNMENT_EMAIL_ACCOUNT),
+                    Value = RequestTypeEnum.COMPANY_EMAIL_ACCOUNT.ToString(),
+                    Text = RequestTypeEnum.DisplayName(RequestTypeEnum.COMPANY_EMAIL_ACCOUNT),
                     Group = nonAssistedGroup
                 },
                 new SelectListItem
