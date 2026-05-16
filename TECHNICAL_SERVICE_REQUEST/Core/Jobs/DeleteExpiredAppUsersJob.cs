@@ -9,7 +9,7 @@ using System.Web;
 using TECHNICAL_SERVICE_REQUEST.Enumerables;
 using TECHNICAL_SERVICE_REQUEST.Models;
 
-namespace TECHNICAL_SERVICE_REQUEST.Jobs
+namespace TECHNICAL_SERVICE_REQUEST.Core
 {
     public class DeactivateExpiredAppUsersJob : IJob
     {

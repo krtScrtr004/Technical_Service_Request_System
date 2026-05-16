@@ -7,7 +7,7 @@ using System.Threading.Tasks;
 using System.Web;
 using TECHNICAL_SERVICE_REQUEST.Models;
 
-namespace TECHNICAL_SERVICE_REQUEST.Jobs
+namespace TECHNICAL_SERVICE_REQUEST.Core
 {
     [DisallowConcurrentExecution]
     public class DeleteOldNotificationsJob : IJob

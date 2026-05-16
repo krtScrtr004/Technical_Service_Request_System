@@ -10,7 +10,7 @@ using TECHNICAL_SERVICE_REQUEST.Enumerables;
 using TECHNICAL_SERVICE_REQUEST.Models;
 using TECHNICAL_SERVICE_REQUEST.Services;
 
-namespace TECHNICAL_SERVICE_REQUEST.Jobs
+namespace TECHNICAL_SERVICE_REQUEST.Core
 {
     [DisallowConcurrentExecution]
     public class NotifyTechnicianUpcomingServiceJob : IJob

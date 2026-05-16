@@ -4,9 +4,10 @@ using Quartz;
 using Quartz.Impl;
 using Serilog;
 using System;
+using System.Configuration;
+using System.IO;
 using System.Web.Hosting;
 using TECHNICAL_SERVICE_REQUEST.Core;
-using System.Configuration;
 
 [assembly: OwinStartupAttribute(typeof(TECHNICAL_SERVICE_REQUEST.Startup))]
 namespace TECHNICAL_SERVICE_REQUEST
@@ -36,29 +37,42 @@ namespace TECHNICAL_SERVICE_REQUEST
 
         private void InitialiazeLogger()
         {
-            var logDirectory = HostingEnvironment.MapPath("~/Logs") ?? "Logs";
+            // Ensure we have a physical base log directory
+            var baseLogVirtual = "~/Logs";
+            var baseLogPath = HostingEnvironment.MapPath(baseLogVirtual)
+                ?? Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "Logs");
+
+            var infoDirectory = Path.Combine(baseLogPath, "Information");
+            var warningDirectory = Path.Combine(baseLogPath, "Warning");
+            var errorDirectory = Path.Combine(baseLogPath, "Error");
+
+            // Create directories explicitly (no-op if they already exist)
+            System.IO.Directory.CreateDirectory(infoDirectory);
+            System.IO.Directory.CreateDirectory(warningDirectory);
+            System.IO.Directory.CreateDirectory(errorDirectory);
+
             Log.Logger = new LoggerConfiguration()
-               .MinimumLevel.Debug() // Set minimum log level
+               .MinimumLevel.Debug()
                .WriteTo.File(
-                    $"{logDirectory}/info-.txt",
-                    rollingInterval: RollingInterval.Day, // Create new file daily
-                    retainedFileCountLimit: 30, // Retain last 30 (days) logs
-                    fileSizeLimitBytes: 100_000_000, // Limit log file to 100MB
-                    rollOnFileSizeLimit: true, // Create new file when the size limit is reached
+                    System.IO.Path.Combine(infoDirectory, "info-.txt"),
+                    rollingInterval: RollingInterval.Day,
+                    retainedFileCountLimit: 30,
+                    fileSizeLimitBytes: 100_000_000,
+                    rollOnFileSizeLimit: true,
                     restrictedToMinimumLevel: Serilog.Events.LogEventLevel.Information)
                .WriteTo.File(
-                    $"{logDirectory}/warning-.txt",
-                    rollingInterval: RollingInterval.Day, // Create new file daily
-                    retainedFileCountLimit: 30, // Retain last 30 (days) logs
-                    fileSizeLimitBytes: 100_000_000, // Limit log file to 100MB
-                    rollOnFileSizeLimit: true, // Create new file when the size limit is reached
+                    System.IO.Path.Combine(warningDirectory, "warning-.txt"),
+                    rollingInterval: RollingInterval.Day,
+                    retainedFileCountLimit: 30,
+                    fileSizeLimitBytes: 100_000_000,
+                    rollOnFileSizeLimit: true,
                     restrictedToMinimumLevel: Serilog.Events.LogEventLevel.Warning)
                .WriteTo.File(
-                    $"{logDirectory}/error.txt",
-                    rollingInterval: RollingInterval.Day, // Create new file daily
-                    retainedFileCountLimit: 30, // Retain last 30 (days) logs
-                    fileSizeLimitBytes: 100_000_000, // Limit log file to 100MB
-                    rollOnFileSizeLimit: true, // Create new file when the size limit is reached
+                    System.IO.Path.Combine(errorDirectory, "error-.txt"),
+                    rollingInterval: RollingInterval.Day,
+                    retainedFileCountLimit: 30,
+                    fileSizeLimitBytes: 100_000_000,
+                    rollOnFileSizeLimit: true,
                     restrictedToMinimumLevel: Serilog.Events.LogEventLevel.Error)
                .CreateLogger();
         }
