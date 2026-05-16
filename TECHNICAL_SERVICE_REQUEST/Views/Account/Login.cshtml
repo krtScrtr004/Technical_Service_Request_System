@@ -30,26 +30,25 @@
             <img class="logo-glow" src="@Url.Content("~/Content/Images/logo.png")" />
         </div>
 
-        <h5 class="doh-tag light-text">
-            <span class="block light-text">
-                DEPARTMENT OF HEALTH
-            </span>
-            <span class="">
-                METRO MANILA CENTER FOR HEALTH DEVELOPMENT
-            </span>
-        </h5>
-
         <h3>
             <span class="system-title">
-                TECHNICAL SERVICE REQUEST SYSTEM
+                TechIT
             </span>
         </h3>
+
+        <h5 class="doh-tag light-text">
+            <span class="block light-text">
+                TECHNICAL SERVICE REQUEST SYSTEM
+            </span>
+        </h5>
 
         <!-- Login Form -->
         <section id="loginForm">
             @using (Html.BeginForm("Login", "Account", new { ReturnUrl = ViewBag.ReturnUrl }, FormMethod.Post))
             {
                 @Html.AntiForgeryToken()
+
+                @Html.ValidationSummary();
 
                 <div class="form-group-sm">
                     @Html.ValidationMessageFor(m => m.Email, "", new { @class = "text-danger" })

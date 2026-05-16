@@ -33,7 +33,7 @@
     }
 
     // Type
-    const equipmentTypeContainer = $(".equipment-type");
+    const equipmentTypeContainer = $(".equipment-type > .label");
     if (equipmentTypeContainer.length === 0) {
         console.warn("Equipment type container not found");
     } else {
@@ -45,7 +45,7 @@
     }
 
     // Status
-    const equipmentStatusContainer = $(".equipment-status");
+    const equipmentStatusContainer = $(".equipment-status > .label");
     if (equipmentStatusContainer.length === 0) {
         console.warn("Equipment status container not found");
     } else {

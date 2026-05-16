@@ -21,7 +21,6 @@ namespace TECHNICAL_SERVICE_REQUEST.Controllers
     [Authorize2]
     public class RequestController : BaseController
     {
-        // GET: TechnicalServiceRequests
         [Authorize2]
         [AuthenticateUserPrivilege(new int[] { AppUserRoleEnum.STANDARD, AppUserRoleEnum.IT, AppUserRoleEnum.ADMIN })]
         public ActionResult Index()
@@ -44,7 +43,6 @@ namespace TECHNICAL_SERVICE_REQUEST.Controllers
             }
         }
 
-        // GET: TechnicalServiceRequests/Details/5
         [AuthenticateUserPrivilege(new int[] { AppUserRoleEnum.STANDARD, AppUserRoleEnum.IT, AppUserRoleEnum.ADMIN })]
         public ActionResult Details(int id)
         {
@@ -231,7 +229,6 @@ namespace TECHNICAL_SERVICE_REQUEST.Controllers
             }
         }
 
-        // POST: TechnicalServiceRequests/Create
         [Authorize2]
         [HttpPost]
         [ValidateAntiForgeryToken]

@@ -227,7 +227,9 @@
                 @* Request Type *@
                 <div class="tsr-detail-item">
                     <p class="tsr-detail-label light-text">TYPE</p>
-                    <p class="tsr-detail-value">@requestTypeName</p>
+                    <p class="tsr-detail-value">
+                        <span class="label label-info">@requestTypeName</span>
+                    </p>
                 </div>
 
                 @* Severity *@
@@ -319,7 +321,9 @@
 
                             <div class="col-sm-4 col-xs-12 tsr-schedule-item">
                                 <p class="tsr-schedule-item-label">TYPE</p>
-                                <p class="tsr-schedule-item-value">@(Model.EquipmentTypeName ?? "N/A")</p>
+                                <p class="tsr-schedule-item-value">
+                                    <span class="label label-success">@(Model.EquipmentTypeName ?? "N/A")</span>
+                                </p>
                             </div>
                         </div>
                     </div>

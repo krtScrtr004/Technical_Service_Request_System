@@ -202,6 +202,7 @@
     .buttons-container > button,
     .buttons-container > a {
         min-width: 24ch;
+        flex: 1;
     }
 
         .buttons-container > button > div {
@@ -216,6 +217,12 @@
     .detail-grid-3,
     .detail-grid-2 {
         grid-template-columns: 1fr 1fr;
+    }
+
+    .buttons-container > button,
+    .buttons-container > a {
+        flex: unset;
+        width: 100%;
     }
 }
 

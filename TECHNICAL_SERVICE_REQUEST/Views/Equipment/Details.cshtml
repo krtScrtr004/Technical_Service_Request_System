@@ -19,7 +19,8 @@
     var typeName = Model.TypeId > 0
         ? EquipmentTypeEnum.DisplayName(Model.TypeId)
         : "N/A";
-    var statusName = Model.StatusId > 0
+    var statusId = Model.StatusId;
+    var statusName = statusId > 0
         ? EquipmentStatusEnum.DisplayName(Model.StatusId)
         : "N/A";
     var buildingNumber = Model.BuildingNumber.GetValueOrDefault() > 0
@@ -44,6 +45,21 @@
     }
 
     var castedModel = (new EquipmentService()).ToEquipmentFormViewModel(Model);
+
+    Func<int, string> getStatusLabelClass = (status) =>
+    {
+        switch (status)
+        {
+            case EquipmentStatusEnum.OPERATIONAL:
+                return "label label-info status-label";
+            case EquipmentStatusEnum.UNDER_REPAIR:
+                return "label label-danger status-label";
+            case EquipmentStatusEnum.FOR_DISPOSAL:
+                return "label label-warning status-label";
+            default:
+                return "label label-default status-label";
+        }
+    };
 }
 
 @section Styles {
@@ -97,7 +113,9 @@
                     @* Type *@
                     <div class="detail-item">
                         <p class="detail-label">TYPE</p>
-                        <p class="equipment-type detail-value">@typeName</p>
+                        <p class="equipment-type detail-value">
+                            <span class="label label-success">@typeName</span>
+                        </p>
                     </div>
                 </div>
             </section>
@@ -143,7 +161,9 @@
                     @* Status *@
                     <div class="detail-item">
                         <p class="detail-label">STATUS</p>
-                        <p class="equipment-status detail-value">@statusName</p>
+                        <p class="equipment-status detail-value">
+                            <span class="@getStatusLabelClass(statusId)">@statusName</span>
+                        </p>
                     </div>
 
                     @* Repair Count *@

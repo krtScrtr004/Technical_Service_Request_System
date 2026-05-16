@@ -1,6 +1,6 @@
 ﻿$(document).ready(function () {
     const assetTagInput = $("#asset-tag-input");
-    const equipmentModelInput = $("#TechnicalServiceRequestEquipmentModel");
+    const equipmentModelInput = $("#EquipmentModel");
     const equipmentTypeSelect = $("#technical_service_request_equipment_type_select");
     const technicalServiceTypeSelect = $("#technical_service_type_select");
     const suggestionContainer = $("#asset-tag-suggestions");

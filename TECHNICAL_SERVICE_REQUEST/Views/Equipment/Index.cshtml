@@ -5,6 +5,7 @@
 @{
     ViewBag.Title = "List";
     var currentUser = ViewBag.CurrentUser as AppUserSession;
+    var isStandard = AppUserRoleEnum.IsStandard(currentUser.RoleId);
 }
 
 @section Styles
@@ -23,22 +24,25 @@
         </section>
 
         <section class="panel-body">
-            <section class="flex-row flex-space-between">
-                <section>
-                    @Html.Partial(
-                        "~/Views/Equipment/Partial/_CreateEntryModal.cshtml",
-                        new EquipmentFormViewModel()
-                    )
+            <section class="flex-row @(isStandard ? "flex-row-reverse" : "flex-space-between")">
+                @if (!isStandard)
+                {
+                    <section>
+                        @Html.Partial(
+                                 "~/Views/Equipment/Partial/_CreateEntryModal.cshtml",
+                                 new EquipmentFormViewModel()
+                             )
 
-                    <button id="create_equipment_entry_button"
-                            class="btn btn-info"
-                            type="button"
-                            data-toggle="modal"
-                            data-target="#create_equipment_entry_modal">
-                        <i class="glyphicon glyphicon-plus"></i>
-                        Create New Entry
-                    </button>
-                </section>
+                        <button id="create_equipment_entry_button"
+                                class="btn btn-info"
+                                type="button"
+                                data-toggle="modal"
+                                data-target="#create_equipment_entry_modal">
+                            <i class="glyphicon glyphicon-plus"></i>
+                            Create New Entry
+                        </button>
+                    </section>
+                }
 
                 <section class="filter-selection-container">
                     @* Status Filter *@
