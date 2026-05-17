@@ -114,6 +114,11 @@ $RECYCLE.BIN/
 .AppleDouble
 .LSOverride
 
+# Ignore local IIS/Web configuration transforms
+Web.config
+Web.Debug.config
+Web.Release.config
+
 # Environment / Secrets — NEVER commit these
 *.env
 *.env.*
