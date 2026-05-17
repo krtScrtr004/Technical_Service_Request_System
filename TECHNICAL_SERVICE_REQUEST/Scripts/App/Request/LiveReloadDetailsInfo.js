@@ -13,7 +13,7 @@
             case "LOW":
                 labelClass = "label-success";
                 break;
-            case "MEDIM":
+            case "MEDIUM":
                 labelClass = "label-warning";
                 break;
             case "HIGH":

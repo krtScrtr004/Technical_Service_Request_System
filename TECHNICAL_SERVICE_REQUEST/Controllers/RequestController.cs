@@ -801,7 +801,7 @@ namespace TECHNICAL_SERVICE_REQUEST.Controllers
                     success = true,
                     isFormGeneratable = isFormGeneratable && formGeneratableHistoryId.HasValue,
                     formLink = formGeneratableHistoryId.HasValue
-                        ? Url.Action("Form", "TechnicalServiceRequests", new { id = formGeneratableHistoryId.Value })
+                        ? Url.Action("Form", "Request", new { id = formGeneratableHistoryId.Value })
                         : "#"
                 }, JsonRequestBehavior.AllowGet);
             }

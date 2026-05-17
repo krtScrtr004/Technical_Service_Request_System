@@ -58,7 +58,7 @@
 
                     <tr>
                         <td rowspan="3" class="logo">
-                            <img src="~/Content/Images/logo.png" alt="DOH Logo" title="DOH Logo" width="90" />
+                            <img src="~/Content/Images/logo_black.png" alt="DOH Logo" title="DOH Logo" width="90" />
                         </td>
                     </tr>
 
@@ -285,9 +285,9 @@
                                 <input type="checkbox"
                                        id="government_email_account"
                                        name="government_email_account"
-                                       @(RequestTypeEnum.GOVERNMENT_EMAIL_ACCOUNT == selectedType ? "checked" : "")
+                                       @(RequestTypeEnum.COMPANY_EMAIL_ACCOUNT == selectedType ? "checked" : "")
                                        disabled />
-                                <label for="government_email_account">Government Email / Account</label>
+                                <label for="company_email_account">Company Email / Account</label>
                             </form>
                         </td>
 
@@ -462,7 +462,7 @@
             </table>
 
             <div>
-                <p class="text-right">DOHNCRO-KMITS-SR Form 01 Rev. 02</p>
+                <p class="text-right">ICTMS-KMITS-SR Form 01 Rev. 02</p>
             </div>
         </section>
 
