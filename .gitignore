@@ -121,6 +121,7 @@ appsettings.Development.json
 appsettings.Local.json
 secrets.json
 Web.config.user
+secrets.config
 
 # SVN
 .svn/

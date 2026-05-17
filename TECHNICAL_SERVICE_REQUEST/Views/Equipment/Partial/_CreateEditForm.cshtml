@@ -1,0 +1,106 @@
+﻿@model TECHNICAL_SERVICE_REQUEST.Models.EquipmentFormViewModel
+
+@Html.AntiForgeryToken()
+@Html.HiddenFor(model => model.Id)
+
+<section class="equipment-form-section relative">
+    <h5 class="text-primary equipment-section-title bold-text">
+        <i class="glyphicon glyphicon-info-sign"></i>
+        GENERAL INFORMATION
+    </h5>
+
+    <div class="form-input-container flex-row flex-wrap">
+        @* Asset Tag *@
+        <div class="flex-wrap flex-1 form-group relative">
+            @Html.LabelFor(model => model.AssetTag)
+
+            <div class="asset-tag-wrapper">
+                @Html.EditorFor(
+                    model => model.AssetTag,
+                    new { htmlAttributes = new { @class = "form-control text-uppercase", id = "asset-tag-input", autocomplete = "off" } }
+                )
+
+                <div id="asset-tag-suggestions" class="asset-tag-suggestions" aria-hidden="true">
+                    <!-- Suggestion items will be injected here -->
+                </div>
+            </div>
+
+            @Html.ValidationMessageFor(model => model.AssetTag, "", new { @class = "text-danger" })
+        </div>
+
+        @* Model *@
+        <div class="flex-wrap flex-1 form-group relative">
+            @Html.LabelFor(model => model.Model)
+            @Html.EditorFor(model => model.Model, new { htmlAttributes = new { @class = "form-control text-uppercase" } })
+            @Html.ValidationMessageFor(model => model.Model, "", new { @class = "text-danger" })
+        </div>
+
+        @* Status *@
+        <div class="flex-wrap flex-1 form-group relative">
+            @Html.LabelFor(model => model.StatusId)
+            @Html.DropDownListFor(
+                model => model.StatusId,
+                Model.Statuses,
+                "-- SELECT EQUIPMENT STATUS --",
+                new { id = "technical_service_request_equipment_status_select", @class = "form-control" }
+            )
+            @Html.ValidationMessageFor(model => model.StatusId, "", new { @class = "text-danger" })
+        </div>
+
+        @* Type *@
+        <div class="flex-wrap flex-1 form-group relative">
+            @Html.LabelFor(model => model.TypeId)
+            @Html.DropDownListFor(
+                model => model.TypeId,
+                Model.Types,
+                "-- SELECT EQUIPMENT TYPE --",
+                new { id = "technical_service_request_equipment_type_select", @class = "form-control" }
+            )
+            @Html.ValidationMessageFor(model => model.TypeId, "", new { @class = "text-danger" })
+        </div>
+    </div>
+</section>
+
+ @* Location Information*@
+<section class="equipment-form-section relative">
+    <h5 class="text-primary equipment-section-title bold-text">
+        <i class="glyphicon glyphicon-map-marker"></i>
+        LOCATION INFORMATION <em class="light-text">(Optional)</em>
+    </h5>
+
+    <div class="form-input-container flex-row flex-wrap">
+        @* Building Number *@
+        <div class="flex-wrap flex-1 form-group relative">
+            @Html.LabelFor(model => model.BuildingNumber)
+            @Html.DropDownListFor(
+                model => model.BuildingNumber,
+                Model.BuildingNumbers,
+                "-- SELECT BUILDING NUMBER --",
+                new { id = "equipment_building_number_select", @class = "form-control" }
+            )
+            @Html.ValidationMessageFor(model => model.BuildingNumber, "", new { @class = "text-danger" })
+        </div>
+
+        @* Floor Number *@
+        <div class="flex-wrap flex-1 form-group relative">
+            @Html.LabelFor(model => model.FloorNumber)
+            @Html.DropDownListFor(
+                model => model.FloorNumber,
+                Model.FloorNumbers,
+                "-- SELECT FLOOR NUMBER --",
+                new { id = "equipment_floor_number_select", @class = "form-control" }
+            )
+            @Html.ValidationMessageFor(model => model.FloorNumber, "", new { @class = "text-danger" })
+        </div>
+
+        @* Office *@
+        <div class="flex-wrap flex-1 form-group relative">
+            @Html.LabelFor(model => model.Office)
+            @Html.EditorFor(model => model.Office, new { htmlAttributes = new { @class = "form-control text-uppercase" } })
+            @Html.ValidationMessageFor(model => model.Office, "", new { @class = "text-danger" })
+        </div>
+
+    </div>
+</section>
+
+

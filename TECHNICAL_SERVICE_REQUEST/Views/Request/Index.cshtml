@@ -1,0 +1,199 @@
+﻿@using TECHNICAL_SERVICE_REQUEST.Utilities;
+@using TECHNICAL_SERVICE_REQUEST.Enumerables;
+@using TECHNICAL_SERVICE_REQUEST.Core;
+
+@{
+    ViewBag.Title = "List";
+
+    var currentUser = ViewBag.CurrentUser as AppUserSession;
+
+    var isAdmin = AppUserRoleEnum.IsAdmin(currentUser.RoleId);
+    var isIT = AppUserRoleEnum.IsIT(currentUser.RoleId);
+}
+
+
+@section Styles
+{
+    <link rel="stylesheet" href="~/Content/App/Request/Index.css" type="text/css" />
+}
+
+<section class="container tsr-index-page flex-row flex-child-center-v">
+    <div class="table-panel panel panel-default">
+
+        <section class="panel-heading">
+            <strong>
+                Technical Service Requests
+            </strong>
+        </section>
+
+        <section class="panel-body">
+            <section class="filter-selection-container">
+
+                @* Type Filter *@
+                <div class="filter-selection">
+                    <label for="type_filter">Type:</label>
+                    <select id="type_filter" class="form-control">
+                        <option value="0" selected>All</option>
+                        @if (isAdmin || isIT)
+                        {
+
+                            <option value="assigned">
+                                Assigned
+                            </option>
+                            <option value="non-assisted">
+                                Non Assisted
+                            </option>
+                            <option value="queued">
+                                Queued
+                            </option>
+                        }
+
+                        @* Type *@
+                        <optgroup label="Type">
+                            <option value="@RequestTypeEnum.ACCOUNT_CREATION">
+                                @RequestTypeEnum.DisplayName(
+                                    RequestTypeEnum.ACCOUNT_CREATION
+                               )
+                            </option>
+
+                            <option value="@RequestTypeEnum.AUDIO_VISUAL_SETUP">
+                                @RequestTypeEnum.DisplayName(
+                                    RequestTypeEnum.AUDIO_VISUAL_SETUP
+                               )
+                            </option>
+
+                            <option value="@RequestTypeEnum.DATA_CORRECTION">
+                                @RequestTypeEnum.DisplayName(
+                                    RequestTypeEnum.DATA_CORRECTION
+                               )
+                            </option>
+
+                            <option value="@RequestTypeEnum.EQUIPMENT_REPAIR_TROUBLESHOOTING">
+                                @RequestTypeEnum.DisplayName(
+                                    RequestTypeEnum.EQUIPMENT_REPAIR_TROUBLESHOOTING
+                               )
+                            </option>
+
+                            <option value="@RequestTypeEnum.COMPANY_EMAIL_ACCOUNT">
+                                @RequestTypeEnum.DisplayName(
+                                    RequestTypeEnum.COMPANY_EMAIL_ACCOUNT
+                               )
+                            </option>
+
+                            <option value="@RequestTypeEnum.INTERNET_CONNECTIVITY">
+                                @RequestTypeEnum.DisplayName(
+                                    RequestTypeEnum.INTERNET_CONNECTIVITY
+                               )
+                            </option>
+
+                            <option value="@RequestTypeEnum.LIVESTREAM_SETUP">
+                                @RequestTypeEnum.DisplayName(
+                                    RequestTypeEnum.LIVESTREAM_SETUP
+                               )
+                            </option>
+
+                            <option value="@RequestTypeEnum.PASSWORD_ACCESS_ISSUE">
+                                @RequestTypeEnum.DisplayName(
+                                    RequestTypeEnum.PASSWORD_ACCESS_ISSUE
+                               )
+                            </option>
+
+                            <option value="@RequestTypeEnum.PRODUCTION_MATERIAL_PRINTING">
+                                @RequestTypeEnum.DisplayName(
+                                    RequestTypeEnum.PRODUCTION_MATERIAL_PRINTING
+                               )
+                            </option>
+
+                            <option value="@RequestTypeEnum.SYSTEM_SUPPORT">
+                                @RequestTypeEnum.DisplayName(
+                                    RequestTypeEnum.SYSTEM_SUPPORT
+                               )
+                            </option>
+
+                            <option value="@RequestTypeEnum.TECHNICAL_GUIDANCE">
+                                @RequestTypeEnum.DisplayName(
+                                    RequestTypeEnum.TECHNICAL_GUIDANCE
+                               )
+                            </option>
+
+                            <option value="@RequestTypeEnum.ZOOM_WEBEX_LINK">
+                                @RequestTypeEnum.DisplayName(
+                                    RequestTypeEnum.ZOOM_WEBEX_LINK
+                               )
+                            </option>
+
+                            <option value="100">
+                                Others
+                            </option>
+                        </optgroup>
+                    </select>
+                </div>
+
+                @* Status Filter *@
+                <div class="filter-selection">
+                    <label for="status_filter">Status:</label>
+                    @Html.DropDownList(
+                        "status_filter",
+                        RequestStatusEnum.GetSelectListItems(),
+                        "All",
+                        new { @class = "form-control" }
+                   )
+                </div>
+
+                @* Date Request Filter *@
+                <div class="filter-selection">
+                    <label for="date_request_filter">Date Request:</label>
+                    <select id="date_request_filter" class="form-control">
+                        <option value="0" selected>All</option>
+                        <optgroup label="Request Date">
+                            <option value="1">
+                                Today
+                            </option>
+                            <option value="2">
+                                This Week
+                            </option>
+                            <option value="3">
+                                This Month
+                            </option>
+                            <option value="4">
+                                This Year
+                            </option>
+                        </optgroup>
+                    </select>
+                </div>
+
+            </section>
+
+            <div class="table-responsive">
+                <table id="technical_request_table" class="table table-striped">
+
+                    <thead>
+                        <tr>
+                            <th></th>
+                            <th class="reference-code">Reference Code</th>
+                            <th class="client-info">Client Information</th>
+                            <th>Service Type</th>
+                            <th>Status</th>
+                            <th>Date Requested</th>
+                            <th>Actions</th>
+                        </tr>
+                    </thead>
+
+                    <tbody>
+                    </tbody>
+                </table>
+            </div>
+        </section>
+
+    </div>
+</section>
+
+@section Scripts
+{
+    <script>
+        const userId = parseInt("@currentUser.Id", 10);
+        const requestUrl = "@Url.Action("GetTechnicalRequests", "Request")";
+    </script>
+
+    <script src="~/Scripts/App/Request/InitializeListingDataTable.js" defer></script>
+}

@@ -1,0 +1,43 @@
+﻿@model TECHNICAL_SERVICE_REQUEST.Models.EquipmentFormViewModel
+@using TECHNICAL_SERVICE_REQUEST.Core
+
+@{ ViewBag.Title = "Create"; }
+
+<section id="create_equipment_entry_modal" class="modal fade" role="dialog">
+    <section class="modal-dialog">
+
+        @* Modal content *@
+        <section class="modal-content">
+
+            @* Header *@
+            <section class="modal-header bg-primary">
+                <button type="button" class="close" data-dismiss="modal">&times;</button>
+
+                <h4 class="modal-title text-light">
+                    <i class="glyphicon glyphicon-list-alt text-light"></i>
+                    Create New Equipment Entry
+                </h4>
+            </section>
+
+            @using (Html.BeginForm(
+                "Create",
+                null,
+                FormMethod.Post,
+                new { @class = "flex-col flex-1" }
+            ))
+            {
+                Html.RenderPartial("~/Views/Equipment/Partial/_CreateEditForm.cshtml", Model);
+
+                <section class="equipment-form-actions text-right flex-row-reverse flex-child-center-h">
+                    <button type="submit" class="btn btn-m btn-primary bold-text">
+                        <i class="glyphicon glyphicon-plus"></i>
+                        Create
+                    </button>
+                </section>
+            }
+
+        </section>
+
+    </section>
+</section>
+

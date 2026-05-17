@@ -1,0 +1,21 @@
+﻿@using TECHNICAL_SERVICE_REQUEST.Utilities;
+
+@{
+    var alertModal = TempData["alertModal"] as AlertModalUtility;
+}
+
+
+@if (alertModal != null)
+{
+    <script>
+        var alertModalData = @Html.Raw(Json.Encode(alertModal))
+
+        Swal.fire({
+            title: alertModalData.Title,
+            text: alertModalData.Message,
+            icon: alertModalData.Status,
+            confirmButtonText: 'OK',
+            width: "600px"
+        });
+    </script>
+}

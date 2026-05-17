@@ -1,0 +1,585 @@
+﻿/* ========== 1. INTERACTIVE BASE ========== */
+/* Smooth transitions for interactive elements */
+.btn-primary,
+.btn-success,
+.btn-info,
+.btn-warning,
+.btn-danger {
+    transition: background-color var(--transition-dur) ease, border-color var(--transition-dur) ease, box-shadow var(--transition-dur) ease, color var(--transition-dur) ease;
+}
+
+/* Generic disabled utility */
+.btn[disabled],
+.btn.disabled,
+.disabled {
+    opacity: 0.65;
+    cursor: not-allowed !important;
+}
+
+/* anchors styled as buttons */
+a.btn:hover, a.btn:focus {
+    text-decoration: none;
+}
+
+/* ========== 2. BUTTONS ========== */
+/* Primary button */
+.btn-primary {
+    background-color: var(--primary);
+    color: #ffffff;
+    border-color: #1a252f;
+}
+
+    .btn-primary:hover,
+    .btn-primary:focus,
+    .btn-primary:focus-visible {
+        background-color: #1a252f; /* darker primary */
+        border-color: #0f1619;
+        color: #ffffff;
+        outline: none;
+        box-shadow: 0 0 0 3px rgba(44,62,80,0.12);
+    }
+
+    .btn-primary:active,
+    .btn-primary.active {
+        background-color: #0f1619;
+        border-color: #0b0f11;
+    }
+
+    .btn-primary[disabled],
+    .btn-primary.disabled,
+    fieldset[disabled] .btn-primary {
+        opacity: 0.65;
+        cursor: not-allowed;
+        box-shadow: none;
+    }
+
+/* Success button */
+.btn-success {
+    background-color: var(--success);
+    border-color: #15a589;
+}
+
+    .btn-success:hover,
+    .btn-success:focus,
+    .btn-success:focus-visible {
+        background-color: #15a589;
+        border-color: #138f73;
+        color: #ffffff;
+        box-shadow: 0 0 0 3px rgba(24,188,156,0.12);
+    }
+
+    .btn-success:active,
+    .btn-success.active {
+        background-color: #0f7864;
+        border-color: #0b5b48;
+    }
+
+    .btn-success[disabled],
+    .btn-success.disabled,
+    fieldset[disabled] .btn-success {
+        opacity: 0.65;
+        cursor: not-allowed;
+    }
+
+/* Info button */
+.btn-info {
+    background-color: var(--info);
+    border-color: #2980b9;
+}
+
+    .btn-info:hover,
+    .btn-info:focus,
+    .btn-info:focus-visible {
+        background-color: #2980b9;
+        border-color: #216e9b;
+        color: #ffffff;
+        box-shadow: 0 0 0 3px rgba(52,152,219,0.12);
+    }
+
+    .btn-info:active,
+    .btn-info.active {
+        background-color: #1f6ea7;
+        border-color: #185683;
+    }
+
+    .btn-info[disabled],
+    .btn-info.disabled,
+    fieldset[disabled] .btn-info {
+        opacity: 0.65;
+        cursor: not-allowed;
+    }
+
+/* Warning button */
+.btn-warning {
+    background-color: var(--warning);
+    border-color: #d68910;
+}
+
+    .btn-warning:hover,
+    .btn-warning:focus,
+    .btn-warning:focus-visible {
+        background-color: #d68910;
+        border-color: #b86f0d;
+        color: #ffffff;
+        box-shadow: 0 0 0 3px rgba(243,156,18,0.12);
+    }
+
+    .btn-warning:active,
+    .btn-warning.active {
+        background-color: #b86f0d;
+        border-color: #995b0b;
+    }
+
+    .btn-warning[disabled],
+    .btn-warning.disabled,
+    fieldset[disabled] .btn-warning {
+        opacity: 0.65;
+        cursor: not-allowed;
+    }
+
+/* Danger button */
+.btn-danger {
+    background-color: var(--danger);
+    border-color: #c0392b;
+}
+
+    .btn-danger:hover,
+    .btn-danger:focus,
+    .btn-danger:focus-visible {
+        background-color: #ac3024;
+        border-color: #9e2e24;
+        color: #ffffff;
+        box-shadow: 0 0 0 3px rgba(231,76,60,0.12);
+    }
+
+    .btn-danger:active,
+    .btn-danger.active {
+        background-color: #9e2e24;
+        border-color: #7b241c;
+    }
+
+    .btn-danger[disabled],
+    .btn-danger.disabled,
+    fieldset[disabled] .btn-danger {
+        opacity: 0.65;
+        cursor: not-allowed;
+    }
+
+/* Small helper button combinations used in markup */
+.btn.flex-row,
+.btn.flex-col,
+.btn.center-child {
+    gap: 0.25rem;
+}
+
+/* ========== 3. LABELS ========== */
+.label-primary {
+    background-color: var(--primary);
+}
+
+.label-success {
+    background-color: var(--success);
+}
+
+.label-info {
+    background-color: var(--info);
+}
+
+.label-warning {
+    background-color: var(--warning);
+}
+
+.label-danger {
+    background-color: var(--danger);
+}
+
+/* ========== 4. ALERTS ========== */
+.alert-success {
+    background-color: #d4edda;
+    border-color: #c3e6cb;
+    color: #155724;
+}
+
+.alert-info {
+    background-color: #d1ecf1;
+    border-color: #bee5eb;
+    color: #0c5460;
+}
+
+.alert-warning {
+    background-color: #fff3cd;
+    border-color: #ffeaa7;
+    color: #856404;
+}
+
+.alert-danger {
+    background-color: #f8d7da;
+    border-color: #f5c6cb;
+    color: #721c24;
+}
+
+/* ========== 5. PANELS ========== */
+.panel-primary > .panel-heading {
+    background-color: var(--primary);
+    border-color: var(--primary);
+    color: #ffffff;
+}
+
+.panel-success > .panel-heading {
+    background-color: var(--success);
+    border-color: var(--success);
+    color: #ffffff;
+}
+
+.panel-info > .panel-heading {
+    background-color: var(--info);
+    border-color: var(--info);
+    color: #ffffff;
+}
+
+.panel-warning > .panel-heading {
+    background-color: var(--warning);
+    border-color: var(--warning);
+    color: #ffffff;
+}
+
+.panel-danger > .panel-heading {
+    background-color: var(--danger);
+    border-color: var(--danger);
+    color: #ffffff;
+}
+
+/* ========== 6. PROGRESS BARS ========== */
+.progress-bar {
+    background-color: var(--primary);
+}
+
+.progress-bar-success {
+    background-color: var(--success);
+}
+
+.progress-bar-info {
+    background-color: var(--info);
+}
+
+.progress-bar-warning {
+    background-color: var(--warning);
+}
+
+.progress-bar-danger {
+    background-color: var(--danger);
+}
+
+/* ========== 7. FORMS ========== */
+.form-control:focus {
+    border-color: var(--primary);
+    box-shadow: inset 0 1px 1px rgba(0, 0, 0, 0.075), 0 0 8px rgba(44,62,80,0.6);
+}
+
+/* ========== 8. NAVIGATION (TABS / PILLS) ========== */
+.nav-tabs > li.active > a {
+    color: var(--primary);
+    border-bottom-color: var(--primary);
+}
+
+.nav-tabs > li > a:hover,
+.nav-tabs > li > a:focus,
+.nav-pills > li > a:hover,
+.nav-pills > li > a:focus {
+    color: #ffffff;
+    background-color: rgba(44,62,80,0.9);
+    border-color: rgba(0,0,0,0.08);
+}
+
+.nav-pills > li.active > a,
+.nav-pills > li.active > a:hover,
+.nav-pills > li.active > a:focus {
+    background-color: var(--primary);
+    color: #ffffff;
+}
+
+/* ========== 9. PAGINATION ========== */
+.pagination > .active > a,
+.pagination > .active > span {
+    background-color: var(--primary);
+    border-color: var(--primary);
+    color: #ffffff;
+}
+
+.pagination > li > a:hover,
+.pagination > li > a:focus {
+    background-color: #f5f5f5;
+    color: var(--primary);
+    border-color: #ddd;
+}
+
+/* ========== 10. TEXT & BACKGROUND UTILITIES ========== */
+.text-primary {
+    color: var(--primary);
+}
+
+.text-success {
+    color: var(--success);
+}
+
+.text-info {
+    color: var(--info);
+}
+
+.text-warning {
+    color: var(--warning);
+}
+
+.text-danger {
+    color: var(--danger);
+}
+
+.bg-primary {
+    background-color: var(--primary);
+}
+
+.bg-success {
+    background-color: var(--success);
+}
+
+.bg-info {
+    background-color: var(--info);
+}
+
+.bg-warning {
+    background-color: var(--warning);
+}
+
+.bg-danger {
+    background-color: var(--danger);
+}
+
+.text-light {
+    color: #FFFFFF;
+}
+
+/* ========== 11. ASSET-TAG SUGGESTIONS ========== */
+.asset-tag-suggestions {
+    position: absolute;
+    top: calc(100% + 4px);
+    left: 0;
+    right: 0;
+    z-index: 1050;
+    background: #ffffff;
+    border: 1px solid #dcdcdc;
+    border-radius: 3px;
+    box-shadow: 0 2px 6px rgba(0,0,0,0.08);
+    max-height: 200px;
+    overflow-y: auto;
+    display: none;
+    padding: 4px 0;
+    -webkit-overflow-scrolling: touch;
+}
+
+    .asset-tag-suggestions.open {
+        display: block;
+    }
+
+    .asset-tag-suggestions .suggestion-item {
+        padding: 8px 12px;
+        font-size: 13px;
+        color: #333;
+        cursor: pointer;
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+    }
+
+        .asset-tag-suggestions .suggestion-item:hover,
+        .asset-tag-suggestions .suggestion-item.active {
+            background-color: #f5f5f5;
+        }
+
+/* ========== 12. TABLES & DATATABLES STYLING ========== */
+table.table-bordered {
+    border: 1px solid #B9C1C2 !important;
+    border-collapse: collapse !important;
+}
+
+    table.table-bordered td, table.table-bordered th {
+        border: 1px solid #B9C1C2 !important;
+    }
+
+.dataTables_wrapper {
+    padding: var(--space);
+}
+
+    .dataTables_wrapper table.dataTable {
+        width: 100% !important;
+        border-collapse: collapse !important;
+        box-shadow: 0 0 5px 5px rgba(0,0,0,0.1);
+    }
+
+        .dataTables_wrapper table.dataTable thead th {
+            color: var(--primary);
+            font-weight: 600;
+            padding: 0.75rem;
+            border: 1px solid #ddd;
+            text-align: left;
+        }
+
+        .dataTables_wrapper table.dataTable tbody td {
+            padding: 0.75rem;
+            border: 1px solid #ddd;
+        }
+
+        .dataTables_wrapper table.dataTable thead th, .dataTables_wrapper table.dataTable tbody td {
+            border: unset !important;
+            padding: 12px !important;
+        }
+
+        .dataTables_wrapper table.dataTable thead th { /* header variant used elsewhere */
+            color: #ffffff !important;
+        }
+
+        .dataTables_wrapper table.dataTable thead th {
+            background: var(--primary);
+        }
+
+    .dataTables_wrapper .dataTables_length {
+        float: left;
+        margin-bottom: 1rem;
+    }
+
+    .dataTables_wrapper .dataTables_filter {
+        float: right;
+        margin-bottom: 1rem;
+    }
+
+        .dataTables_wrapper .dataTables_length select, .dataTables_wrapper .dataTables_filter input {
+            border: 1px solid #ddd;
+            padding: 0.5rem;
+            margin: 0 0.5rem;
+        }
+
+    .dataTables_wrapper .dataTables_info {
+        float: left;
+        padding: 1rem 0;
+    }
+
+    .dataTables_wrapper .dataTables_paginate {
+        float: right;
+        padding: 1rem 0;
+    }
+
+/* ========== 13. DATATABLES PAGINATION BUTTON STATES ========== */
+/* Primary variant for DataTables paginate buttons */
+.dataTables_paginate {
+    margin-top: 12px;
+    display: flex;
+    align-items: center;
+    gap: 4px;
+}
+
+    .dataTables_paginate .paginate_button {
+        padding: 6px 12px;
+        border-radius: 6px;
+        cursor: pointer;
+        color: #ffffff !important;
+        background: var(--success);
+        border: 1px solid var(--success);
+    }
+
+        .dataTables_paginate .paginate_button:hover {
+            background: #0f7864 !important;
+            border: 1px solid #0f7864 !important;
+        }
+
+        .dataTables_paginate .paginate_button.current {
+            background: var(--success) !important;
+            border: 1px solid var(--success) !important;
+            color: #ffffff !important;
+            font-weight: bold;
+        }
+
+        .dataTables_paginate .paginate_button.disabled {
+            opacity: 0.4;
+            cursor: not-allowed;
+        }
+
+            .dataTables_paginate .paginate_button.disabled:hover {
+                background: unset !important;
+                border: unset !important;
+                cursor: not-allowed !important;
+            }
+
+/* Alternative pagination styling used elsewhere */
+.dataTables_wrapper .dataTables_paginate .paginate_button {
+    display: inline-block;
+    padding: 0.5rem 0.75rem;
+    margin: 0 0.125rem;
+    border: 1px solid #ddd;
+    background: #fff;
+    color: #333;
+    cursor: pointer;
+    text-decoration: none;
+}
+
+    .dataTables_wrapper .dataTables_paginate .paginate_button.current {
+        background: var(--primary);
+        border-color: var(--primary);
+        color: #fff;
+    }
+
+    .dataTables_wrapper .dataTables_paginate .paginate_button.disabled {
+        opacity: 0.5;
+        cursor: not-allowed;
+    }
+
+/* ========== 14. MISC: SWAL, MODAL, PANEL-TITLE, PANEL, DATEPICKER ========== */
+.swal2-popup {
+    font-size: 1.6rem !important;
+}
+
+.modal-header > button.close {
+    color: var(--default);
+}
+
+.panel-title > i, .modal-title > i {
+    margin-right: 1rem;
+}
+
+.panel {
+    box-shadow: var(--box-shadow);
+    margin: 0;
+}
+
+.datepicker .table-condensed thead th,
+.datepicker .table-condensed thead th.prev,
+.datepicker .table-condensed thead th.next,
+.datepicker .table-condensed thead th.datepicker-switch {
+    background: var(--primary) !important;
+    color: #fff !important;
+    border-radius: 0 !important;
+}
+
+    .datepicker .table-condensed thead th.prev > span,
+    .datepicker .table-condensed thead th.next > span {
+        background: transparent !important;
+        box-shadow: none !important;
+        color: #fff !important;
+    }
+
+.datepicker table tr td.active,
+.datepicker table tr td.active.disabled,
+.datepicker table tr td.active.disabled:active,
+.datepicker table tr td.active.disabled:hover.active,
+.datepicker table tr td.active.disabled:hover:active,
+.datepicker table tr td.active:active,
+.datepicker table tr td.active:hover.active,
+.datepicker table tr td.active:hover:active {
+    background: var(--primary) !important;
+    border-radius: 0;
+}
+
+/* ========== 15. RESPONSIVE / SMALL-SCREEN ADJUSTMENTS ========== */
+@media (max-width: 767px) {
+    .asset-tag-suggestions {
+        max-height: 180px;
+    }
+}

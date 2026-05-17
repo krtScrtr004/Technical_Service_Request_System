@@ -1,0 +1,110 @@
+﻿@using TECHNICAL_SERVICE_REQUEST.Enumerables
+@using TECHNICAL_SERVICE_REQUEST.Core
+
+@{
+    var currentUser = ViewBag.CurrentUser as AppUserSession;
+
+    var isAdmin = AppUserRoleEnum.IsAdmin(currentUser.RoleId);
+    var isIT = AppUserRoleEnum.IsIT(currentUser.RoleId);
+    var isStandard = AppUserRoleEnum.IsStandard(currentUser.RoleId);
+}
+
+<header class="bg-primary">
+    <nav class="navbar navbar-primary text-de border">
+        <section class="container-fluid">
+
+            <!-- App Name -->
+            <section class="navbar-header">
+                <button type="button" class="navbar-toggle collapsed" data-toggle="collapse" data-target="#main-navbar" aria-expanded="false" aria-controls="main-navbar">
+                    <span class="icon-bar bg-default"></span>
+                    <span class="icon-bar bg-default"></span>
+                    <span class="icon-bar bg-default"></span>
+                </button>
+
+                <a href="@Url.Action("Index", "Dashboard")" class="navbar-brand brand-link">
+                    <img src="~/Content/Images/logo.png" height="36" alt="Technical Service Request" title="Technical Service Request" />
+                    <div class="brand-text">
+                        TechIT
+                    </div>
+                </a>
+
+            </section>
+
+            @* Selection *@
+            <section id="main-navbar" class="collapse navbar-collapse bg-primary">
+                <ul class="nav navbar-nav">
+                    @* Home *@
+                    <li>
+                        @Html.ActionLink("Dashboard", "Index", "Dashboard")
+                    </li>
+
+                    @* Registration Selection *@
+                    @if (isAdmin)
+                    {
+                        <li class="dropdown">
+                            <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-expanded="true">
+                                Users <span class="caret"></span>
+                            </a>
+
+                            <ul class="dropdown-menu" role="menu">
+                                @* Registration List *@
+                                <li>
+                                    <a href="@Url.Action("Index", "User")">ACCOUNTS</a>
+                                </li>
+
+                                @* Request List *@
+                                <li>
+                                    <a href="@Url.Action("Index", "Registration")">REQUESTS</a>
+                                </li>
+                            </ul>
+                        </li>
+                    }
+
+                    @* Technical Service Request *@
+                    @if (isAdmin || isIT)
+                    {
+                        <li>
+                            @Html.ActionLink("Technical Service Requests", "Index", "Request")
+                        </li>
+                    }
+                    else if (isStandard)
+                    {
+                        <li class="dropdown">
+                            <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-expanded="true">
+                                Technical Services <span class="caret"></span>
+                            </a>
+
+                            <ul class="dropdown-menu" role="menu">
+                                @* Create *@
+                                <li>
+                                    <a href="@Url.Action("Create", "Request")">CREATE</a>
+                                </li>
+                                @* See Requests *@
+                                <li>
+                                    <a href="@Url.Action("Index", "Request")">
+                                        REQUESTS
+                                    </a>
+                                </li>
+                            </ul>
+                        </li>
+                    }
+
+                    @* Manage Availability - IT only *@
+                    @if (isIT)
+                    {
+                        <li>
+                            @Html.ActionLink("Manage Availabilities", "Manage", "ITAvailability", new { id = currentUser.Id }, null)
+                        </li>
+                    }
+
+                    <li>
+                        @Html.ActionLink("Equipments", "Index", "Equipment")
+                    </li>
+                </ul>
+
+                @Html.Partial("_LoginPartial")
+            </section>
+
+        </section>
+    </nav>
+</header>

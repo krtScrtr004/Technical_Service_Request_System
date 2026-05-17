@@ -1,0 +1,131 @@
+﻿.equipment-form-panel-container {
+    width: 100%;
+    min-width: 0;
+    padding: 0 10px;
+}
+
+.equipment-form-panel {
+    width: 50%;
+    min-width: 900px;
+    max-width: var(--max-width-std);
+    min-height: 500px;
+    margin-top: 20px;
+}
+
+    .equipment-form-panel .panel-heading {
+        background: #f7fbff;
+        border-bottom: 1px solid #d9edf7;
+    }
+
+    .equipment-form-panel .panel-title {
+        font-weight: 600;
+        margin: 0;
+    }
+
+    .equipment-form-panel .panel-body > form {
+        gap: var(--space);
+    }
+
+    .equipment-form-section {
+        flex: 1;
+        padding: 15px;
+        border: 1px solid #eee;
+        border-radius: 4px;
+        background: #fff;
+    }
+
+.equipment-section-title {
+    margin-top: 0;
+    margin-bottom: 15px;
+    font-weight: 600;
+    border-left: 4px solid var(--primary);
+    padding-left: 8px;
+}
+
+    .equipment-section-title > i {
+        margin-right: 0.5rem;
+    }
+
+.equipment-form-section .form-input-container {
+    gap: var(--space);
+}
+
+.equipment-form-section .form-group {
+    margin-bottom: 12px;
+}
+
+    .equipment-form-section .form-group input,
+    .equipment-form-section .form-group select {
+        min-width: 28ch;
+    }
+
+    .equipment-form-section label {
+        font-size: 12px;
+        text-transform: uppercase;
+        color: #555;
+        margin-bottom: 4px;
+    }
+
+.equipment-form-actions {
+    padding: 10px;
+    border-top: 1px solid #eee;
+    gap: 1rem;
+}
+
+    .equipment-form-actions .btn + .btn {
+        margin-left: 6px;
+    }
+
+@media (max-width: 1200px) {
+    .equipment-form-panel {
+        width: 75%;
+        min-width: unset;
+    }
+}
+
+@media (max-width: 991px) {
+    .equipment-form-panel-container {
+        padding: 0 8px;
+    }
+}
+
+@media (max-width: 767px) {
+    .equipment-form-panel-container {
+        padding: 0 4px;
+    }
+
+    .equipment-form-panel {
+        width: 100%;
+        margin-top: 12px;
+    }
+
+        .equipment-form-panel .panel-heading,
+        .equipment-form-panel .panel-body,
+        .equipment-form-section {
+            padding-left: 10px;
+            padding-right: 10px;
+        }
+
+            .equipment-form-section .row.flex-child-center-h {
+                display: block;
+            }
+
+    .equipment-form-actions {
+        display: block;
+        text-align: left;
+    }
+
+        .equipment-form-actions .btn {
+            display: block;
+            width: 100%;
+            margin: 0 0 8px;
+        }
+
+            .equipment-form-actions .btn + .btn {
+                margin-left: 0;
+            }
+
+            .equipment-form-actions .btn:last-child {
+                margin-bottom: 0;
+            }
+}
